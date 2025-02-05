@@ -1,0 +1,11 @@
+/.idea/
+*.iml
+Foo.java
+/application.properties
+/*.json
+/dev/
+
+/target/
+/**/target
+
+pom.xml.versionsBackup
