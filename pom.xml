@@ -10,6 +10,10 @@
 
     <packaging>pom</packaging>
 
+    <name>MicroJ Toybox Parent</name>
+    <description>Parent POM for Toybox toolkit</description>
+    <url>https://github.com/mjcro/toybox-all</url>
+
     <modules>
         <module>api</module>
         <module>swing</module>
