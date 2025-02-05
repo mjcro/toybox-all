@@ -11,6 +11,10 @@
 
     <artifactId>api</artifactId>
 
+    <name>MicroJ Toybox API</name>
+    <description>API for Toybox toolkit</description>
+    <url>https://github.com/mjcro/toybox-all</url>
+
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>

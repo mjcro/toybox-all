@@ -11,6 +11,10 @@
 
     <artifactId>templates</artifactId>
 
+    <name>MicroJ Toybox String Templates</name>
+    <description>String Templates for Toybox toolkit</description>
+    <url>https://github.com/mjcro/toybox-all</url>
+
     <properties>
         <maven.compiler.source>8</maven.compiler.source>
         <maven.compiler.target>8</maven.compiler.target>
