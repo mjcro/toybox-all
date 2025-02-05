@@ -6,7 +6,7 @@
     <parent>
         <groupId>io.github.mjcro.toybox</groupId>
         <artifactId>root</artifactId>
-        <version>0.3</version>
+        <version>0.3.1</version>
     </parent>
 
     <artifactId>app</artifactId>
@@ -18,8 +18,6 @@
     <properties>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.deploy.skip>false</maven.deploy.skip>
     </properties>
 
     <dependencies>
@@ -32,14 +30,6 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>io.github.mjcro</groupId>
-            <artifactId>interfaces</artifactId>
-        </dependency>
-        <dependency>
-            <groupId>org.slf4j</groupId>
-            <artifactId>slf4j-api</artifactId>
         </dependency>
 
         <dependency>

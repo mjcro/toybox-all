@@ -6,7 +6,7 @@
 
     <groupId>io.github.mjcro.toybox</groupId>
     <artifactId>root</artifactId>
-    <version>0.3</version>
+    <version>0.3.1</version>
 
     <packaging>pom</packaging>
 
@@ -49,7 +49,6 @@
     </distributionManagement>
 
     <properties>
-        <maven.deploy.skip>true</maven.deploy.skip>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
     </properties>
 
@@ -105,16 +104,6 @@
                 <artifactId>lombok</artifactId>
                 <version>1.18.32</version>
                 <scope>provided</scope>
-            </dependency>
-            <dependency>
-                <groupId>io.github.mjcro</groupId>
-                <artifactId>interfaces</artifactId>
-                <version>1.0.22</version>
-            </dependency>
-            <dependency>
-                <groupId>org.slf4j</groupId>
-                <artifactId>slf4j-api</artifactId>
-                <version>2.0.13</version>
             </dependency>
 
             <dependency>
