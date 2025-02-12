@@ -7,9 +7,9 @@ public interface Menu extends Labeled, WithOrder {
             FILE_MENU = new SystemMenu(-1, "file", "File", null),
             TEMPLATES_MENU = new SystemMenu(100, "toybox://templates", "Templates", null),
             TOYBOX_MENU = new SystemMenu(Integer.MAX_VALUE, "toybox://main", "Toybox", null),
-            TOYBOX_DEVELOPMENT_MENU = new SystemMenu(Integer.MAX_VALUE - 1, "toybox://main/dev", "Development", null),
-            TOYBOX_BASIC_TOOLS_SUBMENU = new SystemMenu(0, "toybox://main/basictools", "Basic tools", null),
-            TOYBOX_EXAMPLES_SUBMENU = new SystemMenu(0, "toybox://main/dev/examples", "Examples", null);
+            TOYBOX_DEVELOPMENT_MENU = new SystemMenu(-1, "toybox://main/dev", "Development", null),
+            TOYBOX_BASIC_TOOLS_MENU = new SystemMenu(1_000_000, "toybox://main/basictools", "Basic tools", null),
+            TOYBOX_EXAMPLES_SUBMENU = new SystemMenu(-1, "toybox://main/dev/examples", "Examples", null);
 
     static Menu text(String s) {
         return new TextMenu(0, s);

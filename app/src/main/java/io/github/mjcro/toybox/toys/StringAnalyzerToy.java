@@ -25,7 +25,7 @@ import java.util.regex.Pattern;
 public class StringAnalyzerToy implements Toy {
     @Override
     public List<Menu> getPath() {
-        return List.of(Menu.TOYBOX_MENU, Menu.TOYBOX_BASIC_TOOLS_SUBMENU);
+        return List.of(Menu.TOYBOX_BASIC_TOOLS_MENU);
     }
 
     @Override

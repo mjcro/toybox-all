@@ -10,11 +10,11 @@ import io.github.mjcro.toybox.swing.Components;
 import io.github.mjcro.toybox.swing.Styles;
 import io.github.mjcro.toybox.swing.ToyboxLaF;
 import io.github.mjcro.toybox.swing.factories.ButtonsFactory;
-import io.github.mjcro.toybox.swing.factories.LabelsFactory;
 import io.github.mjcro.toybox.swing.widgets.panels.ShortInformationPanel;
 import lombok.RequiredArgsConstructor;
 
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -40,7 +40,7 @@ import java.util.function.UnaryOperator;
 public class InstantAnalyzerToy implements Toy {
     @Override
     public List<Menu> getPath() {
-        return List.of(Menu.TOYBOX_MENU, Menu.TOYBOX_BASIC_TOOLS_SUBMENU);
+        return List.of(Menu.TOYBOX_BASIC_TOOLS_MENU);
     }
 
     @Override
@@ -124,9 +124,35 @@ public class InstantAnalyzerToy implements Toy {
         private void initComponents() {
             super.setLayout(new BorderLayout());
 
-            JPanel uberHeader = new JPanel(new BorderLayout());
-            uberHeader.add(informationPanel, BorderLayout.PAGE_START);
+            JPanel header = new JPanel();
+            BoxLayout layout = new BoxLayout(header, BoxLayout.PAGE_AXIS);
+            header.setLayout(layout);
 
+            header.add(informationPanel);
+            header.add(Styles.titledBorder("Parse").wrap(buildParsePanel()));
+            header.add(Styles.titledBorder("Result").wrap(parsedInstantDisplay));
+            header.add(Styles.titledBorder("Simple modifications").wrap(modificationSet));
+
+            super.add(header, BorderLayout.PAGE_START);
+
+            modificationSet.setSetter(this::modifyInstant);
+
+            JList<Instant> previousInstants = new JList<>(listModel);
+            previousInstants.addMouseListener(new MouseAdapter() {
+                public void mouseClicked(MouseEvent evt) {
+                    JList list = (JList) evt.getSource();
+                    if (evt.getClickCount() == 2) {
+                        // Double-click detected
+                        int index = list.locationToIndex(evt.getPoint());
+                        applyInstant(listModel.get(index), null, false);
+                    }
+                }
+            });
+
+            super.add(Styles.titledBorder("History").wrap(new JScrollPane(previousInstants)), BorderLayout.CENTER);
+        }
+
+        private JPanel buildParsePanel() {
             JPanel header = new JPanel(new BorderLayout());
             JPanel headerRight = new JPanel();
             tz.setEditable(false);
@@ -139,30 +165,7 @@ public class InstantAnalyzerToy implements Toy {
             Styles.PADDING_NORMAL.apply(inputFieldContainer);
             inputFieldContainer.add(inputField, BorderLayout.CENTER);
             header.add(inputFieldContainer, BorderLayout.CENTER);
-            uberHeader.add(header, BorderLayout.PAGE_END);
-            super.add(uberHeader, BorderLayout.PAGE_START);
-
-            JPanel inner1 = new JPanel(new BorderLayout());
-            JPanel inner2 = new JPanel(new BorderLayout());
-            inner2.add(parsedInstantDisplay, BorderLayout.PAGE_START);
-            modificationSet.setSetter(this::modifyInstant);
-            inner2.add(modificationSet, BorderLayout.PAGE_END);
-            inner1.add(inner2, BorderLayout.PAGE_START);
-
-            JList<Instant> previousInstants = new JList<>(listModel);
-            previousInstants.addMouseListener(new MouseAdapter() {
-                public void mouseClicked(MouseEvent evt) {
-                    JList list = (JList)evt.getSource();
-                    if (evt.getClickCount() == 2) {
-                        // Double-click detected
-                        int index = list.locationToIndex(evt.getPoint());
-                        applyInstant(listModel.get(index), null, false);
-                    }
-                }
-            });
-            inner1.add(new JScrollPane(previousInstants), BorderLayout.CENTER);
-
-            super.add(inner1, BorderLayout.CENTER);
+            return header;
         }
 
         private void onApplyButtonClick(ActionEvent e) {
@@ -232,21 +235,6 @@ public class InstantAnalyzerToy implements Toy {
         }
     }
 
-    private static class LabeledOutput extends JPanel {
-        private final JTextField textField = new JTextField();
-
-        LabeledOutput(String label) {
-            super(new BorderLayout());
-            textField.setEditable(false);
-            super.add(LabelsFactory.create(" " + label + " "), BorderLayout.LINE_START);
-            super.add(textField, BorderLayout.CENTER);
-        }
-
-        public void setText(String s) {
-            textField.setText(s);
-        }
-    }
-
     private static class ModificationSet extends JPanel {
         private Consumer<Instant> setter;
         private Instant instant;
@@ -291,34 +279,38 @@ public class InstantAnalyzerToy implements Toy {
     }
 
     private static class ParsedInstantDisplay extends JPanel {
-        private final DateTimeFormatter fmt = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss");
-        private final LabeledOutput unix = new LabeledOutput("Unix");
-        private final LabeledOutput utc = new LabeledOutput("UTC");
-        private final LabeledOutput sanFran = new LabeledOutput("San Francisco");
-        private final LabeledOutput newYork = new LabeledOutput("New York");
-        private final LabeledOutput austin = new LabeledOutput("Austin");
-        private final LabeledOutput beijing = new LabeledOutput("Beijing");
-        private final LabeledOutput tokyo = new LabeledOutput("Tokyo");
-        private final LabeledOutput local = new LabeledOutput("Local " + ZoneId.systemDefault().getDisplayName(TextStyle.NARROW, Locale.ROOT));
-        private final LabeledOutput provided = new LabeledOutput("Given");
+        private final DateTimeFormatter fmt = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        private final ParsedResultSingleElement
+                provided = new ParsedResultSingleElement("Given"),
+                unix = new ParsedResultSingleElement("Unix"),
+                utc = new ParsedResultSingleElement("UTC"),
+                iso = new ParsedResultSingleElement("ISO"),
+                sanFran = new ParsedResultSingleElement("San Francisco"),
+                newYork = new ParsedResultSingleElement("New York"),
+                austin = new ParsedResultSingleElement("Austin"),
+                beijing = new ParsedResultSingleElement("Beijing"),
+                tokyo = new ParsedResultSingleElement("Tokyo"),
+                local = new ParsedResultSingleElement("Local " + ZoneId.systemDefault().getDisplayName(TextStyle.NARROW, Locale.ROOT));
 
         ParsedInstantDisplay() {
-            super(new GridLayout(3, 3, 4, 4));
+            super(new GridLayout(0, 4, 4, 4));
             Styles.PADDING_NORMAL.apply(this);
+            super.add(provided);
             super.add(unix);
             super.add(utc);
+            super.add(iso);
             super.add(local);
             super.add(sanFran);
             super.add(newYork);
             super.add(austin);
             super.add(beijing);
             super.add(tokyo);
-            super.add(provided);
         }
 
         public void setInstant(Instant instant, ZoneId zoneId) {
             unix.setText(String.valueOf(instant.getEpochSecond()));
             utc.setText(fmt.withZone(ZoneOffset.UTC).format(instant));
+            iso.setText(DateTimeFormatter.ISO_DATE_TIME.withZone(zoneId == null ? ZoneOffset.UTC : zoneId).format(instant));
             sanFran.setText(fmt.withZone(ZoneId.of("America/Los_Angeles")).format(instant));
             austin.setText(fmt.withZone(ZoneId.of("US/Central")).format(instant));
             newYork.setText(fmt.withZone(ZoneId.of("America/New_York")).format(instant));
@@ -330,6 +322,22 @@ public class InstantAnalyzerToy implements Toy {
                             ? ""
                             : fmt.withZone(zoneId).format(instant)
             );
+        }
+    }
+
+    private static class ParsedResultSingleElement extends JPanel {
+        private final JTextField textField = new JTextField();
+
+        ParsedResultSingleElement(String label) {
+            super(new BorderLayout());
+            setBorder(new EmptyBorder(1, 1, 5, 1));
+            textField.setEditable(false);
+            add(new JLabel(label), BorderLayout.PAGE_START);
+            add(textField, BorderLayout.CENTER);
+        }
+
+        public void setText(String s) {
+            textField.setText(s);
         }
     }
 

@@ -2,5 +2,8 @@ io.github.mjcro.toybox.toys.UIPropertiesToy
 io.github.mjcro.toybox.toys.InstantAnalyzerToy
 io.github.mjcro.toybox.toys.StringAnalyzerToy
 io.github.mjcro.toybox.toys.StringConverterToy
+io.github.mjcro.toybox.toys.DataViewToy
 io.github.mjcro.toybox.toys.Settings
 io.github.mjcro.toybox.toys.AboutToy
+io.github.mjcro.toybox.toys.CipherListToy
+io.github.mjcro.toybox.toys.LogsToy

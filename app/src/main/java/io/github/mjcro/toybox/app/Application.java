@@ -22,7 +22,7 @@ public class Application {
             MAIN_ICON = "toybox-64",
             MAIN_TITLE = "ToyBox",
             WINDOW = "tabWindow",
-            VERSION = "v0.3";
+            VERSION = "v0.4";
 
     public static void main(String[] args) {
         // Obtaining and propagating settings
@@ -43,6 +43,9 @@ public class Application {
         if (DEBUG) {
             new CustomLoggingAppender().listen(e -> System.out.println("APP+" + e.getLevel() + " " + e.getFormattedMessage()));
         }
+
+        // Logs buffer
+        new CustomLoggingAppender().listen(LogBuffer.Instance::add);
 
         // Building application context
         ApplicationContext context = new AnnotationConfigApplicationContext(configurationClasses);

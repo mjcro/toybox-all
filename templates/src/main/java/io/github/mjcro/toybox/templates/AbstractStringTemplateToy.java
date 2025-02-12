@@ -7,6 +7,7 @@ import io.github.mjcro.toybox.swing.Components;
 import io.github.mjcro.toybox.swing.Styles;
 import io.github.mjcro.toybox.swing.factories.ButtonsFactory;
 import io.github.mjcro.toybox.swing.layouts.InlineBlockLayout;
+import io.github.mjcro.toybox.swing.widgets.ExceptionDetailsJPanel;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
@@ -34,7 +35,9 @@ public abstract class AbstractStringTemplateToy implements Toy {
     public static class Panel extends JPanel {
         private final Environment environment;
         private final JPanel inputs;
-        private final JTextArea output;
+        private final JPanel outputOrException = new JPanel();
+        private final JTextArea output = new JTextArea();
+        private final ExceptionDetailsJPanel exceptionDetailsJPanel = new ExceptionDetailsJPanel();
         private final JButton applyButton;
         private final JButton copyToClipButton;
         private final JButton saveToFileButton;
@@ -51,16 +54,16 @@ public abstract class AbstractStringTemplateToy implements Toy {
             this.environment = environment;
 
             // Outputs block
-            output = new JTextArea();
+            CardLayout outputCardLayout = new CardLayout();
+            outputOrException.setLayout(outputCardLayout);
             output.setEditable(false);
             if (dataObject != null) {
                 dataObject.getInitialString().ifPresent(output::setText);
             }
             Styles.TEXT_MONOSPACED.apply(output);
-            JPanel outputs = new JPanel();
-            outputs.setLayout(new BorderLayout());
-            outputs.add(new JScrollPane(output), BorderLayout.CENTER);
-            super.add(outputs, BorderLayout.CENTER);
+            outputOrException.add(new JScrollPane(output), "result");
+            outputOrException.add(exceptionDetailsJPanel, "exception");
+            super.add(outputOrException, BorderLayout.CENTER);
 
             // Inputs
             JPanel top = new JPanel();
@@ -158,17 +161,17 @@ public abstract class AbstractStringTemplateToy implements Toy {
                         }
                     }
                     object.produce(sb);
+                    String text = sb.toString();
+                    hash.setText(md5Hex(text));
+                    output.setText(text);
+                    saveToFileButton.setEnabled(!text.isEmpty());
+                    copyToClipButton.setEnabled(!text.isEmpty());
+                    applyButton.setEnabled(true);
+                    ((CardLayout) outputOrException.getLayout()).show(outputOrException, "result");
                 } catch (Throwable err) {
-                    if (sb.length() > 0) {
-                        sb.append("\n");
-                    }
-                    err.printStackTrace();
-                    do {
-                        sb.append(err.getClass()).append("\n");
-                        sb.append(err.getMessage()).append("\n");
-                        Throwable next = err.getCause();
-                        err = next == err ? null : next;
-                    } while (err != null);
+                    exceptionDetailsJPanel.setException(err);
+                    ((CardLayout) outputOrException.getLayout()).show(outputOrException, "exception");
+                    log.error("Error applying template", err);
                 } finally {
                     ui.accept(() -> {
                         applyButton.setEnabled(true);
@@ -176,12 +179,6 @@ public abstract class AbstractStringTemplateToy implements Toy {
                         for (Binding b : bindings) {
                             b.setEnabled(true);
                         }
-                        String text = sb.toString();
-                        hash.setText(md5Hex(text));
-                        output.setText(text);
-                        saveToFileButton.setEnabled(!text.isEmpty());
-                        copyToClipButton.setEnabled(!text.isEmpty());
-                        applyButton.setEnabled(true);
                     });
                 }
             });
