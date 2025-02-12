@@ -2,6 +2,8 @@ package io.github.mjcro.toybox.swing;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.font.FontRenderContext;
+import java.awt.geom.AffineTransform;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
@@ -77,6 +79,13 @@ public class Components {
             padding.setOpaque(false);
         }
         return padding;
+    }
+
+    public static int getStringWidth(Component component, String s) {
+        AffineTransform affinetransform = new AffineTransform();
+        FontRenderContext frc = new FontRenderContext(affinetransform, true, true);
+        Font font = component.getFont();
+        return (int) (font.getStringBounds(s, frc).getWidth());
     }
 
     public static <T> T with(T t, Consumer<T> consumer) {
