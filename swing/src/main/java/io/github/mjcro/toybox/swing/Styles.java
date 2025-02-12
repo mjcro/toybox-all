@@ -6,13 +6,13 @@ import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
 import javax.swing.text.JTextComponent;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
-import java.awt.font.TextAttribute;
-import java.util.Map;
 
 @Slf4j
 public class Styles {
@@ -24,14 +24,11 @@ public class Styles {
             BORDER_LOWERED_BEVEL = c -> c.setBorder(BorderFactory.createLoweredSoftBevelBorder()),
             COLOR_FG_SUCCESS = c -> c.setForeground(new Color(14, 109, 56)),
             COLOR_FG_ERROR = c -> c.setForeground(new Color(109, 14, 25)),
-            BOLD = c -> {
-                Font font = c.getFont();
-                Map attributes = font.getAttributes();
-                attributes.put(TextAttribute.WEIGHT, TextAttribute.WEIGHT_BOLD);
-                c.setFont(font.deriveFont(attributes));
-            },
+            BOLD = c -> c.setFont(c.getFont().deriveFont(Font.BOLD)),
+            ITALIC = c -> c.setFont(c.getFont().deriveFont(Font.ITALIC)),
             FONT_SMALLER_1 = c -> c.setFont(c.getFont().deriveFont(c.getFont().getSize() - 1f)),
             FONT_SMALLER_2 = c -> c.setFont(c.getFont().deriveFont(c.getFont().getSize() - 2f)),
+            RENDERER_JTREE_PADDING = c -> c.setBorder(new EmptyBorder(2, 2, 2, 2)),
             NONE = $ -> {
             };
 
@@ -55,6 +52,10 @@ public class Styles {
             TABLE_CELL_INSTANT = new LafStyle("tableCellInstant"),
 
     LAF_STUB = new LafStyle("");
+
+    public static Hint<JComponent> titledBorder(String title) {
+        return c -> c.setBorder(new TitledBorder(new EtchedBorder(), title));
+    }
 
     public static Hint<JComponent> setPreferredWidth(int width) {
         return c -> c.setPreferredSize(new Dimension(width, c.getPreferredSize().height));
