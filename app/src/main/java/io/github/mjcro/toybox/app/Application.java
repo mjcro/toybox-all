@@ -22,7 +22,7 @@ public class Application {
             MAIN_ICON = "toybox-64",
             MAIN_TITLE = "ToyBox",
             WINDOW = "tabWindow",
-            VERSION = "v0.4";
+            VERSION = "v0.3.2";
 
     public static void main(String[] args) {
         // Obtaining and propagating settings
