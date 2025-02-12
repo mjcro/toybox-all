@@ -18,6 +18,7 @@ import javax.swing.*;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import javax.swing.text.JTextComponent;
+import javax.swing.tree.DefaultMutableTreeNode;
 import java.awt.*;
 import java.time.Duration;
 import java.time.Instant;
@@ -92,6 +93,21 @@ abstract class AbstractWindowContext<T extends Component> implements Context {
                     fillPopup(v);
                     return;
                 }
+            }
+        }
+        if (target instanceof JTree) {
+            JTree x = (JTree) target;
+            Object v = x.getLastSelectedPathComponent();
+            if (v instanceof DefaultMutableTreeNode) {
+                v = ((DefaultMutableTreeNode) v).getUserObject();
+                if (v != null) {
+                    fillPopup(v);
+                    return;
+                }
+            }
+            if (v != null) {
+                fillPopup(v);
+                return;
             }
         }
         if (target instanceof CharSequence) {
