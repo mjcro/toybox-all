@@ -3,6 +3,7 @@ package io.github.mjcro.toybox.swing.widgets.panels;
 import io.github.mjcro.toybox.swing.Components;
 import io.github.mjcro.toybox.swing.factories.ButtonsFactory;
 import io.github.mjcro.toybox.swing.factories.LabelsFactory;
+import io.github.mjcro.toybox.swing.widgets.ExceptionDetailsJPanel;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -12,10 +13,12 @@ import java.awt.event.ActionEvent;
 public class ShortInformationPanel extends JPanel {
     private final JLabel messageLabel = LabelsFactory.create("");
     private final JButton dismissButton = ButtonsFactory.create("Dismiss", this::onDismissButtonClick);
-    private final JButton detailsButton = ButtonsFactory.create("Details");
+    private final JButton detailsButton = ButtonsFactory.create("Details", this::onDetailsButtonClick);
 
     private final Color successBg = new Color(178, 225, 208);
     private final Color errorBg = new Color(225, 178, 209);
+
+    private Throwable exception;
 
     public ShortInformationPanel() {
         super(new BorderLayout());
@@ -56,6 +59,8 @@ public class ShortInformationPanel extends JPanel {
     }
 
     public void setException(Throwable cause) {
+        this.exception = cause;
+
         if (cause == null) {
             setNone();
             return;
@@ -72,6 +77,10 @@ public class ShortInformationPanel extends JPanel {
 
     public void onDismissButtonClick(ActionEvent e) {
         setNone();
+    }
+
+    public void onDetailsButtonClick(ActionEvent e) {
+        ExceptionDetailsJPanel.newWindow(this.exception);
     }
 
     public static void main(String[] args) {
