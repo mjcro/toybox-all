@@ -18,6 +18,7 @@ public class TableCellRendererInstant extends AbstractTableCellRendererLabel {
         normalFg = UIManager.getColor("TextField.inactiveForeground");
 
         label.setVerticalAlignment(SwingConstants.CENTER);
+        label.setHorizontalAlignment(SwingConstants.CENTER);
         Styles.FONT_SMALLER_1.apply(label);
     }
 
