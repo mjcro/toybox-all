@@ -22,7 +22,7 @@ public class Application {
             MAIN_ICON = "toybox-64",
             MAIN_TITLE = "ToyBox",
             WINDOW = "tabWindow",
-            VERSION = "v0.3.2";
+            VERSION = "v0.3.3";
 
     public static void main(String[] args) {
         // Obtaining and propagating settings
@@ -71,6 +71,9 @@ public class Application {
             }
             if ("-tab".equalsIgnoreCase(a) || "--tab".equalsIgnoreCase(a)) {
                 WINDOW = "tabWindow";
+            }
+            if ("--dark".equalsIgnoreCase(a)) {
+                DARK_MODE = true;
             }
         }
     }
