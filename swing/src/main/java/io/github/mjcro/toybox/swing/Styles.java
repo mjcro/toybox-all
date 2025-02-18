@@ -9,6 +9,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.text.JTextComponent;
+import javax.swing.tree.DefaultTreeCellRenderer;
 import java.awt.*;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
@@ -97,6 +98,20 @@ public class Styles {
 
     public static Hint<AbstractButton> onAction(Runnable r) {
         return c -> c.addActionListener(e -> r.run());
+    }
+
+    public static Hint<JLabel> labelIcon(String uri) {
+        return c -> Icons.get(uri).ifPresent(c::setIcon);
+    }
+
+    public static Hint<DefaultTreeCellRenderer> treeIcon(String uri) {
+        return c -> {
+            Icons.get(uri).ifPresent(i -> {
+                c.setOpenIcon(i);
+                c.setClosedIcon(i);
+                c.setLeafIcon(i);
+            });
+        };
     }
 
     public static Hint<JLabel> derivedColor(Object value) {

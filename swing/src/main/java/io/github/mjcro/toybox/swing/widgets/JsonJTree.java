@@ -4,12 +4,14 @@ import io.github.mjcro.toybox.swing.Components;
 import io.github.mjcro.toybox.swing.Icons;
 import io.github.mjcro.toybox.swing.Styles;
 import io.github.mjcro.toybox.swing.ToyboxLaF;
+import io.github.mjcro.toybox.swing.TypedDecorator;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import java.awt.*;
 import java.util.Collection;
+import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
@@ -42,14 +44,14 @@ public class JsonJTree extends JTree {
             parent.add(new DefaultMutableTreeNode(null));
         } else if (data instanceof Map<?, ?>) {
             Map<?, ?> map = (Map<?, ?>) data;
-            DefaultMutableTreeNode node = new DefaultMutableTreeNode(new ObjectContainer(keyName));
+            DefaultMutableTreeNode node = new DefaultMutableTreeNode(new TypedDecorator<>(Type.OBJECT, keyName == null ? "object" : keyName + ":"));
             parent.add(node);
             for (Map.Entry<?, ?> entry : map.entrySet()) {
                 setDataRecursively(node, entry, null);
             }
         } else if (data instanceof Collection<?>) {
             Collection<?> collection = (Collection<?>) data;
-            DefaultMutableTreeNode node = new DefaultMutableTreeNode(new CollectionContainer(keyName));
+            DefaultMutableTreeNode node = new DefaultMutableTreeNode(new TypedDecorator<>(Type.COLLECTION, keyName));
             parent.add(node);
             for (Object o : collection) {
                 setDataRecursively(node, o, null);
@@ -76,11 +78,7 @@ public class JsonJTree extends JTree {
         }
     }
 
-    public static class Renderer extends CustomTreeCellRenderer {
-        private final JLabel labelContainerObject = new JLabel("");
-        private final JLabel labelContainerCollection = new JLabel("");
-        private final JLabel labelKeyOnly = new JLabel();
-        private final JLabel label = new JLabel();
+    public static class Renderer extends TypedDecoratorCustomTreeCellRenderer<Type> {
         private final KeyValuePanel panelKeyValue = new KeyValuePanel();
 
         private final Color colorString = UIManager.getColor("Actions.Green");
@@ -89,13 +87,18 @@ public class JsonJTree extends JTree {
         private final Color colorOther = UIManager.getColor("Actions.Red");
 
         Renderer() {
+            super(new EnumMap<>(Map.of(
+                    Type.OBJECT,
+                    hinted(Styles.treeIcon("fam://table")),
+                    Type.COLLECTION,
+                    hinted(Styles.treeIcon("fam://text_list_bullets"))
+            )));
+
+            Styles.treeIcon("fam://bullet_black").apply(this);
+
             Styles.BOLD.apply(panelKeyValue.value);
 
-            Icons.get("fam://table").ifPresent(labelContainerObject::setIcon);
-            Icons.get("fam://text_list_bullets").ifPresent(labelContainerCollection::setIcon);
-            Icons.get("fam://bullet_black").ifPresent(labelKeyOnly::setIcon);
             Icons.get("fam://bullet_black").ifPresent(panelKeyValue::setIcon);
-            Icons.get("fam://bullet_black").ifPresent(label::setIcon);
         }
 
         @Override
@@ -112,22 +115,7 @@ public class JsonJTree extends JTree {
                 value = ((DefaultMutableTreeNode) value).getUserObject();
             }
 
-            if (value instanceof ObjectContainer) {
-                String keyName = ((ObjectContainer) value).key;
-                labelContainerObject.setText(keyName == null ? "object" : keyName + ":");
-                labelContainerObject.setForeground(selected ? colorSelectedFg : colorNormalFg);
-                return labelContainerObject;
-            } else if (value instanceof CollectionContainer) {
-                String keyName = ((CollectionContainer) value).key;
-                labelContainerCollection.setText(keyName == null ? "collection" : keyName + ":");
-                labelContainerCollection.setForeground(selected ? colorSelectedFg : colorNormalFg);
-                return labelContainerCollection;
-            } else if (value instanceof KeyOnly) {
-                KeyOnly ko = (KeyOnly) value;
-                labelKeyOnly.setText(ko.key + ":");
-                labelKeyOnly.setForeground(selected ? colorSelectedFg : colorNormalFg);
-                return labelKeyOnly;
-            } else if (value instanceof Map.Entry<?, ?>) {
+            if (value instanceof Map.Entry<?, ?>) {
                 Map.Entry<?, ?> kv = (Map.Entry<?, ?>) value;
                 Object v = kv.getValue();
                 panelKeyValue.key.setText(kv.getKey() + ":  ");
@@ -135,11 +123,9 @@ public class JsonJTree extends JTree {
                 panelKeyValue.key.setForeground(selected ? colorSelectedFg : colorNormalFg);
                 panelKeyValue.value.setForeground(selected ? colorSelectedFg : getFgColorFor(v));
                 return panelKeyValue;
-            } else {
-                label.setText(value == null ? "null" : value.toString());
-                label.setForeground(selected ? colorSelectedFg : getFgColorFor(value));
-                return label;
             }
+
+            return super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
         }
 
         private Color getFgColorFor(Object v) {
@@ -172,28 +158,8 @@ public class JsonJTree extends JTree {
         }
     }
 
-    private static class KeyOnly {
-        private final String key;
-
-        private KeyOnly(String key) {
-            this.key = key;
-        }
-    }
-
-    private static class ObjectContainer {
-        private final String key;
-
-        private ObjectContainer(String key) {
-            this.key = key;
-        }
-    }
-
-    private static class CollectionContainer {
-        private final String key;
-
-        private CollectionContainer(String key) {
-            this.key = key;
-        }
+    private enum Type {
+        OBJECT, COLLECTION;
     }
 
     public static void main(String[] args) {
