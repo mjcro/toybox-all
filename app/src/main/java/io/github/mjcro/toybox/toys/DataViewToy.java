@@ -10,6 +10,7 @@ import io.github.mjcro.toybox.swing.Styles;
 import io.github.mjcro.toybox.swing.ToyboxLaF;
 import io.github.mjcro.toybox.swing.widgets.ExceptionDetailsJPanel;
 import io.github.mjcro.toybox.swing.widgets.JsonJTree;
+import io.github.mjcro.toybox.swing.widgets.XmlJTree;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
@@ -25,7 +26,7 @@ public class DataViewToy implements Toy {
 
     @Override
     public Label getLabel() {
-        return Label.ofIconAndName("fam://tag", "JSON view");
+        return Label.ofIconAndName("fam://tag", "Data view");
     }
 
     @Override
@@ -36,6 +37,11 @@ public class DataViewToy implements Toy {
     private static class Panel extends JPanel {
         private final JTextArea input = new JTextArea();
         private final JSplitPane pane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+        private final JComboBox<Mode> modeChooser = new JComboBox<>(new Mode[]{
+                Mode.JSON_TREE,
+                Mode.JSON_PRETTY,
+                Mode.XML_TREE
+        });
 
         Panel() {
             super(new BorderLayout());
@@ -48,6 +54,7 @@ public class DataViewToy implements Toy {
             JPanel panel = new JPanel();
             JButton apply = new JButton("Apply");
             Styles.onAction(this::apply).apply(apply);
+            panel.add(modeChooser);
             panel.add(apply);
             return panel;
         }
@@ -66,17 +73,57 @@ public class DataViewToy implements Toy {
             int loc = pane.getDividerLocation();
             pane.add(component, JSplitPane.BOTTOM);
             pane.setDividerLocation(loc);
+            Components.setInheritedPopupRecursively(pane);
+        }
+
+        private void setResult(String string) {
+            JTextArea textArea = new JTextArea(string);
+            textArea.setEditable(false);
+            Styles.TEXT_MONOSPACED.apply(textArea);
+            setResult(new JScrollPane(textArea));
         }
 
         private void apply() {
             try {
-                ObjectMapper mapper = new ObjectMapper();
-                Object data = mapper.readValue(input.getText(), Object.class);
-                setResult(new JScrollPane(new JsonJTree(data)));
+                switch ((Mode) modeChooser.getSelectedItem()) {
+                    case JSON_TREE: {
+                        ObjectMapper mapper = new ObjectMapper();
+                        Object data = mapper.readValue(input.getText(), Object.class);
+                        setResult(new JScrollPane(new JsonJTree(data)));
+                    }
+                    break;
+                    case JSON_PRETTY: {
+                        ObjectMapper mapper = new ObjectMapper();
+                        Object data = mapper.readValue(input.getText(), Object.class);
+                        setResult(mapper.writerWithDefaultPrettyPrinter().writeValueAsString(data));
+                    }
+                    break;
+                    case XML_TREE:
+                        setResult(new JScrollPane(new XmlJTree(input.getText())));
+                        break;
+                }
             } catch (Exception e) {
                 log.error("Error parsing JSON", e);
                 setResult(new ExceptionDetailsJPanel(e));
             }
+        }
+    }
+
+    private enum Mode {
+        JSON_TREE("JSON tree"),
+        JSON_PRETTY("Formatted JSON"),
+        XML_TREE("XML tree");
+
+        private final String displayName;
+
+        Mode(String displayName) {
+            this.displayName = displayName;
+        }
+
+
+        @Override
+        public String toString() {
+            return displayName;
         }
     }
 
