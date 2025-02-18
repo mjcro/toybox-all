@@ -28,6 +28,7 @@ import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Optional;
 
 @RequiredArgsConstructor(access = AccessLevel.PROTECTED)
@@ -120,6 +121,26 @@ abstract class AbstractWindowContext<T extends Component> implements Context {
                 }
             }
         }
+        if (target instanceof Map.Entry<?, ?>) {
+            Object key = ((Map.Entry<?, ?>) target).getKey();
+            Object value = ((Map.Entry<?, ?>) target).getValue();
+            if (key instanceof CharSequence) {
+                addPopupElement(io.github.mjcro.toybox.api.Action.ofName("Copy key", () -> getEnvironment().clipboardPut(key.toString())));
+            }
+            if (value instanceof CharSequence) {
+                addPopupElement(io.github.mjcro.toybox.api.Action.ofName("Copy value", () -> getEnvironment().clipboardPut(key.toString())));
+            }
+        }
+
+        if (target instanceof Class<?>) {
+            addPopupElement(io.github.mjcro.toybox.api.Action.ofName("Copy class name", () -> getEnvironment().clipboardPut(((Class<?>) target).getName())));
+        }
+
+        if (target instanceof Exception) {
+            addPopupElement(io.github.mjcro.toybox.api.Action.ofName("Copy exception class name", () -> getEnvironment().clipboardPut(target.getClass().getName())));
+            addPopupElement(io.github.mjcro.toybox.api.Action.ofName("Copy exception message", () -> getEnvironment().clipboardPut(((Exception) target).getMessage())));
+        }
+
         if (target instanceof Enum) {
             CharSequence x;
             if (target instanceof WithName) {
