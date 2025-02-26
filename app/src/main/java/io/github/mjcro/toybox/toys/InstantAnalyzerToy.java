@@ -7,9 +7,11 @@ import io.github.mjcro.toybox.api.Menu;
 import io.github.mjcro.toybox.api.Toy;
 import io.github.mjcro.toybox.api.events.SetWindowHintEvent;
 import io.github.mjcro.toybox.swing.Components;
-import io.github.mjcro.toybox.swing.Styles;
-import io.github.mjcro.toybox.swing.ToyboxLaF;
-import io.github.mjcro.toybox.swing.factories.ButtonsFactory;
+import io.github.mjcro.toybox.swing.hint.Hints;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxButtons;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxLaF;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxLabels;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxPanels;
 import io.github.mjcro.toybox.swing.widgets.panels.ShortInformationPanel;
 import lombok.RequiredArgsConstructor;
 
@@ -25,9 +27,12 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
 import java.time.format.TextStyle;
 import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalAdjusters;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -60,13 +65,11 @@ public class InstantAnalyzerToy implements Toy {
     }
 
     private static final class Panel extends JPanel {
-        private Instant currentInstant = null;
-        private ZoneId currentZoneId = null;
         private Consumer<Event> eventConsumer = event -> {
         };
 
         private final JTextField inputField = new JTextField();
-        private final JComboBox<TimeZoneSelection> tz = new JComboBox<>(TimeZoneSelection.items());
+        private final JComboBox<TimeZoneSelection> tz = new JComboBox<>(TimeZoneSelection.items(true));
         private final ParsedInstantDisplay parsedInstantDisplay = new ParsedInstantDisplay();
         private final ModificationSet modificationSet = new ModificationSet();
         private final ShortInformationPanel informationPanel = new ShortInformationPanel();
@@ -74,6 +77,7 @@ public class InstantAnalyzerToy implements Toy {
 
         private final List<BiFunction<String, ZoneId, Instant>> instantParsers = List.of(
                 (s, zoneId) -> Instant.from(LocalDateTime.parse(s).atZone(zoneId)),
+                (s, zoneId) -> Instant.from(LocalDateTime.parse(s.replaceAll("\\.", "-").replaceAll(" ", "T")).atZone(zoneId)),
                 (s, zoneId) -> Instant.from(LocalDate.parse(s).atStartOfDay().atZone(zoneId)),
                 (s, zoneId) -> Instant.parse(s),
                 (s, zoneId) -> Instant.ofEpochSecond(Long.parseLong(s))
@@ -93,7 +97,7 @@ public class InstantAnalyzerToy implements Toy {
         }
 
         private void modifyInstant(Instant instant) {
-            applyInstant(instant, currentZoneId, false);
+            applyInstant(instant, null, false);
         }
 
         public void setEventConsumer(Consumer<Event> consumer) {
@@ -115,7 +119,6 @@ public class InstantAnalyzerToy implements Toy {
             if (storeHistory) {
                 listModel.insertElementAt(instant, 0);
             }
-            currentInstant = instant;
             parsedInstantDisplay.setInstant(instant, null);
             modificationSet.setInstant(instant);
             eventConsumer.accept(new SetWindowHintEvent(instant.toString()));
@@ -124,14 +127,12 @@ public class InstantAnalyzerToy implements Toy {
         private void initComponents() {
             super.setLayout(new BorderLayout());
 
-            JPanel header = new JPanel();
-            BoxLayout layout = new BoxLayout(header, BoxLayout.PAGE_AXIS);
-            header.setLayout(layout);
-
-            header.add(informationPanel);
-            header.add(Styles.titledBorder("Parse").wrap(buildParsePanel()));
-            header.add(Styles.titledBorder("Result").wrap(parsedInstantDisplay));
-            header.add(Styles.titledBorder("Simple modifications").wrap(modificationSet));
+            JPanel header = ToyBoxPanels.verticalRows(
+                    informationPanel,
+                    Hints.titledBorder("Parse").wrap(buildParsePanel()),
+                    Hints.titledBorder("Result").wrap(parsedInstantDisplay),
+                    Hints.titledBorder("Modifications").wrap(modificationSet)
+            );
 
             super.add(header, BorderLayout.PAGE_START);
 
@@ -149,7 +150,9 @@ public class InstantAnalyzerToy implements Toy {
                 }
             });
 
-            super.add(Styles.titledBorder("History").wrap(new JScrollPane(previousInstants)), BorderLayout.CENTER);
+            JPanel historyPanel = new JPanel(new BorderLayout());
+            historyPanel.add(new JScrollPane(previousInstants));
+            super.add(Hints.titledBorder("History").wrap(historyPanel), BorderLayout.CENTER);
         }
 
         private JPanel buildParsePanel() {
@@ -157,12 +160,12 @@ public class InstantAnalyzerToy implements Toy {
             JPanel headerRight = new JPanel();
             tz.setEditable(false);
             headerRight.add(tz);
-            JButton parseButton = ButtonsFactory.create("Parse", this::onApplyButtonClick, Styles.BUTTON_PRIMARY);
+            JButton parseButton = ToyBoxButtons.createPrimary("Parse", this::onApplyButtonClick);
             headerRight.add(parseButton);
             header.add(headerRight, BorderLayout.LINE_END);
 
             JPanel inputFieldContainer = new JPanel(new BorderLayout());
-            Styles.PADDING_NORMAL.apply(inputFieldContainer);
+            Hints.PADDING_NORMAL.apply(inputFieldContainer);
             inputFieldContainer.add(inputField, BorderLayout.CENTER);
             header.add(inputFieldContainer, BorderLayout.CENTER);
             return header;
@@ -182,6 +185,7 @@ public class InstantAnalyzerToy implements Toy {
                 for (BiFunction<String, ZoneId, Instant> parser : instantParsers) {
                     try {
                         instant = parser.apply(text, zoneId);
+                        break;
                     } catch (RuntimeException error) {
                         // ignore
                     }
@@ -218,11 +222,13 @@ public class InstantAnalyzerToy implements Toy {
             return name;
         }
 
-        public static Vector<TimeZoneSelection> items() {
+        public static Vector<TimeZoneSelection> items(final boolean includeNull) {
             ZoneId local = ZoneId.systemDefault();
 
             Vector<TimeZoneSelection> v = new Vector<>();
-            v.add(new TimeZoneSelection("", null));
+            if (includeNull) {
+                v.add(new TimeZoneSelection("", null));
+            }
             v.add(new TimeZoneSelection("* UTC", ZoneOffset.UTC));
             v.add(new TimeZoneSelection("* Local - " + local.getDisplayName(TextStyle.NARROW, Locale.ROOT), local));
 
@@ -236,21 +242,43 @@ public class InstantAnalyzerToy implements Toy {
     }
 
     private static class ModificationSet extends JPanel {
+        private final JComboBox<TimeZoneSelection> tz = new JComboBox<>(TimeZoneSelection.items(false));
+
         private Consumer<Instant> setter;
         private Instant instant;
 
         ModificationSet() {
-            super(new GridLayout(1, 8));
-            Styles.PADDING_NORMAL.apply(this);
+            super(new BorderLayout());
 
-            add(construct("-24 hours", i -> i.plus(-24, ChronoUnit.HOURS)));
-            add(construct("-1 hour", i -> i.plus(-1, ChronoUnit.HOURS)));
-            add(construct("-1 minute", i -> i.plus(-1, ChronoUnit.MINUTES)));
-            add(construct("-1 second", i -> i.plus(-1, ChronoUnit.SECONDS)));
-            add(construct("+1 second", i -> i.plus(1, ChronoUnit.SECONDS)));
-            add(construct("+1 minute", i -> i.plus(1, ChronoUnit.MINUTES)));
-            add(construct("+1 hour", i -> i.plus(1, ChronoUnit.HOURS)));
-            add(construct("+24 hours", i -> i.plus(24, ChronoUnit.HOURS)));
+            JPanel buttons1 = ToyBoxPanels.horizontalGrid(2,
+                    constructInstantMod("-24 hours", i -> i.plus(-24, ChronoUnit.HOURS)),
+                    constructInstantMod("-1 hour", i -> i.plus(-1, ChronoUnit.HOURS)),
+                    constructInstantMod("-1 minute", i -> i.plus(-1, ChronoUnit.MINUTES)),
+                    constructInstantMod("-1 second", i -> i.plus(-1, ChronoUnit.SECONDS)),
+                    constructInstantMod("+1 second", i -> i.plus(1, ChronoUnit.SECONDS)),
+                    constructInstantMod("+1 minute", i -> i.plus(1, ChronoUnit.MINUTES)),
+                    constructInstantMod("+1 hour", i -> i.plus(1, ChronoUnit.HOURS)),
+                    constructInstantMod("+24 hours", i -> i.plus(24, ChronoUnit.HOURS))
+            );
+
+            JPanel buttons2 = ToyBoxPanels.horizontalGrid(2,
+                    constructZDTMod("Year begin", t -> t.with(TemporalAdjusters.firstDayOfYear()).truncatedTo(ChronoUnit.DAYS)),
+                    constructZDTMod("Month begin", t -> t.with(TemporalAdjusters.firstDayOfMonth()).truncatedTo(ChronoUnit.DAYS)),
+                    constructZDTMod("Day begin", t -> t.truncatedTo(ChronoUnit.DAYS)),
+                    constructZDTMod("Day end", t -> t.truncatedTo(ChronoUnit.DAYS).plusDays(1).minusSeconds(1)),
+                    constructZDTMod("Month end", t -> t.with(TemporalAdjusters.lastDayOfMonth()).truncatedTo(ChronoUnit.DAYS).plusDays(1).minusSeconds(1)),
+                    constructZDTMod("Year end", t -> t.with(TemporalAdjusters.lastDayOfYear()).truncatedTo(ChronoUnit.DAYS).plusDays(1).minusSeconds(1))
+            );
+
+            JPanel buttons = ToyBoxPanels.verticalRows(2, buttons1, buttons2);
+
+            this.add(buttons, BorderLayout.CENTER);
+
+            JPanel tzSelector = ToyBoxPanels.twoColumnsRight(
+                    new AbstractMap.SimpleEntry<>(ToyBoxLabels.create("Time Zone"), tz)
+            );
+
+            this.add(tzSelector, BorderLayout.PAGE_START);
 
             setInstant(null);
         }
@@ -259,7 +287,18 @@ public class InstantAnalyzerToy implements Toy {
             this.instant = instant;
             boolean enabled = instant != null;
             for (Component c : getComponents()) {
-                c.setEnabled(enabled);
+                if (c instanceof Container) {
+                    for (Component cc : ((Container) c).getComponents()) {
+                        cc.setEnabled(enabled);
+                        if (cc instanceof Container) {
+                            for (Component ccc : ((Container) cc).getComponents()) {
+                                ccc.setEnabled(enabled);
+                            }
+                        }
+                    }
+                } else {
+                    c.setEnabled(enabled);
+                }
             }
         }
 
@@ -267,12 +306,28 @@ public class InstantAnalyzerToy implements Toy {
             this.setter = setter;
         }
 
-        private JButton construct(String text, UnaryOperator<Instant> mod) {
-            return ButtonsFactory.create(text, (ActionListener) e -> {
-                Instant modified = mod.apply(instant);
-                Consumer<Instant> s = setter;
-                if (s != null) {
-                    s.accept(modified);
+        private JButton constructInstantMod(String text, UnaryOperator<Instant> mod) {
+            return ToyBoxButtons.create(text, (ActionListener) e -> {
+                if (instant != null) {
+                    Instant modified = mod.apply(instant);
+                    Consumer<Instant> s = setter;
+                    if (s != null) {
+                        s.accept(modified);
+                    }
+                }
+            });
+        }
+
+        private JButton constructZDTMod(String text, UnaryOperator<ZonedDateTime> mod) {
+            return ToyBoxButtons.create(text, (ActionListener) e -> {
+                if (instant != null) {
+                    ZoneId zoneId = ((TimeZoneSelection) tz.getSelectedItem()).zoneId;
+                    ZonedDateTime zdt = ZonedDateTime.ofInstant(instant, zoneId);
+                    Instant modified = mod.apply(zdt).toInstant();
+                    Consumer<Instant> s = setter;
+                    if (s != null) {
+                        s.accept(modified);
+                    }
                 }
             });
         }
@@ -294,7 +349,7 @@ public class InstantAnalyzerToy implements Toy {
 
         ParsedInstantDisplay() {
             super(new GridLayout(0, 4, 4, 4));
-            Styles.PADDING_NORMAL.apply(this);
+            Hints.PADDING_NORMAL.apply(this);
             super.add(provided);
             super.add(unix);
             super.add(utc);
@@ -332,7 +387,7 @@ public class InstantAnalyzerToy implements Toy {
             super(new BorderLayout());
             setBorder(new EmptyBorder(1, 1, 5, 1));
             textField.setEditable(false);
-            add(new JLabel(label), BorderLayout.PAGE_START);
+            add(ToyBoxLabels.create(label), BorderLayout.PAGE_START);
             add(textField, BorderLayout.CENTER);
         }
 
@@ -342,7 +397,7 @@ public class InstantAnalyzerToy implements Toy {
     }
 
     public static void main(String[] args) {
-        ToyboxLaF.initialize(false);
+        ToyBoxLaF.initialize(false);
         Components.show(new Panel());
     }
 }
