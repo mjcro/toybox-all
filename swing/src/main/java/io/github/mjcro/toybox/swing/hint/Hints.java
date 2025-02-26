@@ -1,7 +1,7 @@
-package io.github.mjcro.toybox.swing;
+package io.github.mjcro.toybox.swing.hint;
 
-import lombok.Getter;
-import lombok.RequiredArgsConstructor;
+import io.github.mjcro.toybox.swing.Components;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxIcons;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
@@ -16,7 +16,7 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 @Slf4j
-public class Styles {
+public class Hints {
     public static final Hint<JComponent>
             PADDING_NANO = c -> c.setBorder(new EmptyBorder(1, 1, 1, 1)),
             PADDING_MINI = c -> c.setBorder(new EmptyBorder(2, 2, 2, 2)),
@@ -40,19 +40,19 @@ public class Styles {
     },
             RIGHT = c -> c.setHorizontalAlignment(SwingConstants.RIGHT);
 
-    public static final LafStyle
-            TEXT_MINI = new LafStyle("mini"),
-            TEXT_SMALL = new LafStyle("small"),
-            TEXT_LIGHT = new LafStyle("light"),
-            TEXT_SEMIBOLD = new LafStyle("semibold"),
-            TEXT_MONOSPACED = new LafStyle("monospaced"),
-            TEXT_BIGGEST = new LafStyle("h00"),
-            BUTTON_PRIMARY = new LafStyle("buttonPrimary"),
-            BUTTON_SUCCESS = new LafStyle("buttonSuccess"),
-            TABLE_CELL_INDEX = new LafStyle("tableCellIndex"),
-            TABLE_CELL_INSTANT = new LafStyle("tableCellInstant"),
+    public static final LaFStyle
+            TEXT_MINI = new LaFStyle("mini"),
+            TEXT_SMALL = new LaFStyle("small"),
+            TEXT_LIGHT = new LaFStyle("light"),
+            TEXT_SEMIBOLD = new LaFStyle("semibold"),
+            TEXT_MONOSPACED = new LaFStyle("monospaced"),
+            TEXT_BIGGEST = new LaFStyle("h00"),
+            BUTTON_PRIMARY = new LaFStyle("buttonPrimary"),
+            BUTTON_SUCCESS = new LaFStyle("buttonSuccess"),
+            TABLE_CELL_INDEX = new LaFStyle("tableCellIndex"),
+            TABLE_CELL_INSTANT = new LaFStyle("tableCellInstant"),
 
-    LAF_STUB = new LafStyle("");
+    LAF_STUB = new LaFStyle("");
 
     public static Hint<JComponent> titledBorder(String title) {
         return c -> c.setBorder(new TitledBorder(new EtchedBorder(), title));
@@ -101,12 +101,12 @@ public class Styles {
     }
 
     public static Hint<JLabel> labelIcon(String uri) {
-        return c -> Icons.get(uri).ifPresent(c::setIcon);
+        return c -> ToyBoxIcons.get(uri).ifPresent(c::setIcon);
     }
 
     public static Hint<DefaultTreeCellRenderer> treeIcon(String uri) {
         return c -> {
-            Icons.get(uri).ifPresent(i -> {
+            ToyBoxIcons.get(uri).ifPresent(i -> {
                 c.setOpenIcon(i);
                 c.setClosedIcon(i);
                 c.setLeafIcon(i);
@@ -123,10 +123,16 @@ public class Styles {
         };
     }
 
-    @RequiredArgsConstructor
-    public static class LafStyle implements Hint<JComponent> {
-        @Getter
+    public static class LaFStyle implements Hint<JComponent> {
         private final String value;
+
+        public LaFStyle(String value) {
+            this.value = value;
+        }
+
+        public String getValue() {
+            return value;
+        }
 
         @Override
         public void apply(JComponent component) {

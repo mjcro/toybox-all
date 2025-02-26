@@ -1,4 +1,4 @@
-package io.github.mjcro.toybox.swing;
+package io.github.mjcro.toybox.swing.hint;
 
 import io.github.mjcro.interfaces.strings.WithText;
 

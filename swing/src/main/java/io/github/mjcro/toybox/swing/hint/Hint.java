@@ -1,7 +1,15 @@
-package io.github.mjcro.toybox.swing;
+package io.github.mjcro.toybox.swing.hint;
 
+import javax.swing.*;
+
+/**
+ * Defines Java Swing JComponent hint - something that can be used
+ * to decorate, assign listeners or change state of {@link JComponent}.
+ *
+ * @param <T>
+ */
 @FunctionalInterface
-public interface Hint<T extends javax.swing.JComponent> {
+public interface Hint<T extends JComponent> {
     /**
      * Applies all given hints to component.
      *
@@ -10,7 +18,7 @@ public interface Hint<T extends javax.swing.JComponent> {
      * @param <T>       Component type.
      */
     @SafeVarargs
-    static <T extends javax.swing.JComponent> void applyAll(T component, Hint<? super T>... hints) {
+    static <T extends JComponent> void applyAll(T component, Hint<? super T>... hints) {
         for (Hint<? super T> style : hints) {
             style.apply(component);
         }
@@ -24,7 +32,7 @@ public interface Hint<T extends javax.swing.JComponent> {
      * @return Hint.
      */
     @SafeVarargs
-    static <T extends javax.swing.JComponent> Hint<T> combine(Hint<? super T>... hints) {
+    static <T extends JComponent> Hint<T> combine(Hint<? super T>... hints) {
         return c -> {
             if (hints != null) {
                 for (Hint<? super T> s : hints) {
