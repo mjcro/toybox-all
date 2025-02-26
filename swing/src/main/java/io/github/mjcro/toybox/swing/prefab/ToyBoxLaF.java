@@ -1,4 +1,4 @@
-package io.github.mjcro.toybox.swing;
+package io.github.mjcro.toybox.swing.prefab;
 
 import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatLaf;
@@ -6,7 +6,15 @@ import com.formdev.flatlaf.FlatLightLaf;
 
 import javax.swing.*;
 
-public class ToyboxLaF {
+/**
+ * Static utility for Java Look and Feel.
+ */
+public class ToyBoxLaF {
+    /**
+     * Initializes standard ToyBox Look and Feel (LaF).
+     *
+     * @param darkMode True if dark mode should be used, false otherwise.
+     */
     public static void initialize(boolean darkMode) {
         // Installing look and feel
         FlatLightLaf.registerCustomDefaultsSource("toybox.laf.themes");
@@ -18,6 +26,6 @@ public class ToyboxLaF {
         UIManager.put("TabbedPane.tabLayoutPolicy", "scroll");
     }
 
-    private ToyboxLaF() {
+    private ToyBoxLaF() {
     }
 }

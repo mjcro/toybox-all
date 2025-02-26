@@ -1,4 +1,4 @@
-package io.github.mjcro.toybox.swing;
+package io.github.mjcro.toybox.swing.prefab;
 
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
@@ -12,7 +12,7 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Slf4j
-public class Icons {
+public class ToyBoxIcons {
     private static final ConcurrentHashMap<Key, Icon> icons = new ConcurrentHashMap<>();
     public static boolean DARK_MODE = false;
 
@@ -116,7 +116,7 @@ public class Icons {
                     if (!hasExtension) {
                         resourceName += ".png";
                     }
-                    URL r = Icons.class.getResource(resourceName);
+                    URL r = ToyBoxIcons.class.getResource(resourceName);
                     if (r == null) {
                         continue;
                     }

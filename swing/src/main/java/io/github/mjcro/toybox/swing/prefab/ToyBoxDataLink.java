@@ -1,6 +1,6 @@
-package io.github.mjcro.toybox.swing.factories;
+package io.github.mjcro.toybox.swing.prefab;
 
-import io.github.mjcro.toybox.swing.Hint;
+import io.github.mjcro.toybox.swing.hint.Hint;
 import io.github.mjcro.toybox.swing.linking.ComponentDataLink;
 import io.github.mjcro.toybox.swing.linking.JCheckBoxBooleanDataLink;
 import io.github.mjcro.toybox.swing.linking.JTextComponentNumberDataLink;
@@ -12,7 +12,7 @@ import java.lang.reflect.Field;
 import java.util.Optional;
 import java.util.function.UnaryOperator;
 
-public class DataLinkFactory {
+public class ToyBoxDataLink {
     @SafeVarargs
     public static ComponentDataLink<JCheckBox, Boolean> linkBooleanField(
             JCheckBox component,
@@ -115,6 +115,6 @@ public class DataLinkFactory {
         return link;
     }
 
-    private DataLinkFactory() {
+    private ToyBoxDataLink() {
     }
 }

@@ -1,10 +1,10 @@
-package io.github.mjcro.toybox.swing.factories;
+package io.github.mjcro.toybox.swing.prefab;
 
-import io.github.mjcro.toybox.swing.Hint;
+import io.github.mjcro.toybox.swing.hint.Hint;
 
 import javax.swing.*;
 
-public class TextComponentsFactory {
+public class ToyBoxTextComponents {
     private static JTextField createJTextField() {
         return new JTextField();
     }

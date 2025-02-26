@@ -1,11 +1,12 @@
-package io.github.mjcro.toybox.swing.factories;
+package io.github.mjcro.toybox.swing.prefab;
 
-import io.github.mjcro.toybox.swing.Hint;
+import io.github.mjcro.toybox.swing.hint.Hint;
+import io.github.mjcro.toybox.swing.hint.Hints;
 
 import javax.swing.*;
 import java.awt.event.ActionListener;
 
-public class ButtonsFactory {
+public class ToyBoxButtons {
     private static JButton create(String text) {
         return new JButton(text);
     }
@@ -31,6 +32,18 @@ public class ButtonsFactory {
         return button;
     }
 
-    private ButtonsFactory() {
+    public static JButton createPrimary(String text, ActionListener listener) {
+        JButton button = create(text, Hints.BUTTON_PRIMARY);
+        button.addActionListener(listener);
+        return button;
+    }
+
+    public static JButton createSuccess(String text, ActionListener listener) {
+        JButton button = create(text, Hints.BUTTON_SUCCESS);
+        button.addActionListener(listener);
+        return button;
+    }
+
+    private ToyBoxButtons() {
     }
 }

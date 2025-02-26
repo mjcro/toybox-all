@@ -1,10 +1,10 @@
-package io.github.mjcro.toybox.swing.factories;
+package io.github.mjcro.toybox.swing.prefab;
 
-import io.github.mjcro.toybox.swing.Hint;
+import io.github.mjcro.toybox.swing.hint.Hint;
 
 import javax.swing.*;
 
-public class LabelsFactory {
+public class ToyBoxLabels {
     private static JLabel create() {
         return new JLabel();
     }
@@ -33,6 +33,6 @@ public class LabelsFactory {
         return label;
     }
 
-    private LabelsFactory() {
+    private ToyBoxLabels() {
     }
 }
