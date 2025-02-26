@@ -1,7 +1,8 @@
 package io.github.mjcro.toybox.swing.widgets;
 
-import io.github.mjcro.toybox.swing.Icons;
-import io.github.mjcro.toybox.swing.Styles;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxIcons;
+import io.github.mjcro.toybox.swing.hint.Hints;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxLabels;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -63,24 +64,24 @@ public class ExceptionDetailsJTree extends JTree {
     }
 
     private static class Renderer extends CustomTreeCellRenderer {
-        private final JLabel rootLabel = new JLabel();
-        private final JLabel messageLabel = new JLabel();
-        private final JLabel classLabel = new JLabel();
-        private final JLabel hintLabel = new JLabel();
+        private final JLabel rootLabel = ToyBoxLabels.create();
+        private final JLabel messageLabel = ToyBoxLabels.create();
+        private final JLabel classLabel = ToyBoxLabels.create();
+        private final JLabel hintLabel = ToyBoxLabels.create();
         private final StackPanel stackLabel = new StackPanel();
 
         Renderer() {
-            Icons.get("fam://bug").ifPresent(messageLabel::setIcon);
-            Icons.get("fam://tag").ifPresent(classLabel::setIcon);
-            Icons.get("fam://lightbulb").ifPresent(hintLabel::setIcon);
+            ToyBoxIcons.get("fam://bug").ifPresent(messageLabel::setIcon);
+            ToyBoxIcons.get("fam://tag").ifPresent(classLabel::setIcon);
+            ToyBoxIcons.get("fam://lightbulb").ifPresent(hintLabel::setIcon);
 
-            Styles.RENDERER_JTREE_PADDING.apply(messageLabel);
-            Styles.RENDERER_JTREE_PADDING.apply(classLabel);
-            Styles.RENDERER_JTREE_PADDING.apply(stackLabel);
-            Styles.RENDERER_JTREE_PADDING.apply(hintLabel);
+            Hints.RENDERER_JTREE_PADDING.apply(messageLabel);
+            Hints.RENDERER_JTREE_PADDING.apply(classLabel);
+            Hints.RENDERER_JTREE_PADDING.apply(stackLabel);
+            Hints.RENDERER_JTREE_PADDING.apply(hintLabel);
 
-            Styles.BOLD.apply(messageLabel);
-            Styles.TEXT_MONOSPACED.apply(classLabel);
+            Hints.BOLD.apply(messageLabel);
+            Hints.TEXT_MONOSPACED.apply(classLabel);
         }
 
         @Override
@@ -137,9 +138,9 @@ public class ExceptionDetailsJTree extends JTree {
     }
 
     private static class StackPanel extends JPanel {
-        private final JLabel className = new JLabel();
-        private final JLabel fileName = new JLabel();
-        private final JLabel line = new JLabel();
+        private final JLabel className = ToyBoxLabels.create();
+        private final JLabel fileName = ToyBoxLabels.create();
+        private final JLabel line = ToyBoxLabels.create();
 
         private final Icon traceIcon;
         private final Icon traceLambdaIcon;
@@ -153,13 +154,13 @@ public class ExceptionDetailsJTree extends JTree {
             add(fileName);
             add(line);
 
-            Styles.ITALIC.apply(className);
+            Hints.ITALIC.apply(className);
             fileName.setBorder(new EmptyBorder(0, 5, 0, 5));
 
-            this.traceIcon = Icons.get("fam://bullet_yellow").orElse(null);
-            this.traceLambdaIcon = Icons.get("fam://bullet_blue").orElse(null);
-            this.traceToyboxIcon = Icons.get("fam://bullet_pink").orElse(null);
-            this.traceJavaCoreIcon = Icons.get("fam://bullet_white").orElse(null);
+            this.traceIcon = ToyBoxIcons.get("fam://bullet_yellow").orElse(null);
+            this.traceLambdaIcon = ToyBoxIcons.get("fam://bullet_blue").orElse(null);
+            this.traceToyboxIcon = ToyBoxIcons.get("fam://bullet_pink").orElse(null);
+            this.traceJavaCoreIcon = ToyBoxIcons.get("fam://bullet_white").orElse(null);
         }
 
         void setForegroundColor(Color color) {

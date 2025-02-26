@@ -1,10 +1,11 @@
 package io.github.mjcro.toybox.swing.widgets;
 
 import io.github.mjcro.toybox.swing.Components;
-import io.github.mjcro.toybox.swing.Icons;
-import io.github.mjcro.toybox.swing.Styles;
-import io.github.mjcro.toybox.swing.ToyboxLaF;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxIcons;
+import io.github.mjcro.toybox.swing.hint.Hints;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxLaF;
 import io.github.mjcro.toybox.swing.TypedDecorator;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxLabels;
 
 import javax.swing.*;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -89,16 +90,16 @@ public class JsonJTree extends JTree {
         Renderer() {
             super(new EnumMap<>(Map.of(
                     Type.OBJECT,
-                    hinted(Styles.treeIcon("fam://table")),
+                    hinted(Hints.treeIcon("fam://table")),
                     Type.COLLECTION,
-                    hinted(Styles.treeIcon("fam://text_list_bullets"))
+                    hinted(Hints.treeIcon("fam://text_list_bullets"))
             )));
 
-            Styles.treeIcon("fam://bullet_black").apply(this);
+            Hints.treeIcon("fam://bullet_black").apply(this);
 
-            Styles.BOLD.apply(panelKeyValue.value);
+            Hints.BOLD.apply(panelKeyValue.value);
 
-            Icons.get("fam://bullet_black").ifPresent(panelKeyValue::setIcon);
+            ToyBoxIcons.get("fam://bullet_black").ifPresent(panelKeyValue::setIcon);
         }
 
         @Override
@@ -142,8 +143,8 @@ public class JsonJTree extends JTree {
         }
 
         private static class KeyValuePanel extends JPanel {
-            private final JLabel key = new JLabel();
-            private final JLabel value = new JLabel();
+            private final JLabel key = ToyBoxLabels.create();
+            private final JLabel value = ToyBoxLabels.create();
 
             KeyValuePanel() {
                 super(new FlowLayout(FlowLayout.LEFT, 0, 0));
@@ -163,7 +164,7 @@ public class JsonJTree extends JTree {
     }
 
     public static void main(String[] args) {
-        ToyboxLaF.initialize(false);
+        ToyBoxLaF.initialize(false);
 
         Map<String, Object> data = new LinkedHashMap<>();
         data.put("foo", "bar");

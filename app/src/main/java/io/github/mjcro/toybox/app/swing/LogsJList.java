@@ -4,8 +4,9 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.pattern.Abbreviator;
 import ch.qos.logback.classic.pattern.TargetLengthBasedClassNameAbbreviator;
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import io.github.mjcro.toybox.swing.Icons;
-import io.github.mjcro.toybox.swing.Styles;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxIcons;
+import io.github.mjcro.toybox.swing.hint.Hints;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxLabels;
 
 import javax.swing.*;
 import java.awt.*;
@@ -43,16 +44,16 @@ public class LogsJList extends JList<ILoggingEvent> {
     }
 
     private static class Renderer extends JPanel implements ListCellRenderer<ILoggingEvent> {
-        private final JLabel iconLabel = new JLabel();
-        private final JLabel timeLabel = new JLabel();
-        private final JLabel messageLabel = new JLabel();
-        private final JLabel loggerLabel = new JLabel();
+        private final JLabel iconLabel = ToyBoxLabels.create();
+        private final JLabel timeLabel = ToyBoxLabels.create();
+        private final JLabel messageLabel = ToyBoxLabels.create();
+        private final JLabel loggerLabel = ToyBoxLabels.create();
 
-        private final Icon iconTrace = Icons.get("fam://bullet_white").orElse(null);
-        private final Icon iconDebug = Icons.get("fam://bullet_black").orElse(null);
-        private final Icon iconInfo = Icons.get("fam://bullet_green").orElse(null);
-        private final Icon iconWarn = Icons.get("fam://bullet_orange").orElse(null);
-        private final Icon iconError = Icons.get("fam://bullet_red").orElse(null);
+        private final Icon iconTrace = ToyBoxIcons.get("fam://bullet_white").orElse(null);
+        private final Icon iconDebug = ToyBoxIcons.get("fam://bullet_black").orElse(null);
+        private final Icon iconInfo = ToyBoxIcons.get("fam://bullet_green").orElse(null);
+        private final Icon iconWarn = ToyBoxIcons.get("fam://bullet_orange").orElse(null);
+        private final Icon iconError = ToyBoxIcons.get("fam://bullet_red").orElse(null);
 
         private final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSS");
 
@@ -70,9 +71,9 @@ public class LogsJList extends JList<ILoggingEvent> {
             add(messageLabel);
             add(loggerLabel);
 
-            Styles.TABLE_CELL_INSTANT.apply(timeLabel);
-            Styles.BOLD.apply(messageLabel);
-            Styles.ITALIC.apply(loggerLabel);
+            Hints.TABLE_CELL_INSTANT.apply(timeLabel);
+            Hints.BOLD.apply(messageLabel);
+            Hints.ITALIC.apply(loggerLabel);
         }
 
         @Override

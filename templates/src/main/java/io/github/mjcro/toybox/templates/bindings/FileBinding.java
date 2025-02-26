@@ -2,7 +2,7 @@ package io.github.mjcro.toybox.templates.bindings;
 
 import io.github.mjcro.toybox.api.Environment;
 import io.github.mjcro.toybox.swing.BorderLayoutMaster;
-import io.github.mjcro.toybox.swing.factories.ButtonsFactory;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxButtons;
 import lombok.NonNull;
 
 import javax.swing.*;
@@ -19,8 +19,8 @@ import java.util.List;
 public class FileBinding extends AbstractJPanelContainerBinding {
     private final Environment environment;
     private JTextField chosenFileNameTextField = new JTextField();
-    private JButton chooseFileButton = ButtonsFactory.create("Choose", this::onChooseFileButtonClick);
-    private JButton clearButton = ButtonsFactory.create("Clear", this::onClearButtonClick);
+    private JButton chooseFileButton = ToyBoxButtons.create("Choose", this::onChooseFileButtonClick);
+    private JButton clearButton = ToyBoxButtons.create("Clear", this::onClearButtonClick);
     private File file;
 
     public FileBinding(@NonNull Environment environment, @NonNull Object target, @NonNull Field field) {

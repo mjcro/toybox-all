@@ -7,15 +7,16 @@ import io.github.mjcro.toybox.api.Menu;
 import io.github.mjcro.toybox.api.Toy;
 import io.github.mjcro.toybox.app.Application;
 import io.github.mjcro.toybox.swing.BorderLayoutMaster;
-import io.github.mjcro.toybox.swing.Styles;
-import io.github.mjcro.toybox.swing.factories.LabelsFactory;
-import io.github.mjcro.toybox.swing.factories.TextComponentsFactory;
-import net.miginfocom.swing.MigLayout;
+import io.github.mjcro.toybox.swing.hint.Hints;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxLabels;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxPanels;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxTextComponents;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
 import java.awt.*;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -56,7 +57,7 @@ public class AboutToy implements Toy {
             JPanel top = new JPanel();
             top.setLayout(new BoxLayout(top, BoxLayout.PAGE_AXIS));
 
-            JLabel mainLabel = LabelsFactory.create("ToyBox", Styles.TEXT_BIGGEST, Styles.PADDING_EXTRA_LARGE);
+            JLabel mainLabel = ToyBoxLabels.create("ToyBox", Hints.TEXT_BIGGEST, Hints.PADDING_EXTRA_LARGE);
 
             top.add(mainLabel);
             top.add(buildShortEnvPanel());
@@ -67,7 +68,7 @@ public class AboutToy implements Toy {
 
         private JPanel buildInstalledToysPanel() {
             JPanel panel = new JPanel(new BorderLayout());
-            Styles.PADDING_NORMAL.apply(panel);
+            Hints.PADDING_NORMAL.apply(panel);
 
             JTable table = new JTable();
             DefaultTableModel model = new DefaultTableModel();
@@ -95,23 +96,25 @@ public class AboutToy implements Toy {
             columnModel.getColumn(1).setPreferredWidth(500);
             columnModel.getColumn(2).setPreferredWidth(70);
 
-            BorderLayoutMaster.addTopCenter(panel, Styles.PADDING_NORMAL.wrap(LabelsFactory.create("Installed toys")), new JScrollPane(table));
+            BorderLayoutMaster.addTopCenter(panel, Hints.PADDING_NORMAL.wrap(ToyBoxLabels.create("Installed toys")), new JScrollPane(table));
             return panel;
         }
 
         private static JPanel buildShortEnvPanel() {
-            JPanel panel = new JPanel(new MigLayout("", "[][grow, fill]"));
-
-            panel.add(new JLabel("ToyBox version"));
-            panel.add(TextComponentsFactory.createJTextField(Styles.setReadOnlyText(Application.VERSION)), "wrap");
-
-            panel.add(new JLabel("Java version"));
-            panel.add(TextComponentsFactory.createJTextField(Styles.setReadOnlyText(Runtime.version().toString())), "wrap");
-
-            panel.add(new JLabel("Operating system"));
-            panel.add(TextComponentsFactory.createJTextField(Styles.setReadOnlyText(System.getProperty("os.name"))), "wrap");
-
-            return panel;
+            return ToyBoxPanels.twoColumnsRight(
+                    new AbstractMap.SimpleEntry<>(
+                            ToyBoxLabels.create("ToyBox version"),
+                            ToyBoxTextComponents.createJTextField(Hints.setReadOnlyText(Application.VERSION))
+                    ),
+                    new AbstractMap.SimpleEntry<>(
+                            ToyBoxLabels.create("Java version"),
+                            ToyBoxTextComponents.createJTextField(Hints.setReadOnlyText(Runtime.version().toString()))
+                    ),
+                    new AbstractMap.SimpleEntry<>(
+                            ToyBoxLabels.create("Operating system"),
+                            ToyBoxTextComponents.createJTextField(Hints.setReadOnlyText(System.getProperty("os.name")))
+                    )
+            );
         }
     }
 }

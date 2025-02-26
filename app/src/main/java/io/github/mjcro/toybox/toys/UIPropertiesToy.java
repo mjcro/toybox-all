@@ -4,8 +4,8 @@ import io.github.mjcro.toybox.api.Context;
 import io.github.mjcro.toybox.api.Label;
 import io.github.mjcro.toybox.api.Menu;
 import io.github.mjcro.toybox.api.Toy;
-import io.github.mjcro.toybox.swing.Styles;
-import io.github.mjcro.toybox.swing.factories.LabelsFactory;
+import io.github.mjcro.toybox.swing.hint.Hints;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxLabels;
 import io.github.mjcro.toybox.swing.renderers.AbstractTableCellRendererLabel;
 import io.github.mjcro.toybox.swing.renderers.TableCellRendererString;
 import io.github.mjcro.toybox.swing.renderers.ToyboxTableCellRenderer;
@@ -54,8 +54,8 @@ public class UIPropertiesToy implements Toy {
             super.add(pane, BorderLayout.CENTER);
 
             JPanel header = new JPanel(new BorderLayout());
-            Styles.PADDING_NORMAL.apply(header);
-            header.add(LabelsFactory.create("Filter  "), BorderLayout.LINE_START);
+            Hints.PADDING_NORMAL.apply(header);
+            header.add(ToyBoxLabels.create("Filter  "), BorderLayout.LINE_START);
             header.add(filters, BorderLayout.CENTER);
             super.add(header, BorderLayout.PAGE_START);
 
@@ -152,7 +152,7 @@ public class UIPropertiesToy implements Toy {
                     );
                 } else if (value instanceof Border) {
                     Border border = (Border) value;
-                    JLabel label = new JLabel();
+                    JLabel label = ToyBoxLabels.create();
                     var insets = border.getBorderInsets(label);
                     return rendererMonospaced.getTableCellRendererComponent(
                             table,

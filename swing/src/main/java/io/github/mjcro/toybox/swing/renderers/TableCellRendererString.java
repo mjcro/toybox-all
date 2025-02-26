@@ -2,20 +2,20 @@ package io.github.mjcro.toybox.swing.renderers;
 
 import io.github.mjcro.interfaces.strings.WithName;
 import io.github.mjcro.toybox.api.Labeled;
-import io.github.mjcro.toybox.swing.Hint;
-import io.github.mjcro.toybox.swing.Icons;
-import io.github.mjcro.toybox.swing.Styles;
+import io.github.mjcro.toybox.swing.hint.Hint;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxIcons;
+import io.github.mjcro.toybox.swing.hint.Hints;
 
 import javax.swing.*;
 import java.awt.*;
 
 public class TableCellRendererString extends AbstractTableCellRendererLabel {
     public static TableCellRendererString bold() {
-        return new TableCellRendererString(Styles.TEXT_SEMIBOLD);
+        return new TableCellRendererString(Hints.TEXT_SEMIBOLD);
     }
 
     public static TableCellRendererString monospaced() {
-        return new TableCellRendererString(Styles.TEXT_MONOSPACED, Styles.FONT_SMALLER_1);
+        return new TableCellRendererString(Hints.TEXT_MONOSPACED, Hints.FONT_SMALLER_1);
     }
 
     @SafeVarargs
@@ -41,7 +41,7 @@ public class TableCellRendererString extends AbstractTableCellRendererLabel {
         } else if (value instanceof Labeled) {
             Labeled labeled = (Labeled) value;
             label.setText(labeled.getName());
-            labeled.getLabel().getIconURI().flatMap(Icons::get).ifPresent(label::setIcon);
+            labeled.getLabel().getIconURI().flatMap(ToyBoxIcons::get).ifPresent(label::setIcon);
         } else if (value instanceof WithName) {
             label.setText(value.toString());
         }

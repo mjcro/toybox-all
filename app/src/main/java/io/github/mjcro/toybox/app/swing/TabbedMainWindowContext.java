@@ -8,10 +8,10 @@ import io.github.mjcro.toybox.api.events.SetWindowHintEvent;
 import io.github.mjcro.toybox.api.events.SetWindowLabelEvent;
 import io.github.mjcro.toybox.api.events.ShowToyEvent;
 import io.github.mjcro.toybox.api.util.Util;
-import io.github.mjcro.toybox.swing.Icons;
-import io.github.mjcro.toybox.swing.Styles;
-import io.github.mjcro.toybox.swing.factories.ButtonsFactory;
-import io.github.mjcro.toybox.swing.factories.LabelsFactory;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxIcons;
+import io.github.mjcro.toybox.swing.hint.Hints;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxButtons;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxLabels;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -86,9 +86,9 @@ public class TabbedMainWindowContext extends AbstractWindowContext<TabbedMainWin
     }
 
     private static class TabComponent extends JPanel {
-        private final JLabel label = LabelsFactory.create();
-        private final JLabel hint = LabelsFactory.create();
-        private final JButton close = ButtonsFactory.create();
+        private final JLabel label = ToyBoxLabels.create();
+        private final JLabel hint = ToyBoxLabels.create();
+        private final JButton close = ToyBoxButtons.create();
 
         public TabComponent(AbstractToy toy) {
             super(new BorderLayout());
@@ -99,11 +99,11 @@ public class TabbedMainWindowContext extends AbstractWindowContext<TabbedMainWin
             close.setMargin(new Insets(0, 0, 0, 0));
             close.setContentAreaFilled(false);
             close.setToolTipText("Close tab");
-            Icons.get("TitlePane.small.closeIcon").ifPresent(close::setIcon);
+            ToyBoxIcons.get("TitlePane.small.closeIcon").ifPresent(close::setIcon);
             super.add(close, BorderLayout.LINE_END);
 
             setLabel(toy.getLabel());
-            Styles.TEXT_MINI.apply(hint);
+            Hints.TEXT_MINI.apply(hint);
             hint.setForeground(new Color(117, 117, 117));
             JPanel labels = new JPanel(new BorderLayout());
             labels.setBorder(new EmptyBorder(2, 0, 2, 6));
@@ -120,7 +120,7 @@ public class TabbedMainWindowContext extends AbstractWindowContext<TabbedMainWin
         public void setLabel(Label l) {
             if (l != null) {
                 label.setText(l.getName());
-                l.getIconURI().flatMap(Icons::getSmall).ifPresent(label::setIcon);
+                l.getIconURI().flatMap(ToyBoxIcons::getSmall).ifPresent(label::setIcon);
             }
         }
 

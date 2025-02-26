@@ -1,8 +1,8 @@
 package io.github.mjcro.toybox.app;
 
 import io.github.mjcro.toybox.app.config.MainConfiguration;
-import io.github.mjcro.toybox.swing.Icons;
-import io.github.mjcro.toybox.swing.ToyboxLaF;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxIcons;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxLaF;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -22,12 +22,12 @@ public class Application {
             MAIN_ICON = "toybox-64",
             MAIN_TITLE = "ToyBox",
             WINDOW = "tabWindow",
-            VERSION = "v0.3.3";
+            VERSION = "v0.2";
 
     public static void main(String[] args) {
         // Obtaining and propagating settings
         changeSettings(args);
-        Icons.DARK_MODE = DARK_MODE;
+        ToyBoxIcons.DARK_MODE = DARK_MODE;
 
         startSpringApplication(MainConfiguration.class);
     }
@@ -37,7 +37,7 @@ public class Application {
         Instant instant = Instant.now();
 
         // Installing look and feel
-        ToyboxLaF.initialize(DARK_MODE);
+        ToyBoxLaF.initialize(DARK_MODE);
 
         // Debugging appender
         if (DEBUG) {

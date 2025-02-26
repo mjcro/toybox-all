@@ -6,8 +6,8 @@ import io.github.mjcro.toybox.api.Label;
 import io.github.mjcro.toybox.api.Menu;
 import io.github.mjcro.toybox.api.Toy;
 import io.github.mjcro.toybox.swing.Components;
-import io.github.mjcro.toybox.swing.Styles;
-import io.github.mjcro.toybox.swing.factories.LabelsFactory;
+import io.github.mjcro.toybox.swing.hint.Hints;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxLabels;
 import io.github.mjcro.toybox.swing.widgets.panels.HorizontalComponentsPanel;
 import lombok.RequiredArgsConstructor;
 
@@ -51,7 +51,7 @@ public class StringAnalyzerToy implements Toy {
         public Panel() {
             this.sourceText = new JTextArea();
 
-            Styles.TEXT_MONOSPACED.apply(this.sourceText);
+            Hints.TEXT_MONOSPACED.apply(this.sourceText);
 
             this.sourceText.getDocument().addDocumentListener(new DocumentListener() {
                 @Override
@@ -71,7 +71,7 @@ public class StringAnalyzerToy implements Toy {
             });
 
             resultPanel = new HorizontalComponentsPanel();
-            Styles.PADDING_NORMAL.apply(resultPanel);
+            Hints.PADDING_NORMAL.apply(resultPanel);
 
             JSplitPane textAreasPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
             textAreasPanel.setResizeWeight(.5d);
@@ -108,8 +108,8 @@ public class StringAnalyzerToy implements Toy {
 
                 for (Assertion a : assertions) {
                     JPanel panel = new JPanel();
-                    Styles.PADDING_NORMAL.apply(panel);
-                    panel.add(LabelsFactory.create(a.text));
+                    Hints.PADDING_NORMAL.apply(panel);
+                    panel.add(ToyBoxLabels.create(a.text));
                     resultPanel.add(panel);
                 }
                 Components.setInheritedPopupRecursively(resultPanel);
@@ -119,7 +119,7 @@ public class StringAnalyzerToy implements Toy {
         }
 
         private static JPanel buildLabelAndText(String string, String value) {
-            JLabel label = LabelsFactory.create(string);
+            JLabel label = ToyBoxLabels.create(string);
             label.setBorder(new EmptyBorder(0, 0, 0, 5));
             JTextField text = new JTextField(value);
             text.setEditable(false);
@@ -127,7 +127,7 @@ public class StringAnalyzerToy implements Toy {
             panel.setLayout(new BorderLayout());
             panel.add(label, BorderLayout.LINE_START);
             panel.add(text, BorderLayout.CENTER);
-            Styles.PADDING_NORMAL.apply(panel);
+            Hints.PADDING_NORMAL.apply(panel);
             return panel;
         }
 

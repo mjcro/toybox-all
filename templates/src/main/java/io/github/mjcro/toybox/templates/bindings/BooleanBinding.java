@@ -1,7 +1,7 @@
 package io.github.mjcro.toybox.templates.bindings;
 
-import io.github.mjcro.toybox.swing.Styles;
-import io.github.mjcro.toybox.swing.factories.DataLinkFactory;
+import io.github.mjcro.toybox.swing.hint.Hints;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxDataLink;
 import io.github.mjcro.toybox.swing.linking.ComponentDataLink;
 
 import javax.swing.*;
@@ -12,11 +12,11 @@ public class BooleanBinding extends AbstractJPanelContainerBinding {
 
     public BooleanBinding(Object target, Field field) {
         super(target, field);
-        this.link = DataLinkFactory.linkBooleanField(
+        this.link = ToyBoxDataLink.linkBooleanField(
                 new JCheckBox(getLabelName()),
                 field,
                 target,
-                Styles.onAction(this::fireSubmit)
+                Hints.onAction(this::fireSubmit)
         );
         super.add(this.link.getComponent());
     }

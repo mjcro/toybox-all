@@ -1,6 +1,6 @@
 package io.github.mjcro.toybox.swing.renderers;
 
-import io.github.mjcro.toybox.swing.WithHint;
+import io.github.mjcro.toybox.swing.hint.WithHint;
 
 import javax.swing.*;
 import javax.swing.table.TableCellRenderer;

@@ -5,7 +5,7 @@ import io.github.mjcro.toybox.app.Application;
 import io.github.mjcro.toybox.app.ApplicationEnvironment;
 import io.github.mjcro.toybox.app.ApplicationFrame;
 import io.github.mjcro.toybox.app.swing.widgets.StatusBarWidget;
-import io.github.mjcro.toybox.swing.Icons;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxIcons;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Primary;
@@ -49,7 +49,7 @@ public class TabbedMainWindow extends JFrame implements ApplicationFrame {
 
     @Override
     public void initializeAndShow() {
-        Icons.setMainApplicationIcon(this, Application.MAIN_ICON);
+        ToyBoxIcons.setMainApplicationIcon(this, Application.MAIN_ICON);
         setMinimumSize(new java.awt.Dimension(800, 600));
         setLocationRelativeTo(null);
         setVisible(true);

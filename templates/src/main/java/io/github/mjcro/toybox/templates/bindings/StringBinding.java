@@ -1,7 +1,7 @@
 package io.github.mjcro.toybox.templates.bindings;
 
-import io.github.mjcro.toybox.swing.Styles;
-import io.github.mjcro.toybox.swing.factories.DataLinkFactory;
+import io.github.mjcro.toybox.swing.hint.Hints;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxDataLink;
 import io.github.mjcro.toybox.swing.linking.ComponentDataLink;
 
 import javax.swing.*;
@@ -15,14 +15,14 @@ public class StringBinding extends AbstractLabeledDataLinkBinding<JTextField, St
 
     @Override
     protected ComponentDataLink<JTextField, String> createLink() {
-        return DataLinkFactory.linkStringField(
+        return ToyBoxDataLink.linkStringField(
                 new JTextField(),
                 field,
                 target,
                 annotation.trim() ? String::trim : null,
-                Styles.setPreferredWidth(150),
-                Styles.setToolTipText("String input, " + (annotation.trim() ? "with" : "without") + " space trimming"),
-                Styles.onEnterKeyPress(this::fireSubmit)
+                Hints.setPreferredWidth(150),
+                Hints.setToolTipText("String input, " + (annotation.trim() ? "with" : "without") + " space trimming"),
+                Hints.onEnterKeyPress(this::fireSubmit)
         );
     }
 }

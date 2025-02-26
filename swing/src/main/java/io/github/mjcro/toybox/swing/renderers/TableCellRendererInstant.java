@@ -1,6 +1,6 @@
 package io.github.mjcro.toybox.swing.renderers;
 
-import io.github.mjcro.toybox.swing.Styles;
+import io.github.mjcro.toybox.swing.hint.Hints;
 
 import javax.swing.*;
 import java.awt.*;
@@ -19,7 +19,7 @@ public class TableCellRendererInstant extends AbstractTableCellRendererLabel {
 
         label.setVerticalAlignment(SwingConstants.CENTER);
         label.setHorizontalAlignment(SwingConstants.CENTER);
-        Styles.FONT_SMALLER_1.apply(label);
+        Hints.FONT_SMALLER_1.apply(label);
     }
 
     @Override

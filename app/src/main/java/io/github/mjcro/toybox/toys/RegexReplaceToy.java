@@ -5,14 +5,17 @@ import io.github.mjcro.toybox.api.Label;
 import io.github.mjcro.toybox.api.Menu;
 import io.github.mjcro.toybox.api.Toy;
 import io.github.mjcro.toybox.swing.Components;
-import io.github.mjcro.toybox.swing.Styles;
-import io.github.mjcro.toybox.swing.ToyboxLaF;
+import io.github.mjcro.toybox.swing.hint.Hints;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxButtons;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxLaF;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxLabels;
 import io.github.mjcro.toybox.swing.widgets.ExceptionDetailsJPanel;
 import lombok.extern.slf4j.Slf4j;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
 import java.util.List;
 import java.util.regex.Pattern;
 
@@ -67,22 +70,20 @@ public class RegexReplaceToy implements Toy {
                 }
             });
 
-            Styles.setPreferredWidth(400).apply(pattern);
-            Styles.setPreferredWidth(400).apply(replacement);
+            Hints.setPreferredWidth(400).apply(pattern);
+            Hints.setPreferredWidth(400).apply(replacement);
 
-            inputs.add(new JLabel("Preset"));
+            inputs.add(ToyBoxLabels.create("Preset"));
             inputs.add(preset, "w 100%, wrap");
-            inputs.add(new JLabel("Pattern"));
+            inputs.add(ToyBoxLabels.create("Pattern"));
             inputs.add(pattern, "w 100%, wrap");
-            inputs.add(new JLabel("Replacement"));
+            inputs.add(ToyBoxLabels.create("Replacement"));
             inputs.add(replacement, "w 100%, wrap");
 
             JPanel header = new JPanel(new BorderLayout());
             header.add(inputs, BorderLayout.CENTER);
 
-            JButton apply = new JButton("Apply");
-            Styles.BUTTON_PRIMARY.apply(apply);
-            Styles.onAction(this::onApply).apply(apply);
+            JButton apply = ToyBoxButtons.createPrimary("Apply", this::onApply);
 
             JPanel buttons = new JPanel(new FlowLayout(FlowLayout.CENTER));
             buttons.add(apply);
@@ -104,19 +105,20 @@ public class RegexReplaceToy implements Toy {
             int loc = pane.getDividerLocation();
             pane.add(component, JSplitPane.BOTTOM);
             pane.setDividerLocation(loc);
+            Components.setInheritedPopupRecursively(pane);
         }
 
-        private void onApply() {
+        private void onApply(final ActionEvent e) {
             Components.setEnabled(false, preset, pattern, replacement, input);
 
             try {
                 Pattern p = Pattern.compile(pattern.getText());
-                output.setText(p.matcher(input.getText()).replaceAll(replacement.getText()));
+                output.setText(p.matcher(input.getText()).replaceAll(replacement.getText().replace("\\n", "\n")));
 
                 setOutput(new JScrollPane(output));
-            } catch (Throwable e) {
-                log.error("Error applying regex", e);
-                exceptionDetails.setException(e);
+            } catch (Throwable ex) {
+                log.error("Error applying regex", ex);
+                exceptionDetails.setException(ex);
                 setOutput(exceptionDetails);
             } finally {
                 Components.setEnabled(true, preset, pattern, replacement, input);
@@ -142,7 +144,7 @@ public class RegexReplaceToy implements Toy {
     }
 
     public static void main(String[] args) {
-        ToyboxLaF.initialize(false);
+        ToyBoxLaF.initialize(false);
         Components.show(new Panel());
     }
 }

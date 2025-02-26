@@ -1,5 +1,7 @@
 package io.github.mjcro.toybox.swing.renderers;
 
+import io.github.mjcro.toybox.swing.prefab.ToyBoxLabels;
+
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.table.TableCellRenderer;
@@ -17,7 +19,7 @@ public abstract class AbstractTableCellRenderer implements TableCellRenderer {
     }
 
     protected JLabel createLabel() {
-        JLabel label = new JLabel();
+        JLabel label = ToyBoxLabels.create();
         label.setBorder(new EmptyBorder(3, 5, 3, 5));
         label.setOpaque(true);
         return label;

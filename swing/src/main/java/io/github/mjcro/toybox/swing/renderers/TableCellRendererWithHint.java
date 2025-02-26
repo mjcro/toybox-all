@@ -2,7 +2,7 @@ package io.github.mjcro.toybox.swing.renderers;
 
 import io.github.mjcro.interfaces.strings.WithName;
 import io.github.mjcro.interfaces.strings.WithText;
-import io.github.mjcro.toybox.swing.WithHint;
+import io.github.mjcro.toybox.swing.hint.WithHint;
 
 import javax.swing.*;
 import java.awt.*;

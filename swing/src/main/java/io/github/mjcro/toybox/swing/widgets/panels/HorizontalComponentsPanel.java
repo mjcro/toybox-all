@@ -1,8 +1,8 @@
 package io.github.mjcro.toybox.swing.widgets.panels;
 
 import io.github.mjcro.toybox.swing.Components;
-import io.github.mjcro.toybox.swing.factories.ButtonsFactory;
 import io.github.mjcro.toybox.swing.layouts.InlineBlockLayout;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxButtons;
 
 import javax.swing.*;
 import java.awt.*;
@@ -14,13 +14,13 @@ public class HorizontalComponentsPanel extends JPanel {
 
     public static void main(String[] args) {
         HorizontalComponentsPanel x = new HorizontalComponentsPanel();
-        x.add(ButtonsFactory.create("Hello, world"));
-        x.add(ButtonsFactory.create("Foo"));
-        x.add(ButtonsFactory.create("Lorem ipsum"));
-        x.add(ButtonsFactory.create("Bar"));
-        x.add(ButtonsFactory.create("Lorem ipsum dolor sit amet"));
-        x.add(ButtonsFactory.create("Lorem ipsum dolor sit amet"));
-        x.add(ButtonsFactory.create("Lorem ipsum dolor sit amet"));
+        x.add(ToyBoxButtons.create("Hello, world"));
+        x.add(ToyBoxButtons.create("Foo"));
+        x.add(ToyBoxButtons.create("Lorem ipsum"));
+        x.add(ToyBoxButtons.create("Bar"));
+        x.add(ToyBoxButtons.create("Lorem ipsum dolor sit amet"));
+        x.add(ToyBoxButtons.create("Lorem ipsum dolor sit amet"));
+        x.add(ToyBoxButtons.create("Lorem ipsum dolor sit amet"));
 
         JPanel y = new JPanel();
         y.setLayout(new BorderLayout());

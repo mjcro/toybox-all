@@ -8,8 +8,8 @@ import io.github.mjcro.toybox.api.Menu;
 import io.github.mjcro.toybox.api.Toy;
 import io.github.mjcro.toybox.api.util.Util;
 import io.github.mjcro.toybox.swing.Components;
-import io.github.mjcro.toybox.swing.Styles;
-import io.github.mjcro.toybox.swing.factories.ButtonsFactory;
+import io.github.mjcro.toybox.swing.hint.Hints;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxButtons;
 import lombok.Data;
 
 import javax.swing.*;
@@ -123,7 +123,7 @@ public class StringConverterToy implements Toy {
         public Panel() {
             this.sourceText = new JTextArea();
             this.resultText = new JTextArea();
-            this.convertButton = ButtonsFactory.create("Convert To");
+            this.convertButton = ToyBoxButtons.createPrimary("Convert To", e -> doConvert());
             this.sourceTypeSelector = new JComboBox<>(new Vector<>(toBytesConverters));
             this.bytesToResultSelector = new JComboBox<>(new Vector<>(fromBytesConverters));
 
@@ -131,11 +131,9 @@ public class StringConverterToy implements Toy {
             this.sourceTypeSelector.setEditable(false);
             this.bytesToResultSelector.setEditable(false);
 
-            Styles.TEXT_MONOSPACED.apply(this.sourceText);
-            Styles.TEXT_MONOSPACED.apply(this.resultText);
-            Styles.BUTTON_SUCCESS.apply(this.convertButton);
+            Hints.TEXT_MONOSPACED.apply(this.sourceText);
+            Hints.TEXT_MONOSPACED.apply(this.resultText);
 
-            this.convertButton.addActionListener(e -> doConvert());
             this.sourceTypeSelector.addActionListener(e -> doConvert());
             this.bytesToResultSelector.addActionListener(e -> doConvert());
 
@@ -148,21 +146,21 @@ public class StringConverterToy implements Toy {
             selectorsPanel.setLayout(new GridLayout(1, 3));
             selectorsPanel.add(Components.with(new JPanel(), p -> {
                 p.setLayout(new BorderLayout());
-                Styles.PADDING_NORMAL.apply(p);
+                Hints.PADDING_NORMAL.apply(p);
                 p.add(sourceTypeSelector, BorderLayout.CENTER);
             }));
             selectorsPanel.add(Components.with(new JPanel(), p -> {
                 p.setLayout(new BorderLayout());
-                Styles.PADDING_NORMAL.apply(p);
+                Hints.PADDING_NORMAL.apply(p);
                 p.add(convertButton, BorderLayout.CENTER);
             }));
             selectorsPanel.add(Components.with(new JPanel(), p -> {
                 p.setLayout(new BorderLayout());
-                Styles.PADDING_NORMAL.apply(p);
+                Hints.PADDING_NORMAL.apply(p);
                 p.add(bytesToResultSelector, BorderLayout.CENTER);
             }));
 
-            Styles.PADDING_NORMAL.apply(this);
+            Hints.PADDING_NORMAL.apply(this);
             this.setLayout(new BorderLayout());
             this.add(selectorsPanel, BorderLayout.PAGE_START);
             this.add(textAreasPanel, BorderLayout.CENTER);

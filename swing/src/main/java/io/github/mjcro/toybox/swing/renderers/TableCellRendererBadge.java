@@ -4,6 +4,7 @@ import com.formdev.flatlaf.FlatClientProperties;
 import io.github.mjcro.interfaces.strings.WithName;
 import io.github.mjcro.toybox.api.Labeled;
 import io.github.mjcro.toybox.swing.Components;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxLabels;
 
 import javax.swing.*;
 import java.awt.*;
@@ -25,7 +26,7 @@ public class TableCellRendererBadge extends AbstractTableCellRenderer {
 
     public TableCellRendererBadge(Function<Object, Color> backgroundColorResolver) {
         this.panel = new JPanel(new GridBagLayout());
-        this.label = new JLabel();
+        this.label = ToyBoxLabels.create();
         this.label.setFont(this.label.getFont().deriveFont(11.2f));
         label.putClientProperty(FlatClientProperties.STYLE, "arc: 10; border: 2,4,2,4,#667766; background: #f87171; foreground: #ffffff");
 //        label.putClientProperty(FlatClientProperties.STYLE, "arc: 10; padding: 2,4,2,4; background: #f87171; foreground: #ffffff");

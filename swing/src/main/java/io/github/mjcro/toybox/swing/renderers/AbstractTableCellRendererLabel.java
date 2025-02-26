@@ -1,6 +1,6 @@
 package io.github.mjcro.toybox.swing.renderers;
 
-import io.github.mjcro.toybox.swing.Hint;
+import io.github.mjcro.toybox.swing.hint.Hint;
 
 import javax.swing.*;
 import java.awt.*;

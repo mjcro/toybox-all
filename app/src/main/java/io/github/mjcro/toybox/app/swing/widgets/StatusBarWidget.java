@@ -4,10 +4,9 @@ import io.github.mjcro.toybox.app.Application;
 import io.github.mjcro.toybox.app.CustomLoggingAppender;
 import io.github.mjcro.toybox.swing.BorderLayoutMaster;
 import io.github.mjcro.toybox.swing.Components;
-import io.github.mjcro.toybox.swing.Hint;
-import io.github.mjcro.toybox.swing.Styles;
-import io.github.mjcro.toybox.swing.ToyboxLaF;
-import io.github.mjcro.toybox.swing.factories.LabelsFactory;
+import io.github.mjcro.toybox.swing.hint.Hints;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxLaF;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxLabels;
 
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
@@ -18,11 +17,11 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class StatusBarWidget extends JPanel {
-    private final JLabel informationLabel = LabelsFactory.create("Welcome", Styles.TEXT_SMALL);
-    private final JLabel lastElapsedLabel = LabelsFactory.create("", Styles.TEXT_SMALL, Styles.CENTER);
-    private final JLabel memoryUsageLabel = LabelsFactory.create("0M", Styles.TEXT_SMALL, Styles.CENTER);
-    private final JLabel threadsCountLabel = LabelsFactory.create("1", Styles.TEXT_SMALL, Styles.CENTER);
-    private final JLabel versionLabel = LabelsFactory.create(Application.VERSION, Styles.TEXT_SMALL, Styles.CENTER);
+    private final JLabel informationLabel = ToyBoxLabels.create("Welcome", Hints.TEXT_SMALL);
+    private final JLabel lastElapsedLabel = ToyBoxLabels.create("", Hints.TEXT_SMALL, Hints.CENTER);
+    private final JLabel memoryUsageLabel = ToyBoxLabels.create("0M", Hints.TEXT_SMALL, Hints.CENTER);
+    private final JLabel threadsCountLabel = ToyBoxLabels.create("1", Hints.TEXT_SMALL, Hints.CENTER);
+    private final JLabel versionLabel = ToyBoxLabels.create(Application.VERSION, Hints.TEXT_SMALL, Hints.CENTER);
     private final JProgressBar progressBar = new JProgressBar();
 
     public static StatusBarWidget interactive(ScheduledExecutorService scheduler) {
@@ -53,7 +52,7 @@ public class StatusBarWidget extends JPanel {
 
     public StatusBarWidget() {
         super(new BorderLayout());
-        Styles.PADDING_NANO.apply(this);
+        Hints.PADDING_NANO.apply(this);
 
         lastElapsedLabel.setToolTipText("Timing of last operation");
         informationLabel.setToolTipText("Information message");
@@ -78,13 +77,13 @@ public class StatusBarWidget extends JPanel {
 
     private static JPanel wrapBevel(JComponent label) {
         JPanel outer = new JPanel(new BorderLayout());
-        Styles.PADDING_NANO.apply(outer);
+        Hints.PADDING_NANO.apply(outer);
 
         JPanel bevel = new JPanel(new BorderLayout());
-        Styles.BORDER_LOWERED_BEVEL.apply(bevel);
+        Hints.BORDER_LOWERED_BEVEL.apply(bevel);
         outer.add(bevel, BorderLayout.CENTER);
 
-        Styles.PADDING_MINI.apply(label);
+        Hints.PADDING_MINI.apply(label);
         bevel.add(label, BorderLayout.CENTER);
         return outer;
     }
@@ -118,7 +117,7 @@ public class StatusBarWidget extends JPanel {
         container.add(new JPanel(), BorderLayout.CENTER);
         container.add(StatusBarWidget.interactive(service), BorderLayout.PAGE_END);
 
-        ToyboxLaF.initialize(false);
+        ToyBoxLaF.initialize(false);
         Components.show(container);
     }
 }

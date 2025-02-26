@@ -1,8 +1,8 @@
 package io.github.mjcro.toybox.swing.renderers;
 
 import io.github.mjcro.toybox.swing.Components;
-import io.github.mjcro.toybox.swing.Styles;
-import io.github.mjcro.toybox.swing.ToyboxLaF;
+import io.github.mjcro.toybox.swing.hint.Hints;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxLaF;
 
 import javax.swing.*;
 import javax.swing.table.DefaultTableModel;
@@ -47,8 +47,8 @@ public class Example extends JPanel {
         JTable table = new JTable(model);
         table.getColumnModel().getColumn(0).setCellRenderer(new TableCellRendererNull());
         table.getColumnModel().getColumn(1).setCellRenderer(new TableCellRendererString());
-        table.getColumnModel().getColumn(2).setCellRenderer(new TableCellRendererString(Styles.TEXT_SEMIBOLD));
-        table.getColumnModel().getColumn(3).setCellRenderer(new TableCellRendererString(Styles.TEXT_MONOSPACED, Styles.FONT_SMALLER_1));
+        table.getColumnModel().getColumn(2).setCellRenderer(new TableCellRendererString(Hints.TEXT_SEMIBOLD));
+        table.getColumnModel().getColumn(3).setCellRenderer(new TableCellRendererString(Hints.TEXT_MONOSPACED, Hints.FONT_SMALLER_1));
         table.getColumnModel().getColumn(4).setCellRenderer(new TableCellRendererNumber("%.2fs"));
         table.getColumnModel().getColumn(5).setCellRenderer(new TableCellRendererInstant());
         table.getColumnModel().getColumn(6).setCellRenderer(new TableCellRendererBadge());
@@ -59,7 +59,7 @@ public class Example extends JPanel {
     }
 
     public static void main(String[] args) {
-        ToyboxLaF.initialize(false);
+        ToyBoxLaF.initialize(false);
         Components.show(new Example());
     }
 }

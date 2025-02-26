@@ -2,9 +2,10 @@ package io.github.mjcro.toybox.app.swing;
 
 import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import io.github.mjcro.toybox.swing.Hint;
-import io.github.mjcro.toybox.swing.Icons;
-import io.github.mjcro.toybox.swing.Styles;
+import io.github.mjcro.toybox.swing.hint.Hint;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxIcons;
+import io.github.mjcro.toybox.swing.hint.Hints;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxButtons;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
@@ -46,11 +47,11 @@ public class LogsJPanel extends JPanel {
         JPanel header = new JPanel();
 
         JPanel togglers = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 1));
-        Icons.get("fam://bullet_white").ifPresent(toggleTrace::setIcon);
-        Icons.get("fam://bullet_black").ifPresent(toggleDebug::setIcon);
-        Icons.get("fam://bullet_green").ifPresent(toggleInfo::setIcon);
-        Icons.get("fam://bullet_orange").ifPresent(toggleWarn::setIcon);
-        Icons.get("fam://bullet_red").ifPresent(toggleError::setIcon);
+        ToyBoxIcons.get("fam://bullet_white").ifPresent(toggleTrace::setIcon);
+        ToyBoxIcons.get("fam://bullet_black").ifPresent(toggleDebug::setIcon);
+        ToyBoxIcons.get("fam://bullet_green").ifPresent(toggleInfo::setIcon);
+        ToyBoxIcons.get("fam://bullet_orange").ifPresent(toggleWarn::setIcon);
+        ToyBoxIcons.get("fam://bullet_red").ifPresent(toggleError::setIcon);
 
         toggleTrace.setSelected(false);
         toggleDebug.setSelected(false);
@@ -58,7 +59,7 @@ public class LogsJPanel extends JPanel {
         toggleWarn.setSelected(true);
         toggleError.setSelected(true);
 
-        Hint<AbstractButton> action = Styles.onAction(this::applyEvents);
+        Hint<AbstractButton> action = Hints.onAction(this::applyEvents);
         action.apply(toggleTrace);
         action.apply(toggleDebug);
         action.apply(toggleInfo);
@@ -72,8 +73,7 @@ public class LogsJPanel extends JPanel {
         togglers.add(toggleError);
         header.add(togglers);
 
-        JButton refresh = new JButton("Refresh");
-        Styles.onAction(this::refreshEvents).apply(refresh);
+        JButton refresh = ToyBoxButtons.create("Refresh", Hints.onAction(this::refreshEvents));
         header.add(refresh);
 
         return header;

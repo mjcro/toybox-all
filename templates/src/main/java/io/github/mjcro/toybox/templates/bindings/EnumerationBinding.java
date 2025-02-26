@@ -3,8 +3,8 @@ package io.github.mjcro.toybox.templates.bindings;
 import io.github.mjcro.interfaces.strings.WithName;
 import io.github.mjcro.interfaces.tuples.OptionalPair;
 import io.github.mjcro.toybox.api.Label;
-import io.github.mjcro.toybox.swing.Styles;
-import io.github.mjcro.toybox.swing.factories.LabelsFactory;
+import io.github.mjcro.toybox.swing.hint.Hints;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxLabels;
 import io.github.mjcro.toybox.templates.EnumerationValue;
 import lombok.NonNull;
 
@@ -42,8 +42,8 @@ public class EnumerationBinding<T> extends AbstractJPanelContainerBinding {
     }
 
     private void initComponents() {
-        JLabel label = LabelsFactory.create(getLabelName());
-        Styles.PADDING_NORMAL.apply(label);
+        JLabel label = ToyBoxLabels.create(getLabelName());
+        Hints.PADDING_NORMAL.apply(label);
 
         comboBox = new JComboBox<>(new Vector<>(values));
         comboBox.setEditable(false);

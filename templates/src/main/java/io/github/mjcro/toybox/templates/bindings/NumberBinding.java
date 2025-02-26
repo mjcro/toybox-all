@@ -1,7 +1,7 @@
 package io.github.mjcro.toybox.templates.bindings;
 
-import io.github.mjcro.toybox.swing.Styles;
-import io.github.mjcro.toybox.swing.factories.DataLinkFactory;
+import io.github.mjcro.toybox.swing.hint.Hints;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxDataLink;
 import io.github.mjcro.toybox.swing.linking.ComponentDataLink;
 
 import javax.swing.*;
@@ -14,13 +14,13 @@ public class NumberBinding extends AbstractLabeledDataLinkBinding<JTextField, Lo
 
     @Override
     protected ComponentDataLink<JTextField, Long> createLink() {
-        return DataLinkFactory.linkNumberField(
+        return ToyBoxDataLink.linkNumberField(
                 new JTextField(),
                 field,
                 target,
-                Styles.setPreferredWidth(150),
-                Styles.setToolTipText("Numeric " + (field.getType().getSimpleName()) + " input"),
-                Styles.onEnterKeyPress(this::fireSubmit)
+                Hints.setPreferredWidth(150),
+                Hints.setToolTipText("Numeric " + (field.getType().getSimpleName()) + " input"),
+                Hints.onEnterKeyPress(this::fireSubmit)
         );
     }
 }

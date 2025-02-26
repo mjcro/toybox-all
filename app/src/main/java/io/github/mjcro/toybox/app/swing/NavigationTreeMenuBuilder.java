@@ -5,7 +5,7 @@ import io.github.mjcro.toybox.api.Context;
 import io.github.mjcro.toybox.api.Menu;
 import io.github.mjcro.toybox.api.Toy;
 import io.github.mjcro.toybox.app.NavigationTree;
-import io.github.mjcro.toybox.swing.Icons;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxIcons;
 
 import javax.swing.*;
 import java.util.ArrayList;
@@ -56,7 +56,7 @@ public class NavigationTreeMenuBuilder {
     private JMenuItem buildMenuItem(NavigationTree.Node node) {
         JMenuItem item = node.hasNested() ? new JMenu() : new JMenuItem();
         item.setText(node.getMenu().getName());
-        node.getMenu().getLabel().getIconURI().flatMap(Icons::getSmall).ifPresent(item::setIcon);
+        node.getMenu().getLabel().getIconURI().flatMap(ToyBoxIcons::getSmall).ifPresent(item::setIcon);
         if (!node.hasNested() && node.getMenu() instanceof Action) {
             Action action = (Action) node.getMenu();
             item.addActionListener(e -> SwingUtilities.invokeLater(action));

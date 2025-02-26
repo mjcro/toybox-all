@@ -1,5 +1,7 @@
 package io.github.mjcro.toybox.swing;
 
+import io.github.mjcro.toybox.swing.hint.Hints;
+
 import javax.swing.*;
 import java.awt.*;
 import java.awt.font.FontRenderContext;
@@ -44,7 +46,7 @@ public class Components {
     }
 
     public static void onPressEnter(JTextField field, Runnable action) {
-        Styles.onEnterKeyPress(action).apply(field);
+        Hints.onEnterKeyPress(action).apply(field);
     }
 
     public static void setEnabled(boolean enabled, JComponent... components) {
@@ -72,7 +74,7 @@ public class Components {
 
     public static JComponent padding(Component other, boolean transparent) {
         JPanel padding = new JPanel();
-        Styles.PADDING_NORMAL.apply(padding);
+        Hints.PADDING_NORMAL.apply(padding);
         padding.setLayout(new BorderLayout());
         padding.add(other);
         if (transparent) {

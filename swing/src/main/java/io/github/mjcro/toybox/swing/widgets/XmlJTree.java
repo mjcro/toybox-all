@@ -1,10 +1,11 @@
 package io.github.mjcro.toybox.swing.widgets;
 
 import io.github.mjcro.toybox.swing.Components;
-import io.github.mjcro.toybox.swing.Icons;
-import io.github.mjcro.toybox.swing.Styles;
-import io.github.mjcro.toybox.swing.ToyboxLaF;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxIcons;
+import io.github.mjcro.toybox.swing.hint.Hints;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxLaF;
 import io.github.mjcro.toybox.swing.TypedDecorator;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxLabels;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -119,13 +120,13 @@ public class XmlJTree extends JTree {
         public Renderer() {
             super(new EnumMap<>(Map.of(
                     Type.ELEMENT,
-                    hinted(Styles.treeIcon("fam://tag")),
+                    hinted(Hints.treeIcon("fam://tag")),
                     Type.ATTR,
-                    new KeyValueRenderer(Icons.get("fam://tag_blue").orElse(null)),
+                    new KeyValueRenderer(ToyBoxIcons.get("fam://tag_blue").orElse(null)),
                     Type.ATTR_ID,
-                    new KeyValueRenderer(Icons.get("fam://tag_green").orElse(null)),
+                    new KeyValueRenderer(ToyBoxIcons.get("fam://tag_green").orElse(null)),
                     Type.ATTR_NS,
-                    new KeyValueRenderer(Icons.get("fam://tag_purple").orElse(null))
+                    new KeyValueRenderer(ToyBoxIcons.get("fam://tag_purple").orElse(null))
             )));
         }
 
@@ -153,13 +154,13 @@ public class XmlJTree extends JTree {
 
         private KeyValueRenderer(Icon icon) {
             this.panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
-            this.key = new JLabel();
-            this.value = new JLabel();
+            this.key = ToyBoxLabels.create();
+            this.value = ToyBoxLabels.create();
             this.key.setIcon(icon);
             this.panel.add(this.key);
             this.panel.add(this.value);
             this.panel.setOpaque(false);
-            Styles.ITALIC.apply(this.key);
+            Hints.ITALIC.apply(this.key);
         }
 
         @Override
@@ -187,7 +188,7 @@ public class XmlJTree extends JTree {
     }
 
     public static void main(String[] args) throws Exception {
-        ToyboxLaF.initialize(false);
+        ToyBoxLaF.initialize(false);
 
         var xml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
                 "<EDoc></EDoc>";

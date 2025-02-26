@@ -1,6 +1,6 @@
 package io.github.mjcro.toybox.swing.renderers;
 
-import io.github.mjcro.toybox.swing.Styles;
+import io.github.mjcro.toybox.swing.hint.Hints;
 
 import javax.swing.*;
 import java.awt.*;
@@ -11,7 +11,7 @@ public class TableCellRendererNull extends AbstractTableCellRendererLabel {
 
         normalFg = UIManager.getColor("TextField.inactiveForeground");
         this.label.setHorizontalAlignment(SwingConstants.CENTER);
-        Styles.FONT_SMALLER_2.apply(label);
+        Hints.FONT_SMALLER_2.apply(label);
     }
 
     @Override

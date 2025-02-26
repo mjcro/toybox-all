@@ -5,7 +5,7 @@ import io.github.mjcro.toybox.api.Environment;
 import io.github.mjcro.toybox.api.Event;
 import io.github.mjcro.toybox.api.AbstractToy;
 import io.github.mjcro.toybox.api.events.ShowToyEvent;
-import io.github.mjcro.toybox.swing.Icons;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxIcons;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
@@ -45,7 +45,7 @@ class MDIWindowContext extends AbstractWindowContext<MDIWindow> {
         attachPopup(panel);
 
         JInternalFrame internalFrame = new JInternalFrame(toy.getLabel().getName());
-        toy.getLabel().getIconURI().flatMap(Icons::getSmall).ifPresent(internalFrame::setFrameIcon);
+        toy.getLabel().getIconURI().flatMap(ToyBoxIcons::getSmall).ifPresent(internalFrame::setFrameIcon);
         internalFrame.setClosable(true);
         internalFrame.setIconifiable(true);
         internalFrame.setMaximizable(true);

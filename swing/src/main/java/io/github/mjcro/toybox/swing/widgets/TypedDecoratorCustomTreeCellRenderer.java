@@ -1,6 +1,6 @@
 package io.github.mjcro.toybox.swing.widgets;
 
-import io.github.mjcro.toybox.swing.Hint;
+import io.github.mjcro.toybox.swing.hint.Hint;
 import io.github.mjcro.toybox.swing.TypedDecorator;
 
 import javax.swing.*;

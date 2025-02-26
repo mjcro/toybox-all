@@ -4,7 +4,7 @@ import io.github.mjcro.toybox.api.Context;
 import io.github.mjcro.toybox.api.Label;
 import io.github.mjcro.toybox.api.Menu;
 import io.github.mjcro.toybox.api.Toy;
-import io.github.mjcro.toybox.swing.factories.LabelsFactory;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxLabels;
 
 import javax.swing.*;
 import java.util.List;
@@ -23,7 +23,7 @@ public class Settings implements Toy {
     @Override
     public JPanel build(Context context) {
         JPanel panel = new JPanel();
-        panel.add(LabelsFactory.create("Under construction"));
+        panel.add(ToyBoxLabels.create("Under construction"));
         return panel;
     }
 }

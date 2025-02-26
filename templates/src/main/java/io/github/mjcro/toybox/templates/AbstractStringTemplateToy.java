@@ -4,10 +4,10 @@ import io.github.mjcro.toybox.api.Context;
 import io.github.mjcro.toybox.api.Environment;
 import io.github.mjcro.toybox.api.Toy;
 import io.github.mjcro.toybox.swing.Components;
-import io.github.mjcro.toybox.swing.Styles;
-import io.github.mjcro.toybox.swing.factories.ButtonsFactory;
-import io.github.mjcro.toybox.swing.layouts.InlineBlockLayout;
+import io.github.mjcro.toybox.swing.hint.Hints;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxButtons;
 import io.github.mjcro.toybox.swing.widgets.ExceptionDetailsJPanel;
+import io.github.mjcro.toybox.swing.widgets.panels.HorizontalComponentsPanel;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
@@ -50,7 +50,7 @@ public abstract class AbstractStringTemplateToy implements Toy {
 
         public Panel(Environment environment, StringProducer dataObject) {
             super.setLayout(new BorderLayout());
-            Styles.PADDING_NORMAL.apply(this);
+            Hints.PADDING_NORMAL.apply(this);
             this.environment = environment;
 
             // Outputs block
@@ -60,7 +60,7 @@ public abstract class AbstractStringTemplateToy implements Toy {
             if (dataObject != null) {
                 dataObject.getInitialString().ifPresent(output::setText);
             }
-            Styles.TEXT_MONOSPACED.apply(output);
+            Hints.TEXT_MONOSPACED.apply(output);
             outputOrException.add(new JScrollPane(output), "result");
             outputOrException.add(exceptionDetailsJPanel, "exception");
             super.add(outputOrException, BorderLayout.CENTER);
@@ -68,8 +68,7 @@ public abstract class AbstractStringTemplateToy implements Toy {
             // Inputs
             JPanel top = new JPanel();
             top.setLayout(new BorderLayout());
-            inputs = new JPanel();
-            inputs.setLayout(new InlineBlockLayout());
+            inputs = new HorizontalComponentsPanel();
             top.add(inputs, BorderLayout.CENTER);
 
             JPanel topFooter = new JPanel();
@@ -77,15 +76,15 @@ public abstract class AbstractStringTemplateToy implements Toy {
             topFooter.setLayout(new BorderLayout());
 
             JPanel buttons = new JPanel();
-            saveToFileButton = ButtonsFactory.create("Save to file", this::onSaveToFileClick);
+            saveToFileButton = ToyBoxButtons.create("Save to file", this::onSaveToFileClick);
             saveToFileButton.setEnabled(false);
             buttons.add(saveToFileButton);
-            copyToClipButton = ButtonsFactory.create("Copy to clipboard", this::onCopyToClipboardClick);
+            copyToClipButton = ToyBoxButtons.create("Copy to clipboard", this::onCopyToClipboardClick);
             copyToClipButton.setEnabled(false);
             buttons.add(copyToClipButton);
             autoCheckbox.setSelected(true);
             buttons.add(autoCheckbox);
-            applyButton = ButtonsFactory.create("Apply", this::onApplyButtonClick, Styles.BUTTON_PRIMARY);
+            applyButton = ToyBoxButtons.createPrimary("Apply", this::onApplyButtonClick);
             buttons.add(applyButton);
             topFooter.add(buttons, BorderLayout.LINE_END);
 

@@ -6,8 +6,9 @@ import io.github.mjcro.toybox.api.Label;
 import io.github.mjcro.toybox.api.Menu;
 import io.github.mjcro.toybox.api.Toy;
 import io.github.mjcro.toybox.swing.Components;
-import io.github.mjcro.toybox.swing.Styles;
-import io.github.mjcro.toybox.swing.ToyboxLaF;
+import io.github.mjcro.toybox.swing.hint.Hints;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxLaF;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxButtons;
 import io.github.mjcro.toybox.swing.widgets.ExceptionDetailsJPanel;
 import io.github.mjcro.toybox.swing.widgets.JsonJTree;
 import io.github.mjcro.toybox.swing.widgets.XmlJTree;
@@ -52,8 +53,7 @@ public class DataViewToy implements Toy {
 
         private JPanel buildHeaderPanel() {
             JPanel panel = new JPanel();
-            JButton apply = new JButton("Apply");
-            Styles.onAction(this::apply).apply(apply);
+            JButton apply = ToyBoxButtons.create("Apply", Hints.onAction(this::apply));
             panel.add(modeChooser);
             panel.add(apply);
             return panel;
@@ -79,7 +79,7 @@ public class DataViewToy implements Toy {
         private void setResult(String string) {
             JTextArea textArea = new JTextArea(string);
             textArea.setEditable(false);
-            Styles.TEXT_MONOSPACED.apply(textArea);
+            Hints.TEXT_MONOSPACED.apply(textArea);
             setResult(new JScrollPane(textArea));
         }
 
@@ -128,7 +128,7 @@ public class DataViewToy implements Toy {
     }
 
     public static void main(String[] args) {
-        ToyboxLaF.initialize(false);
+        ToyBoxLaF.initialize(false);
 
         Components.show(new Panel());
     }
