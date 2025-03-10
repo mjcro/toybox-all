@@ -4,6 +4,8 @@ import io.github.mjcro.toybox.api.dev.Recommended;
 import net.miginfocom.swing.MigLayout;
 
 import javax.swing.*;
+import javax.swing.border.EtchedBorder;
+import javax.swing.border.TitledBorder;
 import java.awt.*;
 import java.util.Map;
 
@@ -12,6 +14,20 @@ import java.util.Map;
  */
 @Recommended
 public class ToyBoxPanels {
+    /**
+     * Constructs panel with border and title, containing given component.
+     *
+     * @param title     Panel title.
+     * @param component Component to add.
+     * @return Panel.
+     */
+    public static JPanel titledBordered(String title, Component component) {
+        JPanel panel = new JPanel(new BorderLayout());
+        panel.setBorder(new TitledBorder(new EtchedBorder(), title));
+        panel.add(component);
+        return panel;
+    }
+
     /**
      * Constructs panel containing given components positioned
      * in equal-width grid within one row.
