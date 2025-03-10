@@ -44,6 +44,42 @@ public class ToyBoxButtons {
         return button;
     }
 
+    public static JButton createWarning(String text, ActionListener listener) {
+        JButton button = create(text, Hints.BUTTON_WARNING);
+        button.addActionListener(listener);
+        return button;
+    }
+
+    public static JButton createDanger(String text, ActionListener listener) {
+        JButton button = create(text, Hints.BUTTON_DANGER);
+        button.addActionListener(listener);
+        return button;
+    }
+
+    public static JButton createConfirm(String text, ActionListener listener) {
+        JButton button = create(text, Hints.BUTTON_SUCCESS, Hints.buttonIcon("fam://tick"));
+        button.addActionListener(listener);
+        return button;
+    }
+
+    public static JButton createAdd(String text, ActionListener listener) {
+        JButton button = create(text, Hints.BUTTON_SUCCESS, Hints.buttonIcon("fam://add"));
+        button.addActionListener(listener);
+        return button;
+    }
+
+    public static JButton createDelete(String text, ActionListener listener) {
+        JButton button = create(text, Hints.BUTTON_DANGER, Hints.buttonIcon("fam://bin_closed"));
+        button.addActionListener(listener);
+        return button;
+    }
+
+    public static JButton createCancel(String text, ActionListener listener) {
+        JButton button = create(text, Hints.BUTTON_DANGER, Hints.buttonIcon("fam://cross"));
+        button.addActionListener(listener);
+        return button;
+    }
+
     private ToyBoxButtons() {
     }
 }
