@@ -1,11 +1,12 @@
 package io.github.mjcro.toybox.swing.widgets;
 
 import io.github.mjcro.toybox.swing.Components;
-import io.github.mjcro.toybox.swing.prefab.ToyBoxIcons;
-import io.github.mjcro.toybox.swing.hint.Hints;
-import io.github.mjcro.toybox.swing.prefab.ToyBoxLaF;
 import io.github.mjcro.toybox.swing.TypedDecorator;
+import io.github.mjcro.toybox.swing.hint.Hints;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxIcons;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxLaF;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxLabels;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxTreeCellRenderers;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
@@ -120,7 +121,7 @@ public class XmlJTree extends JTree {
         public Renderer() {
             super(new EnumMap<>(Map.of(
                     Type.ELEMENT,
-                    hinted(Hints.treeIcon("fam://tag")),
+                    ToyBoxTreeCellRenderers.createWithIcon("fam://tag"),
                     Type.ATTR,
                     new KeyValueRenderer(ToyBoxIcons.get("fam://tag_blue").orElse(null)),
                     Type.ATTR_ID,

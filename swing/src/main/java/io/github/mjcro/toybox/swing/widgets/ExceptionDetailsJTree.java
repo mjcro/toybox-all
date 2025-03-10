@@ -144,7 +144,7 @@ public class ExceptionDetailsJTree extends JTree {
 
         private final Icon traceIcon;
         private final Icon traceLambdaIcon;
-        private final Icon traceToyboxIcon;
+        private final Icon traceToyBoxIcon;
         private final Icon traceJavaCoreIcon;
 
         StackPanel() {
@@ -159,7 +159,7 @@ public class ExceptionDetailsJTree extends JTree {
 
             this.traceIcon = ToyBoxIcons.get("fam://bullet_yellow").orElse(null);
             this.traceLambdaIcon = ToyBoxIcons.get("fam://bullet_blue").orElse(null);
-            this.traceToyboxIcon = ToyBoxIcons.get("fam://bullet_pink").orElse(null);
+            this.traceToyBoxIcon = ToyBoxIcons.get("fam://bullet_pink").orElse(null);
             this.traceJavaCoreIcon = ToyBoxIcons.get("fam://bullet_white").orElse(null);
         }
 
@@ -174,7 +174,7 @@ public class ExceptionDetailsJTree extends JTree {
             if (cn.startsWith("java")) {
                 className.setIcon(traceJavaCoreIcon);
             } else if (cn.startsWith("io.github.mjcro.toybox")) {
-                className.setIcon(traceToyboxIcon);
+                className.setIcon(traceToyBoxIcon);
             } else if (cn.contains("$")) {
                 className.setIcon(traceLambdaIcon);
             } else {
