@@ -2,3 +2,4 @@ io.github.mjcro.toybox.templates.example.ExampleStringTemplate
 io.github.mjcro.toybox.templates.example.BooleansExampleStringTemplate
 io.github.mjcro.toybox.templates.example.IntegersExampleStringTemplate
 io.github.mjcro.toybox.templates.example.FloatsExampleStringTemplate
+io.github.mjcro.toybox.templates.example.FilesExampleStringTemplate

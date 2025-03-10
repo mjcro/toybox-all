@@ -1,11 +1,13 @@
 package io.github.mjcro.toybox.templates.bindings;
 
+import io.github.mjcro.interfaces.Decorator;
 import io.github.mjcro.toybox.api.Environment;
 import io.github.mjcro.toybox.swing.BorderLayoutMaster;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxButtons;
 import lombok.NonNull;
 
 import javax.swing.*;
+import javax.swing.filechooser.FileFilter;
 import java.awt.*;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.dnd.DnDConstants;
@@ -14,19 +16,51 @@ import java.awt.dnd.DropTargetDropEvent;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.lang.reflect.Field;
+import java.util.ArrayList;
 import java.util.List;
 
 public class FileBinding extends AbstractJPanelContainerBinding {
     private final Environment environment;
-    private JTextField chosenFileNameTextField = new JTextField();
-    private JButton chooseFileButton = ToyBoxButtons.create("Choose", this::onChooseFileButtonClick);
-    private JButton clearButton = ToyBoxButtons.create("Clear", this::onClearButtonClick);
+    private final JTextField chosenFileNameTextField = new JTextField();
+    private final JButton chooseFileButton = ToyBoxButtons.create("Choose", this::onChooseFileButtonClick);
+    private final JButton clearButton = ToyBoxButtons.create("Clear", this::onClearButtonClick);
     private File file;
+    private FileFilter[] fileFilters = null;
 
-    public FileBinding(@NonNull Environment environment, @NonNull Object target, @NonNull Field field) {
+    public FileBinding(
+            @NonNull Environment environment,
+            @NonNull Object target,
+            @NonNull Field field
+    ) {
         super(target, field);
         this.environment = environment;
+
+        // Reading options
+        Class<?> options = annotation.options();
+        if (options != null && options != Void.class) {
+            readOptions(options);
+        }
+
         initComponents();
+    }
+
+    private void readOptions(Class<?> options) {
+        if (options.isEnum()) {
+            Object[] constants = options.getEnumConstants();
+            ArrayList<FileFilter> filters = new ArrayList<>();
+            for (Object c : constants) {
+                if (c instanceof Decorator<?>) {
+                    c = ((Decorator<?>) c).getDecorated();
+                }
+                if (c instanceof FileFilter) {
+                    filters.add((FileFilter) c);
+                }
+            }
+
+            if (!filters.isEmpty()) {
+                fileFilters = filters.toArray(new FileFilter[0]);
+            }
+        }
     }
 
     private void initComponents() {
@@ -77,7 +111,7 @@ public class FileBinding extends AbstractJPanelContainerBinding {
             public void onNoFileChosen() {
                 chooseFileButton.setEnabled(true);
             }
-        });
+        }, fileFilters);
     }
 
     public void onClearButtonClick(ActionEvent e) {

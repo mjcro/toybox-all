@@ -29,4 +29,6 @@ public @interface Databind {
      * @return Class providing enumeration values.
      */
     Class<? extends Iterable<OptionalPair<?, Label>>> enumerationProvider() default VoidEnumerationValues.class;
+
+    Class<?> options() default Void.class;
 }
