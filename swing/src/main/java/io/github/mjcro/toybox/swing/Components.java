@@ -83,6 +83,16 @@ public class Components {
         return padding;
     }
 
+    public static void setMaxHeight(Component c, int height) {
+        Dimension d;
+        d = c.getMaximumSize();
+        d.height = height;
+        c.setMaximumSize(d);
+        d = c.getPreferredSize();
+        d.height = height;
+        c.setPreferredSize(d);
+    }
+
     public static int getStringWidth(Component component, String s) {
         AffineTransform affinetransform = new AffineTransform();
         FontRenderContext frc = new FontRenderContext(affinetransform, true, true);
