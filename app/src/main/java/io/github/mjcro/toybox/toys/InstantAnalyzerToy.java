@@ -29,10 +29,13 @@ import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.TextStyle;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
+import java.util.Map;
 import java.util.AbstractMap;
+import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
@@ -75,12 +78,55 @@ public class InstantAnalyzerToy implements Toy {
         private final ShortInformationPanel informationPanel = new ShortInformationPanel();
         private final DefaultListModel<Instant> listModel = new DefaultListModel<>();
 
+        private final List<DateTimeFormatter> formatters = List.of(
+                // Format: "Nov 18, 2021, 4:22:24 PM UTC+2"
+                // English month names, 12-hour format with AM/PM, and time zone
+                new DateTimeFormatterBuilder()
+                        .parseCaseInsensitive()
+                        .appendPattern("MMM d, yyyy, h:mm:ss a VV")
+                        .toFormatter(Locale.ENGLISH),
+
+                // Standard macOS date format: "пн 10 березня 2025 11:58:07 EET"
+                // Ukrainian format: weekday (short), day, month (short), year, time, and time zone
+                new DateTimeFormatterBuilder()
+                        .parseCaseInsensitive()
+                        .appendPattern("E d MMMM yyyy HH:mm:ss z")
+                        .toFormatter(new Locale("uk", "UA")),
+
+                // Format: "2024-10-08 12:13:06.810834 UTC"
+                // ISO format with microseconds and time zone
+                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSSSSS VV"),
+
+
+                // Format: "2024-10-08 12:13:06 UTC"
+                // Standard ISO format with time zone (no microseconds)
+                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss VV"),
+
+                // Format: "2024-10-08 12:13:06"
+                // Standard ISO format without time zone
+                DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss")
+        );
+
         private final List<BiFunction<String, ZoneId, Instant>> instantParsers = List.of(
                 (s, zoneId) -> Instant.from(LocalDateTime.parse(s).atZone(zoneId)),
                 (s, zoneId) -> Instant.from(LocalDateTime.parse(s.replaceAll("\\.", "-").replaceAll(" ", "T")).atZone(zoneId)),
                 (s, zoneId) -> Instant.from(LocalDate.parse(s).atStartOfDay().atZone(zoneId)),
                 (s, zoneId) -> Instant.parse(s),
-                (s, zoneId) -> Instant.ofEpochSecond(Long.parseLong(s))
+                (s, zoneId) -> Instant.ofEpochSecond(Long.parseLong(s)),
+                (s, zoneId) -> formatters.stream()
+                        .map(formatter -> {
+                            try {
+                                return ZonedDateTime.parse(
+                                        formatter.getLocale().getISO3Language().equals("ukr") ? replaceShortMonthWithFull(s) : s,
+                                        formatter
+                                ).toInstant();
+                            } catch (Exception ignored) {
+                                return null;
+                            }
+                        })
+                        .filter(inst -> inst != null)
+                        .findFirst()
+                        .orElseThrow()
         );
 
         public Panel() {
@@ -122,6 +168,27 @@ public class InstantAnalyzerToy implements Toy {
             parsedInstantDisplay.setInstant(instant, null);
             modificationSet.setInstant(instant);
             eventConsumer.accept(new SetWindowHintEvent(instant.toString()));
+        }
+
+        private String replaceShortMonthWithFull(String s) {
+            Map<String, String> shortToFullMonthMap = new HashMap<>();
+            shortToFullMonthMap.put("січ", "січня");
+            shortToFullMonthMap.put("лют", "лютого");
+            shortToFullMonthMap.put("бер", "березня");
+            shortToFullMonthMap.put("кві", "квітня");
+            shortToFullMonthMap.put("тра", "травня");
+            shortToFullMonthMap.put("чер", "червня");
+            shortToFullMonthMap.put("лип", "липня");
+            shortToFullMonthMap.put("сер", "серпня");
+            shortToFullMonthMap.put("вер", "вересня");
+            shortToFullMonthMap.put("жов", "жовтня");
+            shortToFullMonthMap.put("лис", "листопада");
+            shortToFullMonthMap.put("гру", "грудня");
+
+            for (Map.Entry<String, String> entry : shortToFullMonthMap.entrySet()) {
+                s = s.replace(entry.getKey(), entry.getValue());
+            }
+            return s;
         }
 
         private void initComponents() {
