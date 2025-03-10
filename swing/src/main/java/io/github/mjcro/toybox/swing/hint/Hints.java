@@ -49,6 +49,8 @@ public class Hints {
             TEXT_BIGGEST = new LaFStyle("h00"),
             BUTTON_PRIMARY = new LaFStyle("buttonPrimary"),
             BUTTON_SUCCESS = new LaFStyle("buttonSuccess"),
+            BUTTON_WARNING = new LaFStyle("buttonWarning"),
+            BUTTON_DANGER = new LaFStyle("buttonDanger"),
             TABLE_CELL_INDEX = new LaFStyle("tableCellIndex"),
             TABLE_CELL_INSTANT = new LaFStyle("tableCellInstant"),
 
@@ -101,6 +103,10 @@ public class Hints {
     }
 
     public static Hint<JLabel> labelIcon(String uri) {
+        return c -> ToyBoxIcons.get(uri).ifPresent(c::setIcon);
+    }
+
+    public static Hint<AbstractButton> buttonIcon(String uri) {
         return c -> ToyBoxIcons.get(uri).ifPresent(c::setIcon);
     }
 
