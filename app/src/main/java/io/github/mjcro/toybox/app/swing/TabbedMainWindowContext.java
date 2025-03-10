@@ -8,9 +8,9 @@ import io.github.mjcro.toybox.api.events.SetWindowHintEvent;
 import io.github.mjcro.toybox.api.events.SetWindowLabelEvent;
 import io.github.mjcro.toybox.api.events.ShowToyEvent;
 import io.github.mjcro.toybox.api.util.Util;
-import io.github.mjcro.toybox.swing.prefab.ToyBoxIcons;
 import io.github.mjcro.toybox.swing.hint.Hints;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxButtons;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxIcons;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxLabels;
 
 import javax.swing.*;
@@ -64,7 +64,7 @@ public class TabbedMainWindowContext extends AbstractWindowContext<TabbedMainWin
     }
 
     private void showInContext(AbstractToy toy) {
-        JPanel panel = toy.build(this);
+        JPanel panel = buildToyPanel(toy);
         attachPopup(panel);
         mainWindow.tabbedPane.addTab(
                 toy.getLabel().getName(),

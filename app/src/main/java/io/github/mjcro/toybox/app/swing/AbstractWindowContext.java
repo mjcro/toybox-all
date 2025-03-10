@@ -3,6 +3,7 @@ package io.github.mjcro.toybox.app.swing;
 import io.github.mjcro.interfaces.Decorator;
 import io.github.mjcro.interfaces.strings.WithName;
 import io.github.mjcro.interfaces.strings.WithText;
+import io.github.mjcro.toybox.api.AbstractToy;
 import io.github.mjcro.toybox.api.Action;
 import io.github.mjcro.toybox.api.Context;
 import io.github.mjcro.toybox.api.Environment;
@@ -55,6 +56,29 @@ abstract class AbstractWindowContext<T extends Component> implements Context {
     private void initPopup(Object target) {
         popupMenu.removeAll();
         fillPopup(target);
+    }
+
+    protected JPanel buildToyPanel(AbstractToy toy) {
+        if (toy == null) {
+            throw new IllegalArgumentException("Unable to build panel for null toy");
+        }
+        JPanel panel;
+        try {
+            panel = toy.build(this);
+        } catch (RuntimeException e) {
+            throw new IllegalStateException(
+                    String.format("Error building panel for toy '%s' %s", toy.getName(), toy.getClass().getName()),
+                    e
+            );
+        }
+
+        if (panel == null) {
+            throw new IllegalStateException(
+                    String.format("Toy '%s' %s created null panel - did you forget to override \"build\" method?", toy.getName(), toy.getClass().getName())
+            );
+        }
+
+        return panel;
     }
 
     private void fillPopup(Object target) {

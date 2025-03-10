@@ -18,7 +18,7 @@ public class LogsToy implements Toy {
 
     @Override
     public Label getLabel() {
-        return Label.ofIconAndName("fam://table_error", "Application logs");
+        return Label.ofIconAndName("fam://folder_bug", "Application logs");
     }
 
     @Override

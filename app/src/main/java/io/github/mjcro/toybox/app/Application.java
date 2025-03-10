@@ -1,5 +1,7 @@
 package io.github.mjcro.toybox.app;
 
+import io.github.mjcro.toybox.api.AbstractToy;
+import io.github.mjcro.toybox.api.Context;
 import io.github.mjcro.toybox.app.config.MainConfiguration;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxIcons;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxLaF;
@@ -29,15 +31,35 @@ public class Application {
         changeSettings(args);
         ToyBoxIcons.DARK_MODE = DARK_MODE;
 
-        startSpringApplication(MainConfiguration.class);
+        // Initializing context and showing main window
+        ApplicationContext applicationContext = startSpringApplication(MainConfiguration.class);
+
+        // Running initial toy(s)
+        if (args != null) {
+            Context toyContext = applicationContext.getBean(ApplicationFrame.class).getContext();
+            for (String arg : args) {
+                if (arg.startsWith("-t")) {
+                    try {
+                        String className = arg.substring(2);
+                        log.info("Showing startup toy {}", className);
+                        Class<?> clazz = Class.forName(className);
+                        Object bean = clazz.getConstructor().newInstance();
+                        toyContext.show((AbstractToy) bean, null);
+                    } catch (ReflectiveOperationException e) {
+                        throw new RuntimeException(e);
+                    }
+                }
+            }
+        }
     }
 
-    public static void startSpringApplication(Class<?>... configurationClasses) {
-        log.info("Starting Toybox");
+    public static ApplicationContext startSpringApplication(Class<?>... configurationClasses) {
+        log.info("Starting ToyBox");
         Instant instant = Instant.now();
 
         // Installing look and feel
         ToyBoxLaF.initialize(DARK_MODE);
+        log.info("LaF loaded");
 
         // Debugging appender
         if (DEBUG) {
@@ -49,16 +71,20 @@ public class Application {
 
         // Building application context
         ApplicationContext context = new AnnotationConfigApplicationContext(configurationClasses);
+        log.info("Spring ApplicationContext ready");
 
         // Starting
-        context.getBean(Application.WINDOW, ApplicationFrame.class).initializeAndShow();
+        ApplicationFrame window = context.getBean(Application.WINDOW, ApplicationFrame.class);
+        window.initializeAndShow();
         SwingUtilities.invokeLater(() -> {
-            log.info("Toybox initialized in {}", Duration.between(instant, Instant.now()));
+            log.info("ToyBox initialized in {}", Duration.between(instant, Instant.now()));
         });
+
+        return context;
     }
 
     private static void changeSettings(String[] args) {
-        if (args == null || args.length == 0) {
+        if (args == null) {
             return;
         }
 

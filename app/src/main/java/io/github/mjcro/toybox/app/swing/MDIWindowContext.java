@@ -1,9 +1,9 @@
 package io.github.mjcro.toybox.app.swing;
 
+import io.github.mjcro.toybox.api.AbstractToy;
 import io.github.mjcro.toybox.api.Context;
 import io.github.mjcro.toybox.api.Environment;
 import io.github.mjcro.toybox.api.Event;
-import io.github.mjcro.toybox.api.AbstractToy;
 import io.github.mjcro.toybox.api.events.ShowToyEvent;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxIcons;
 import lombok.extern.slf4j.Slf4j;
@@ -41,7 +41,7 @@ class MDIWindowContext extends AbstractWindowContext<MDIWindow> {
         Context context = this.withInitialData(data);
 
         log.info("Showing toy \"{}\" backed by \"{}\"", toy.getLabel().getName(), toy.getClass().getSimpleName());
-        JPanel panel = toy.build(context);
+        JPanel panel = buildToyPanel(toy);
         attachPopup(panel);
 
         JInternalFrame internalFrame = new JInternalFrame(toy.getLabel().getName());

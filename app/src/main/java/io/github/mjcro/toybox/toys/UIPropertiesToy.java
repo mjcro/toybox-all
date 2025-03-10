@@ -8,7 +8,7 @@ import io.github.mjcro.toybox.swing.hint.Hints;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxLabels;
 import io.github.mjcro.toybox.swing.renderers.AbstractTableCellRendererLabel;
 import io.github.mjcro.toybox.swing.renderers.TableCellRendererString;
-import io.github.mjcro.toybox.swing.renderers.ToyboxTableCellRenderer;
+import io.github.mjcro.toybox.swing.renderers.ToyBoxTableCellRenderer;
 import lombok.Getter;
 
 import javax.swing.*;
@@ -96,7 +96,7 @@ public class UIPropertiesToy implements Toy {
             table.getColumnModel().getColumn(2).setCellRenderer(new Renderer());
         }
 
-        private static class Renderer extends ToyboxTableCellRenderer {
+        private static class Renderer extends ToyBoxTableCellRenderer {
             private final SimpleLabelRenderer rendererIcon = new SimpleLabelRenderer();
             private final SimpleLabelRenderer rendererFont = new SimpleLabelRenderer();
             private final SimpleLabelRenderer rendererColor = new SimpleLabelRenderer();
