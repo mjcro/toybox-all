@@ -50,12 +50,12 @@ public interface Environment {
 
     /**
      * @param name Variable name.
-     * @return Toybox environment variable, if any.
+     * @return ToyBox environment variable, if any.
      */
     Optional<String> getVariable(String name);
 
     /**
-     * Sets Toybox environment variable.
+     * Sets ToyBox environment variable.
      *
      * @param name  Variable name.
      * @param value Variable value.
@@ -155,7 +155,7 @@ public interface Environment {
         /**
          * Returns list of actions to add to popup.
          *
-         * @param ctx    Toybox context.
+         * @param ctx    ToyBox context.
          * @param target Popup event source.
          * @return List of actions.
          */
