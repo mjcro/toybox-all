@@ -23,7 +23,7 @@ public class ToyBoxPanels {
      */
     public static JPanel titledBordered(String title, Component component) {
         JPanel panel = new JPanel(new BorderLayout());
-        panel.setBorder(new TitledBorder(new EtchedBorder(), title));
+        panel.setBorder(new TitledBorder(new EtchedBorder(), " " + title + " "));
         panel.add(component);
         return panel;
     }
