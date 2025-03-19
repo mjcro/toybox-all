@@ -9,3 +9,4 @@ io.github.mjcro.toybox.toys.AboutToy
 io.github.mjcro.toybox.toys.CipherListToy
 io.github.mjcro.toybox.toys.LogsToy
 io.github.mjcro.toybox.toys.ShowRoomComponentsToy
+io.github.mjcro.toybox.toys.HashingToy

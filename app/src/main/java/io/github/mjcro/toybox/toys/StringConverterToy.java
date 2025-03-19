@@ -32,14 +32,11 @@ public class StringConverterToy implements Toy {
     );
     private static final List<BytesToResult> fromBytesConverters = List.of(
             new BytesToResult("String", b -> new String(b, StandardCharsets.UTF_8)),
+            new BytesToResult("Lowercase", b -> new String(b, StandardCharsets.UTF_8).toLowerCase(Locale.ROOT)),
+            new BytesToResult("Uppercase", b -> new String(b, StandardCharsets.UTF_8).toUpperCase(Locale.ROOT)),
             new BytesToResult("Hexadecimal", b -> BaseEncoding.base16().lowerCase().encode(b)),
             new BytesToResult("Base 32", b -> BaseEncoding.base32().encode(b)),
             new BytesToResult("Base 64", b -> BaseEncoding.base64().encode(b)),
-            new BytesToResult("MD5", b -> Hashing.md5().hashBytes(b).toString()),
-            new BytesToResult("SHA256", b -> Hashing.sha256().hashBytes(b).toString()),
-            new BytesToResult("SHA384", b -> Hashing.sha384().hashBytes(b).toString()),
-            new BytesToResult("SHA512", b -> Hashing.sha512().hashBytes(b).toString()),
-            new BytesToResult("CRC32", b -> Hashing.crc32().hashBytes(b).toString()),
             new BytesToResult("IP address", bytes -> {
                 if (bytes == null || bytes.length != 4) {
                     throw new IllegalArgumentException("Expected 4 bytes exactly");
