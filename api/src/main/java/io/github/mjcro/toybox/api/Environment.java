@@ -9,10 +9,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public interface Environment {
+public interface Environment extends Executor {
     String
             VAR_TOYBOX_FILE_PATH = "toybox-file-path";
 
@@ -21,6 +22,7 @@ public interface Environment {
      *
      * @param r Runnable to run.
      */
+    @Override
     void execute(Runnable r);
 
     /**
