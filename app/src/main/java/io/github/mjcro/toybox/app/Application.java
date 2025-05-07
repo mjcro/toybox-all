@@ -24,7 +24,7 @@ public class Application {
             MAIN_ICON = "toybox-64",
             MAIN_TITLE = "ToyBox",
             WINDOW = "tabWindow",
-            VERSION = "v0.3.6";
+            VERSION = "v0.3.7";
 
     public static void main(String[] args) {
         // Obtaining and propagating settings
