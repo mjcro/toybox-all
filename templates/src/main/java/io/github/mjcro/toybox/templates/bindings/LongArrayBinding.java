@@ -1,6 +1,7 @@
 package io.github.mjcro.toybox.templates.bindings;
 
 import io.github.mjcro.toybox.swing.Components;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxTextComponents;
 
 import javax.swing.*;
 import java.awt.*;
@@ -17,7 +18,7 @@ public class LongArrayBinding extends AbstractLabeledBinding {
 
     @Override
     protected JComponent createEditor() {
-        textField = new JTextField();
+        textField = ToyBoxTextComponents.createJTextField();
         textField.setToolTipText("Multiple int64 values\nSeparators are ',;' and space");
         textField.setPreferredSize(new Dimension(250, textField.getPreferredSize().height));
         Components.onPressEnter(textField, this::fireSubmit);

@@ -12,6 +12,7 @@ import io.github.mjcro.toybox.swing.prefab.ToyBoxButtons;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxLaF;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxLabels;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxPanels;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxTextComponents;
 import io.github.mjcro.toybox.swing.widgets.panels.ShortInformationPanel;
 import lombok.RequiredArgsConstructor;
 
@@ -71,7 +72,7 @@ public class InstantAnalyzerToy implements Toy {
         private Consumer<Event> eventConsumer = event -> {
         };
 
-        private final JTextField inputField = new JTextField();
+        private final JTextField inputField = ToyBoxTextComponents.createJTextField();
         private final JComboBox<TimeZoneSelection> tz = new JComboBox<>(TimeZoneSelection.items(true));
         private final ParsedInstantDisplay parsedInstantDisplay = new ParsedInstantDisplay();
         private final ModificationSet modificationSet = new ModificationSet();
@@ -448,12 +449,11 @@ public class InstantAnalyzerToy implements Toy {
     }
 
     private static class ParsedResultSingleElement extends JPanel {
-        private final JTextField textField = new JTextField();
+        private final JTextField textField = ToyBoxTextComponents.createJTextField(Hints.NOT_EDITABLE_TEXT);
 
         ParsedResultSingleElement(String label) {
             super(new BorderLayout());
             setBorder(new EmptyBorder(1, 1, 5, 1));
-            textField.setEditable(false);
             add(ToyBoxLabels.create(label), BorderLayout.PAGE_START);
             add(textField, BorderLayout.CENTER);
         }

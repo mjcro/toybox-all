@@ -6,7 +6,8 @@ import io.github.mjcro.toybox.api.Toy;
 import io.github.mjcro.toybox.swing.Components;
 import io.github.mjcro.toybox.swing.hint.Hints;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxButtons;
-import io.github.mjcro.toybox.swing.widgets.ExceptionDetailsJPanel;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxTextComponents;
+import io.github.mjcro.toybox.swing.widgets.MultiViewTextAreaOrExceptionPanel;
 import io.github.mjcro.toybox.swing.widgets.panels.HorizontalComponentsPanel;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
@@ -21,6 +22,8 @@ import java.math.BigInteger;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.security.MessageDigest;
+import java.time.Duration;
+import java.time.Instant;
 import java.util.ArrayList;
 
 @Slf4j
@@ -35,9 +38,7 @@ public abstract class AbstractStringTemplateToy implements Toy {
     public static class Panel extends JPanel {
         private final Environment environment;
         private final JPanel inputs;
-        private final JPanel outputOrException = new JPanel();
-        private final JTextArea output = new JTextArea();
-        private final ExceptionDetailsJPanel exceptionDetailsJPanel = new ExceptionDetailsJPanel();
+        private final MultiViewTextAreaOrExceptionPanel output = new MultiViewTextAreaOrExceptionPanel();
         private final JButton applyButton;
         private final JButton copyToClipButton;
         private final JButton saveToFileButton;
@@ -54,16 +55,12 @@ public abstract class AbstractStringTemplateToy implements Toy {
             this.environment = environment;
 
             // Outputs block
-            CardLayout outputCardLayout = new CardLayout();
-            outputOrException.setLayout(outputCardLayout);
-            output.setEditable(false);
             if (dataObject != null) {
-                dataObject.getInitialString().ifPresent(output::setText);
+                dataObject.getInitialString().ifPresent(output::setViewText);
             }
-            Hints.TEXT_MONOSPACED.apply(output);
-            outputOrException.add(new JScrollPane(output), "result");
-            outputOrException.add(exceptionDetailsJPanel, "exception");
-            super.add(outputOrException, BorderLayout.CENTER);
+            Hints.NOT_EDITABLE_TEXT.apply(output.getTextArea());
+            Hints.TEXT_MONOSPACED.apply(output.getTextArea());
+            super.add(output, BorderLayout.CENTER);
 
             // Inputs
             JPanel top = new JPanel();
@@ -88,8 +85,7 @@ public abstract class AbstractStringTemplateToy implements Toy {
             buttons.add(applyButton);
             topFooter.add(buttons, BorderLayout.LINE_END);
 
-            hash = new JTextField();
-            hash.setEditable(false);
+            hash = ToyBoxTextComponents.createJTextField(Hints.NOT_EDITABLE_TEXT);
             hash.setBorder(new EmptyBorder(0, 10, 0, 10));
             hash.setOpaque(false);
             hash.setToolTipText("MD5 hash of resulting text");
@@ -103,7 +99,7 @@ public abstract class AbstractStringTemplateToy implements Toy {
         }
 
         private void onCopyToClipboardClick(ActionEvent e) {
-            environment.clipboardPut(output.getText());
+            environment.clipboardPut(output.getViewText());
         }
 
         private void onSaveToFileClick(ActionEvent e) {
@@ -112,7 +108,7 @@ public abstract class AbstractStringTemplateToy implements Toy {
                 public void onFileChosen(File file) throws IOException {
                     log.debug("Saving to file {}", file);
                     try {
-                        Files.write(file.toPath(), output.getText().getBytes(StandardCharsets.UTF_8));
+                        Files.write(file.toPath(), output.getViewText().getBytes(StandardCharsets.UTF_8));
                         log.info("Data saved to file {}", file);
                     } catch (IOException err) {
                         log.error("Error saving data to file", err);
@@ -149,6 +145,8 @@ public abstract class AbstractStringTemplateToy implements Toy {
                 b.setEnabled(false);
             }
 
+            Instant before = Instant.now();
+
             environment.execute(ui -> {
                 StringBuilder sb = new StringBuilder();
                 try {
@@ -162,14 +160,13 @@ public abstract class AbstractStringTemplateToy implements Toy {
                     object.produce(sb);
                     String text = sb.toString();
                     hash.setText(md5Hex(text));
-                    output.setText(text);
+                    output.setViewText(text);
                     saveToFileButton.setEnabled(!text.isEmpty());
                     copyToClipButton.setEnabled(!text.isEmpty());
                     applyButton.setEnabled(true);
-                    ((CardLayout) outputOrException.getLayout()).show(outputOrException, "result");
+                    log.debug("Template evaluated in {}", Duration.between(before, Instant.now()));
                 } catch (Throwable err) {
-                    exceptionDetailsJPanel.setException(err);
-                    ((CardLayout) outputOrException.getLayout()).show(outputOrException, "exception");
+                    output.setViewException(err);
                     log.error("Error applying template", err);
                 } finally {
                     ui.accept(() -> {

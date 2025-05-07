@@ -9,6 +9,7 @@ import io.github.mjcro.toybox.swing.Components;
 import io.github.mjcro.toybox.swing.hint.Hints;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxLaF;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxButtons;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxTextComponents;
 import io.github.mjcro.toybox.swing.widgets.ExceptionDetailsJPanel;
 import io.github.mjcro.toybox.swing.widgets.JsonJTree;
 import io.github.mjcro.toybox.swing.widgets.XmlJTree;
@@ -36,7 +37,7 @@ public class DataViewToy implements Toy {
     }
 
     private static class Panel extends JPanel {
-        private final JTextArea input = new JTextArea();
+        private final JTextArea input = ToyBoxTextComponents.createJTextArea();
         private final JSplitPane pane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
         private final JComboBox<Mode> modeChooser = new JComboBox<>(new Mode[]{
                 Mode.JSON_TREE,
@@ -77,9 +78,11 @@ public class DataViewToy implements Toy {
         }
 
         private void setResult(String string) {
-            JTextArea textArea = new JTextArea(string);
-            textArea.setEditable(false);
-            Hints.TEXT_MONOSPACED.apply(textArea);
+            JTextArea textArea = ToyBoxTextComponents.createJTextArea(
+                    string,
+                    Hints.NOT_EDITABLE_TEXT,
+                    Hints.TEXT_MONOSPACED
+            );
             setResult(new JScrollPane(textArea));
         }
 

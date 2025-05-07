@@ -9,7 +9,9 @@ import io.github.mjcro.toybox.swing.hint.Hints;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxButtons;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxLaF;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxLabels;
-import io.github.mjcro.toybox.swing.widgets.ExceptionDetailsJPanel;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxPanels;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxTextComponents;
+import io.github.mjcro.toybox.swing.widgets.MultiViewTextAreaOrExceptionPanel;
 import lombok.extern.slf4j.Slf4j;
 import net.miginfocom.swing.MigLayout;
 
@@ -39,11 +41,10 @@ public class RegexReplaceToy implements Toy {
     private static class Panel extends JPanel {
         private final JComboBox<Preset> preset = new JComboBox<>();
         private final JTextField
-                pattern = new JTextField(),
-                replacement = new JTextField();
-        private final JTextArea input = new JTextArea();
-        private final JTextArea output = new JTextArea();
-        private final ExceptionDetailsJPanel exceptionDetails = new ExceptionDetailsJPanel();
+                pattern = ToyBoxTextComponents.createJTextField(),
+                replacement = ToyBoxTextComponents.createJTextField();
+        private final JTextArea input = ToyBoxTextComponents.createJTextArea();
+        private final MultiViewTextAreaOrExceptionPanel output = new MultiViewTextAreaOrExceptionPanel("");
         private final JSplitPane pane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 
         public Panel() {
@@ -89,23 +90,18 @@ public class RegexReplaceToy implements Toy {
             buttons.add(apply);
             header.add(buttons, BorderLayout.PAGE_END);
 
-            return header;
+            return ToyBoxPanels.titledBordered("Settings", header);
         }
 
         private Component buildInputOutput() {
-            output.setEditable(false);
+            Hints.TEXT_MONOSPACED.apply(input);
+            Hints.NOT_EDITABLE_TEXT.apply(output.getTextArea());
+            Hints.TEXT_MONOSPACED.apply(output.getTextArea());
 
-            pane.add(new JScrollPane(input), JSplitPane.TOP);
-            pane.add(new JScrollPane(output), JSplitPane.BOTTOM);
+            pane.add(ToyBoxPanels.titledBordered("Input", new JScrollPane(input)));
+            pane.add(ToyBoxPanels.titledBordered("Output", output));
             pane.setResizeWeight(0.5);
             return pane;
-        }
-
-        private void setOutput(Component component) {
-            int loc = pane.getDividerLocation();
-            pane.add(component, JSplitPane.BOTTOM);
-            pane.setDividerLocation(loc);
-            Components.setInheritedPopupRecursively(pane);
         }
 
         private void onApply(final ActionEvent e) {
@@ -113,13 +109,11 @@ public class RegexReplaceToy implements Toy {
 
             try {
                 Pattern p = Pattern.compile(pattern.getText());
-                output.setText(p.matcher(input.getText()).replaceAll(replacement.getText().replace("\\n", "\n")));
-
-                setOutput(new JScrollPane(output));
+                String out = p.matcher(input.getText()).replaceAll(replacement.getText().replace("\\n", "\n"));
+                output.setViewText(out);
             } catch (Throwable ex) {
                 log.error("Error applying regex", ex);
-                exceptionDetails.setException(ex);
-                setOutput(exceptionDetails);
+                output.setViewException(ex);
             } finally {
                 Components.setEnabled(true, preset, pattern, replacement, input);
             }

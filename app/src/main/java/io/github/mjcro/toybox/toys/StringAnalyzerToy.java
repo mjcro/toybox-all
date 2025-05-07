@@ -8,6 +8,7 @@ import io.github.mjcro.toybox.api.Toy;
 import io.github.mjcro.toybox.swing.Components;
 import io.github.mjcro.toybox.swing.hint.Hints;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxLabels;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxTextComponents;
 import io.github.mjcro.toybox.swing.widgets.panels.HorizontalComponentsPanel;
 import lombok.RequiredArgsConstructor;
 
@@ -49,9 +50,7 @@ public class StringAnalyzerToy implements Toy {
         private final JPanel resultPanel;
 
         public Panel() {
-            this.sourceText = new JTextArea();
-
-            Hints.TEXT_MONOSPACED.apply(this.sourceText);
+            this.sourceText = ToyBoxTextComponents.createJTextArea(Hints.TEXT_MONOSPACED);
 
             this.sourceText.getDocument().addDocumentListener(new DocumentListener() {
                 @Override
@@ -121,8 +120,7 @@ public class StringAnalyzerToy implements Toy {
         private static JPanel buildLabelAndText(String string, String value) {
             JLabel label = ToyBoxLabels.create(string);
             label.setBorder(new EmptyBorder(0, 0, 0, 5));
-            JTextField text = new JTextField(value);
-            text.setEditable(false);
+            JTextField text = ToyBoxTextComponents.createJTextField(value, Hints.NOT_EDITABLE_TEXT);
             JPanel panel = new JPanel();
             panel.setLayout(new BorderLayout());
             panel.add(label, BorderLayout.LINE_START);

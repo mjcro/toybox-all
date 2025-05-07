@@ -1,6 +1,7 @@
 package io.github.mjcro.toybox.templates.bindings;
 
 import io.github.mjcro.toybox.swing.Components;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxTextComponents;
 
 import javax.swing.*;
 import java.awt.*;
@@ -16,7 +17,7 @@ public class StringArrayCsvBinding extends AbstractLabeledBinding {
 
     @Override
     protected JComponent createEditor() {
-        textField = new JTextField();
+        textField = ToyBoxTextComponents.createJTextField();
         textField.setToolTipText("Multiple string values separated by comma");
         textField.setPreferredSize(new Dimension(300, textField.getPreferredSize().height));
         Components.onPressEnter(textField, this::fireSubmit);

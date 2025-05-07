@@ -1,12 +1,14 @@
 package io.github.mjcro.toybox.toys;
 
-import com.google.common.hash.Hashing;
 import io.github.mjcro.toybox.api.Context;
 import io.github.mjcro.toybox.api.Label;
 import io.github.mjcro.toybox.api.Menu;
 import io.github.mjcro.toybox.api.Toy;
+import io.github.mjcro.toybox.swing.hint.Hints;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxButtons;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxLabels;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxPanels;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxTextComponents;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.digests.MD5Digest;
@@ -18,6 +20,7 @@ import org.bouncycastle.crypto.digests.SHA1Digest;
 import org.bouncycastle.crypto.digests.SHA224Digest;
 import org.bouncycastle.crypto.digests.SHA256Digest;
 import org.bouncycastle.crypto.digests.SHA384Digest;
+import org.bouncycastle.crypto.digests.SHA3Digest;
 import org.bouncycastle.crypto.digests.SHA512Digest;
 import org.bouncycastle.crypto.generators.OpenBSDBCrypt;
 import org.bouncycastle.crypto.macs.HMac;
@@ -46,7 +49,7 @@ import java.util.zip.Checksum;
 public class HashingToy implements Toy {
     @Override
     public List<Menu> getPath() {
-        return List.of(Menu.TOYBOX_BASIC_TOOLS_MENU);
+        return List.of(Menu.TOYBOX_BASIC_TOOLS_MENU, Menu.TOYBOX_BASIC_TOOLS_CRYPTO_SUBMENU);
     }
 
     @Override
@@ -74,6 +77,8 @@ public class HashingToy implements Toy {
                 TransformOutput.uppercase(new BCDigestHash(SHA384Digest::new)),
                 new BCDigestHash(SHA512Digest::new),
                 TransformOutput.uppercase(new BCDigestHash(SHA512Digest::new)),
+                new BCDigestHash(SHA3Digest::new),
+                TransformOutput.uppercase(new BCDigestHash(SHA3Digest::new)),
                 new BCDigestHash(RIPEMD128Digest::new),
                 TransformOutput.uppercase(new BCDigestHash(RIPEMD128Digest::new)),
                 new BCDigestHash(RIPEMD160Digest::new),
@@ -94,10 +99,10 @@ public class HashingToy implements Toy {
 
         private final Executor executor;
 
-        private final JTextArea input = new JTextArea();
-        private final JTextField password = new JTextField();
-        private final JTextField complexity = new JTextField();
-        private final JTextField output = new JTextField();
+        private final JTextArea input = ToyBoxTextComponents.createJTextArea();
+        private final JTextField password = ToyBoxTextComponents.createJTextField();
+        private final JTextField complexity = ToyBoxTextComponents.createJTextField();
+        private final JTextField output = ToyBoxTextComponents.createJTextField(Hints.NOT_EDITABLE_TEXT);
         private final JCheckBox trimInput = new JCheckBox("Trim input");
         private final JButton hashButton = ToyBoxButtons.createPrimary("Hash", this::onHash);
         private final JComboBox<Hash> hashSelector = new JComboBox<>(new Vector<>(hashes));
@@ -117,19 +122,19 @@ public class HashingToy implements Toy {
 
             JPanel settingsPanel = ToyBoxPanels.twoColumnsRight(
                     new AbstractMap.SimpleEntry<>(
-                            new JLabel("Algorithm"),
+                            ToyBoxLabels.create("Algorithm"),
                             hashSelector
                     ),
                     new AbstractMap.SimpleEntry<>(
-                            new JLabel("Password"),
+                            ToyBoxLabels.create("Password"),
                             password
                     ),
                     new AbstractMap.SimpleEntry<>(
-                            new JLabel("Complexity"),
+                            ToyBoxLabels.create("Complexity"),
                             complexity
                     ),
                     new AbstractMap.SimpleEntry<>(
-                            new JLabel("Additional"),
+                            ToyBoxLabels.create("Additional"),
                             additional
                     )
             );
@@ -137,7 +142,6 @@ public class HashingToy implements Toy {
             complexity.setEnabled(false);
             password.setEnabled(false);
             hashSelector.setEditable(false);
-            output.setEditable(false);
 
             // Realtime changes
             hashSelector.addActionListener(e -> doTryRealtime());

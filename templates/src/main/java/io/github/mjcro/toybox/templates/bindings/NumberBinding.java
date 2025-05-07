@@ -3,6 +3,7 @@ package io.github.mjcro.toybox.templates.bindings;
 import io.github.mjcro.toybox.swing.hint.Hints;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxDataLink;
 import io.github.mjcro.toybox.swing.linking.ComponentDataLink;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxTextComponents;
 
 import javax.swing.*;
 import java.lang.reflect.Field;
@@ -15,7 +16,7 @@ public class NumberBinding extends AbstractLabeledDataLinkBinding<JTextField, Lo
     @Override
     protected ComponentDataLink<JTextField, Long> createLink() {
         return ToyBoxDataLink.linkNumberField(
-                new JTextField(),
+                ToyBoxTextComponents.createJTextField(),
                 field,
                 target,
                 Hints.setPreferredWidth(150),

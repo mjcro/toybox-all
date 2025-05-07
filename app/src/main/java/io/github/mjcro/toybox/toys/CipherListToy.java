@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 public class CipherListToy implements Toy {
     @Override
     public List<Menu> getPath() {
-        return List.of(Menu.TOYBOX_MENU, Menu.TOYBOX_DEVELOPMENT_MENU);
+        return List.of(Menu.TOYBOX_BASIC_TOOLS_MENU, Menu.TOYBOX_BASIC_TOOLS_CRYPTO_SUBMENU);
     }
 
     @Override

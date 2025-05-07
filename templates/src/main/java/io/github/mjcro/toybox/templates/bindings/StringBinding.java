@@ -3,6 +3,7 @@ package io.github.mjcro.toybox.templates.bindings;
 import io.github.mjcro.toybox.swing.hint.Hints;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxDataLink;
 import io.github.mjcro.toybox.swing.linking.ComponentDataLink;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxTextComponents;
 
 import javax.swing.*;
 import java.lang.reflect.Field;
@@ -16,7 +17,7 @@ public class StringBinding extends AbstractLabeledDataLinkBinding<JTextField, St
     @Override
     protected ComponentDataLink<JTextField, String> createLink() {
         return ToyBoxDataLink.linkStringField(
-                new JTextField(),
+                ToyBoxTextComponents.createJTextField(),
                 field,
                 target,
                 annotation.trim() ? String::trim : null,

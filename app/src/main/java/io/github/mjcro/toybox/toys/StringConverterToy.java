@@ -10,6 +10,7 @@ import io.github.mjcro.toybox.api.util.Util;
 import io.github.mjcro.toybox.swing.Components;
 import io.github.mjcro.toybox.swing.hint.Hints;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxButtons;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxTextComponents;
 import lombok.Data;
 
 import javax.swing.*;
@@ -118,18 +119,14 @@ public class StringConverterToy implements Toy {
         private final JButton convertButton;
 
         public Panel() {
-            this.sourceText = new JTextArea();
-            this.resultText = new JTextArea();
+            this.sourceText = ToyBoxTextComponents.createJTextArea(Hints.TEXT_MONOSPACED);
+            this.resultText =  ToyBoxTextComponents.createJTextArea(Hints.TEXT_MONOSPACED, Hints.NOT_EDITABLE_TEXT);
             this.convertButton = ToyBoxButtons.createPrimary("Convert To", e -> doConvert());
             this.sourceTypeSelector = new JComboBox<>(new Vector<>(toBytesConverters));
             this.bytesToResultSelector = new JComboBox<>(new Vector<>(fromBytesConverters));
 
-            this.resultText.setEditable(false);
             this.sourceTypeSelector.setEditable(false);
             this.bytesToResultSelector.setEditable(false);
-
-            Hints.TEXT_MONOSPACED.apply(this.sourceText);
-            Hints.TEXT_MONOSPACED.apply(this.resultText);
 
             this.sourceTypeSelector.addActionListener(e -> doConvert());
             this.bytesToResultSelector.addActionListener(e -> doConvert());
