@@ -26,4 +26,9 @@ public class ShowToyEvent implements Event {
     public Optional<Object> getInitialData() {
         return Optional.ofNullable(initialData);
     }
+
+    @Override
+    public String toString() {
+        return "ShowToyEvent for " + toy.getClass().getSimpleName();
+    }
 }
