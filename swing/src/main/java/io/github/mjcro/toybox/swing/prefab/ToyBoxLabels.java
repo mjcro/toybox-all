@@ -9,6 +9,19 @@ public class ToyBoxLabels {
         return new JLabel();
     }
 
+    public static JLabel create(String text) {
+        JLabel label = create();
+        label.setText(text);
+        return label;
+    }
+
+    public static JLabel create(String text, String tooltip) {
+        JLabel label = create();
+        label.setText(text);
+        label.setToolTipText(tooltip);
+        return label;
+    }
+
     @SafeVarargs
     public static JLabel create(Hint<? super JLabel>... hints) {
         JLabel label = create();
@@ -18,8 +31,7 @@ public class ToyBoxLabels {
 
     @SafeVarargs
     public static JLabel create(String text, Hint<? super JLabel>... hints) {
-        JLabel label = create();
-        label.setText(text);
+        JLabel label = create(text);
         Hint.applyAll(label, hints);
         return label;
     }

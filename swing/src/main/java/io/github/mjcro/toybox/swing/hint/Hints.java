@@ -55,6 +55,10 @@ public class Hints {
             TABLE_CELL_INSTANT = new LaFStyle("tableCellInstant"),
 
     LAF_STUB = new LaFStyle("");
+    
+    public static final Hint<JTextComponent>
+            NOT_EDITABLE_TEXT = c -> c.setEditable(false);
+
 
     public static Hint<JComponent> titledBorder(String title) {
         return c -> c.setBorder(new TitledBorder(new EtchedBorder(), title));
