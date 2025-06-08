@@ -3,8 +3,10 @@ package io.github.mjcro.toybox.app;
 import io.github.mjcro.toybox.api.Context;
 import io.github.mjcro.toybox.api.Environment;
 import io.github.mjcro.toybox.api.Event;
+import io.github.mjcro.toybox.api.SettingsStorage;
 import io.github.mjcro.toybox.api.Toy;
 import io.github.mjcro.toybox.api.events.EventListener;
+import io.github.mjcro.toybox.app.settings.ToyBoxWorkingDirSetting;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -36,7 +38,7 @@ public class ApplicationEnvironment implements Environment {
     private final ConcurrentLinkedQueue<EventListener> eventListeners = new ConcurrentLinkedQueue<>();
     private final ConcurrentLinkedQueue<Toy> registeredToys = new ConcurrentLinkedQueue<>();
 
-    private final VariablesStorage variablesStorage;
+    private final SettingsStorage settingsStorage;
     private final ExecutorService executorService;
 
     @Getter
@@ -51,15 +53,8 @@ public class ApplicationEnvironment implements Environment {
     }
 
     @Override
-    public Optional<String> getVariable(String name) {
-        log.info("Reading variable {}", name);
-        return variablesStorage.getVariable(name);
-    }
-
-    @Override
-    public void setVariable(String name, String value) {
-        log.info("Setting variable {}", name);
-        variablesStorage.setVariable(name, value);
+    public SettingsStorage getSettingsStorage() {
+        return settingsStorage;
     }
 
     @Override
@@ -146,7 +141,9 @@ public class ApplicationEnvironment implements Environment {
     @Override
     public void chooseFileToRead(@NonNull FileCallback callback, FileFilter... fileFilters) {
         JFileChooser fileChooser = new JFileChooser();
-        getVariable(Environment.VAR_TOYBOX_FILE_PATH).ifPresent(s -> fileChooser.setCurrentDirectory(new File(s)));
+        getSettingsStorage().get(ToyBoxWorkingDirSetting.class)
+                .map(ToyBoxWorkingDirSetting::getValue)
+                .ifPresent(s -> fileChooser.setCurrentDirectory(new File(s)));
         fileChooser.setDialogTitle("Select a file");
         if (fileFilters != null) {
             for (FileFilter filter : fileFilters) {
@@ -156,7 +153,7 @@ public class ApplicationEnvironment implements Environment {
         int userSelection = fileChooser.showOpenDialog(getModalParent());
         if (userSelection == JFileChooser.APPROVE_OPTION) {
             File fileToRead = fileChooser.getSelectedFile();
-            setVariable(Environment.VAR_TOYBOX_FILE_PATH, fileToRead.getParentFile().getAbsolutePath());
+            getSettingsStorage().put(new ToyBoxWorkingDirSetting(fileToRead.getParentFile()));
             log.info("Reading file {}", fileToRead.getAbsolutePath());
             try {
                 callback.onFileChosen(fileToRead);
@@ -174,7 +171,9 @@ public class ApplicationEnvironment implements Environment {
         if (file != null) {
             fileChooser.setSelectedFile(file);
         }
-        getVariable(Environment.VAR_TOYBOX_FILE_PATH).ifPresent(s -> fileChooser.setCurrentDirectory(new File(s)));
+        getSettingsStorage().get(ToyBoxWorkingDirSetting.class)
+                .map(ToyBoxWorkingDirSetting::getValue)
+                .ifPresent(s -> fileChooser.setCurrentDirectory(new File(s)));
         fileChooser.setDialogTitle("Specify a file to save");
         int userSelection = fileChooser.showSaveDialog(getModalParent());
         if (userSelection == JFileChooser.APPROVE_OPTION) {
@@ -194,7 +193,7 @@ public class ApplicationEnvironment implements Environment {
                 }
             }
 
-            setVariable(Environment.VAR_TOYBOX_FILE_PATH, fileToSave.getParentFile().getAbsolutePath());
+            getSettingsStorage().put(new ToyBoxWorkingDirSetting(fileToSave.getParentFile()));
             log.info("Saving file {}", fileToSave.getAbsolutePath());
             try {
                 callback.onFileChosen(fileToSave);

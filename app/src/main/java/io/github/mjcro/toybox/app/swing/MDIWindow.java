@@ -18,6 +18,7 @@ import java.util.concurrent.ScheduledExecutorService;
 @Component("mdiWindow")
 @Slf4j
 public class MDIWindow extends JFrame implements ApplicationFrame {
+    private final Environment environment;
     private final ScheduledExecutorService daemonExecutor;
     private final MDIWindowContext context;
     final JDesktopPane desktop = new JDesktopPane();
@@ -26,12 +27,9 @@ public class MDIWindow extends JFrame implements ApplicationFrame {
             @NonNull Environment environment,
             @NonNull ScheduledExecutorService daemonExecutor
     ) {
+        this.environment = environment;
         this.context = new MDIWindowContext(environment, this);
         this.daemonExecutor = daemonExecutor;
-        initComponents(environment);
-        if (environment instanceof ApplicationEnvironment) {
-            ((ApplicationEnvironment) environment).setModalParent(this);
-        }
     }
 
     @Override
@@ -53,6 +51,11 @@ public class MDIWindow extends JFrame implements ApplicationFrame {
 
     @Override
     public void initializeAndShow() {
+        initComponents(environment);
+        if (environment instanceof ApplicationEnvironment) {
+            ((ApplicationEnvironment) environment).setModalParent(this);
+        }
+
         ToyBoxIcons.setMainApplicationIcon(this, Application.MAIN_ICON);
         setMinimumSize(new java.awt.Dimension(800, 600));
         setLocationRelativeTo(null);

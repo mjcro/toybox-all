@@ -20,6 +20,7 @@ import java.util.concurrent.ScheduledExecutorService;
 @Component("tabWindow")
 @Slf4j
 public class TabbedMainWindow extends JFrame implements ApplicationFrame {
+    private final Environment environment;
     private final ScheduledExecutorService daemonExecutor;
     private final TabbedMainWindowContext context;
     final JTabbedPane tabbedPane = new JTabbedPane();
@@ -28,12 +29,9 @@ public class TabbedMainWindow extends JFrame implements ApplicationFrame {
             @NonNull Environment environment,
             @NonNull ScheduledExecutorService daemonExecutor
     ) {
+        this.environment = environment;
         this.context = new TabbedMainWindowContext(environment, this);
         this.daemonExecutor = daemonExecutor;
-        initComponents(environment);
-        if (environment instanceof ApplicationEnvironment) {
-            ((ApplicationEnvironment) environment).setModalParent(this);
-        }
     }
 
     @Override
@@ -55,6 +53,11 @@ public class TabbedMainWindow extends JFrame implements ApplicationFrame {
 
     @Override
     public void initializeAndShow() {
+        initComponents(environment);
+        if (environment instanceof ApplicationEnvironment) {
+            ((ApplicationEnvironment) environment).setModalParent(this);
+        }
+
         ToyBoxIcons.setMainApplicationIcon(this, Application.MAIN_ICON);
         setMinimumSize(new java.awt.Dimension(800, 600));
         setLocationRelativeTo(null);
