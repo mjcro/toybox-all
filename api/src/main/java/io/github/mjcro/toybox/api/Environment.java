@@ -14,9 +14,6 @@ import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 public interface Environment extends Executor {
-    String
-            VAR_TOYBOX_FILE_PATH = "toybox-file-path";
-
     /**
      * Executes given runnable in separate thread.
      *
@@ -51,18 +48,9 @@ public interface Environment extends Executor {
     }
 
     /**
-     * @param name Variable name.
-     * @return ToyBox environment variable, if any.
+     * @return Settings storage.
      */
-    Optional<String> getVariable(String name);
-
-    /**
-     * Sets ToyBox environment variable.
-     *
-     * @param name  Variable name.
-     * @param value Variable value.
-     */
-    void setVariable(String name, String value);
+    SettingsStorage getSettingsStorage();
 
     /**
      * Registers collections of toys.
