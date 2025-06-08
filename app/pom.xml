@@ -23,6 +23,11 @@
     <dependencies>
         <dependency>
             <groupId>io.github.mjcro.toybox</groupId>
+            <artifactId>api</artifactId>
+            <version>${project.parent.version}</version>
+        </dependency>
+        <dependency>
+            <groupId>io.github.mjcro.toybox</groupId>
             <artifactId>swing</artifactId>
             <version>${project.parent.version}</version>
         </dependency>
