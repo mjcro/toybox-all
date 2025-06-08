@@ -4,6 +4,7 @@ import io.github.mjcro.toybox.swing.prefab.ToyBoxIcons;
 import io.github.mjcro.toybox.swing.hint.Hints;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxLabels;
 
+import javax.crypto.AEADBadTagException;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import javax.swing.tree.DefaultMutableTreeNode;
@@ -46,13 +47,7 @@ public class ExceptionDetailsJTree extends JTree {
         }
         node.add(new DefaultMutableTreeNode(e.getClass()));
 
-        // Suggesting hint
-        Class<?> clazz = e.getClass();
-        if (clazz == NumberFormatException.class) {
-            node.add(new DefaultMutableTreeNode(new ExceptionHint("Possible problem with number parsing")));
-        } else if (clazz == RuntimeException.class) {
-            node.add(new DefaultMutableTreeNode(new ExceptionHint("General runtime exception")));
-        }
+        attachHintsRecursively(node, e);
 
         // Adding stack trace
         StackTraceElement[] stackTrace = e.getStackTrace();
@@ -60,6 +55,26 @@ public class ExceptionDetailsJTree extends JTree {
             for (StackTraceElement element : stackTrace) {
                 node.add(new DefaultMutableTreeNode(element));
             }
+        }
+    }
+
+    private void attachHintsRecursively(DefaultMutableTreeNode node, Throwable e) {
+        if (e == null) {
+            return;
+        }
+        Throwable cause = e.getCause();
+        if (cause != null && cause != e) {
+            attachHintsRecursively(node, cause);
+        }
+
+        // Suggesting hint
+        Class<?> clazz = e.getClass();
+        if (clazz == NumberFormatException.class) {
+            node.add(new DefaultMutableTreeNode(new ExceptionHint("Possible problem with number parsing")));
+        } else if (clazz == RuntimeException.class) {
+            node.add(new DefaultMutableTreeNode(new ExceptionHint("General runtime exception")));
+        } else if (clazz == AEADBadTagException.class) {
+            node.add(new DefaultMutableTreeNode(new ExceptionHint("Incorrect password given or corrupted data")));
         }
     }
 
