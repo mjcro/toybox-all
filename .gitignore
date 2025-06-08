@@ -1,11 +1,13 @@
 /.idea/
-*.iml
-Foo.java
-/application.properties
-/*.json
 /dev/
-
 /target/
 /**/target
+
+/application.properties
+
+Foo.java
+*.iml
+/*.json
+/*.dat
 
 pom.xml.versionsBackup
