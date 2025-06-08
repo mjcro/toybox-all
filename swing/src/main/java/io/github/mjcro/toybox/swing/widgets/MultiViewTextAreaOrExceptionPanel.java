@@ -32,7 +32,6 @@ public class MultiViewTextAreaOrExceptionPanel extends MultiViewBasicPanel {
     public void setViewText(CharSequence cs) {
         if (cs == null) {
             setViewEmpty();
-
         } else {
             textArea.setText(cs.toString());
             setSelectedCard(CARD_TEXT_AREA);
