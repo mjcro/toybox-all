@@ -1,6 +1,7 @@
 package io.github.mjcro.toybox.templates;
 
 import java.awt.*;
+import java.util.Optional;
 
 /**
  * Defines components that provides binding from object field
@@ -11,6 +12,11 @@ public interface Binding {
      * @return Component to render.
      */
     Component getComponent();
+
+    /**
+     * @return Binding group.
+     */
+    Optional<String> getGroup();
 
     /**
      * Registers callback function to be invoked by this binding

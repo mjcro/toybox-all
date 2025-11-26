@@ -7,6 +7,7 @@ import lombok.NonNull;
 import javax.swing.*;
 import java.awt.*;
 import java.lang.reflect.Field;
+import java.util.Optional;
 
 public abstract class AbstractJPanelContainerBinding extends JPanel implements Binding {
     protected final Object target;
@@ -24,6 +25,11 @@ public abstract class AbstractJPanelContainerBinding extends JPanel implements B
 
     protected String getLabelName() {
         return annotation.name().isEmpty() ? field.getName() : annotation.name();
+    }
+
+    @Override
+    public Optional<String> getGroup() {
+        return Optional.ofNullable(annotation.group()).filter($ -> !$.isEmpty());
     }
 
     protected void fireSubmit() {

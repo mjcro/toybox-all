@@ -21,6 +21,11 @@ public @interface Databind {
     String name() default "";
 
     /**
+     * @return Group name.
+     */
+    String group() default "";
+
+    /**
      * @return If true, space trimming wherever possible will be applied.
      */
     boolean trim() default true;

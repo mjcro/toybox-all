@@ -33,11 +33,11 @@ public class BooleansExampleStringTemplate extends AbstractStringTemplateToy {
     private static class Template extends AbstractTemplateHelper {
         @Databind(name = "bool")
         private boolean b1;
-        @Databind(name = "bool preset")
+        @Databind(name = "bool preset", group = "Preset values")
         private boolean b2 = true;
         @Databind(name = "Boolean")
         private Boolean b3;
-        @Databind(name = "Boolean preset")
+        @Databind(name = "Boolean preset", group = "Preset values")
         private Boolean b4 = Boolean.TRUE;
     }
 }

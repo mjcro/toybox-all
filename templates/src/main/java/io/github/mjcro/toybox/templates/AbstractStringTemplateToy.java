@@ -6,9 +6,11 @@ import io.github.mjcro.toybox.api.Toy;
 import io.github.mjcro.toybox.swing.Components;
 import io.github.mjcro.toybox.swing.hint.Hints;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxButtons;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxPanels;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxTextComponents;
 import io.github.mjcro.toybox.swing.widgets.MultiViewTextAreaOrExceptionPanel;
 import io.github.mjcro.toybox.swing.widgets.panels.HorizontalComponentsPanel;
+import io.github.mjcro.toybox.swing.widgets.panels.VerticalRowsPanel;
 import lombok.NonNull;
 import lombok.extern.slf4j.Slf4j;
 
@@ -25,6 +27,7 @@ import java.security.MessageDigest;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.LinkedHashSet;
 
 @Slf4j
 public abstract class AbstractStringTemplateToy implements Toy {
@@ -65,7 +68,7 @@ public abstract class AbstractStringTemplateToy implements Toy {
             // Inputs
             JPanel top = new JPanel();
             top.setLayout(new BorderLayout());
-            inputs = new HorizontalComponentsPanel();
+            inputs = new JPanel(new BorderLayout());
             top.add(inputs, BorderLayout.CENTER);
 
             JPanel topFooter = new JPanel();
@@ -188,10 +191,37 @@ public abstract class AbstractStringTemplateToy implements Toy {
 
         private void updateInputs(StringProducer object) {
             bindings = new BindingResolver().getBindings(environment, object);
-            for (Binding binding : bindings) {
-                Component component = binding.getComponent();
-                binding.setSubmitListener(this::doAutoApply);
-                inputs.add(component);
+            LinkedHashSet<String> groups = new LinkedHashSet<>();
+            bindings.forEach($ -> groups.add($.getGroup().orElse("")));
+            if (!groups.isEmpty()) {
+                if (groups.size() == 1) {
+                    HorizontalComponentsPanel inner = new HorizontalComponentsPanel();
+                    for (Binding binding : bindings) {
+                        Component component = binding.getComponent();
+                        binding.setSubmitListener(this::doAutoApply);
+                        inner.add(component);
+                    }
+                    inputs.add(inner);
+                } else {
+                    VerticalRowsPanel inner = new VerticalRowsPanel(BorderFactory.createEmptyBorder());
+                    for (String group : groups) {
+                        HorizontalComponentsPanel inner2 = new HorizontalComponentsPanel();
+                        for (Binding binding : bindings) {
+                            String bindingGroup = binding.getGroup().orElse("");
+                            if (bindingGroup.equals(group)) {
+                                Component component = binding.getComponent();
+                                binding.setSubmitListener(this::doAutoApply);
+                                inner2.add(component);
+                            }
+                        }
+                        inner.add(
+                                group.isEmpty()
+                                        ? ToyBoxPanels.titledBordered("Parameters", inner2)
+                                        : ToyBoxPanels.titledBordered(group, inner2)
+                        );
+                    }
+                    inputs.add(inner);
+                }
             }
             inputs.updateUI();
             Components.setInheritedPopupRecursively(inputs);
