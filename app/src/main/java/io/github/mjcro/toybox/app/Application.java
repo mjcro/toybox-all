@@ -15,16 +15,19 @@ import java.time.Instant;
 
 @Slf4j
 public class Application {
+    public static final String INTERNAL_VERSION = "v0.4.1";
+
     public static boolean
             DEBUG = false,
             DEBUG_COMPONENTS = true,
             DARK_MODE = false;
 
+
     public static String
             MAIN_ICON = "toybox-64",
             MAIN_TITLE = "ToyBox",
             WINDOW = "tabWindow",
-            VERSION = "v0.4.0";
+            VERSION = INTERNAL_VERSION;
 
     public static void main(String[] args) {
         // Obtaining and propagating settings

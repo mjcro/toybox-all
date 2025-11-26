@@ -38,7 +38,7 @@ public class AboutToy implements Toy {
 
     @Override
     public Optional<String> getVersion() {
-        return Optional.of(Application.VERSION);
+        return Optional.of(Application.INTERNAL_VERSION);
     }
 
     @Override
@@ -103,8 +103,12 @@ public class AboutToy implements Toy {
         private static JPanel buildShortEnvPanel() {
             return ToyBoxPanels.twoColumnsRight(
                     new AbstractMap.SimpleEntry<>(
-                            ToyBoxLabels.create("ToyBox version"),
+                            ToyBoxLabels.create("Application version"),
                             ToyBoxTextComponents.createJTextField(Hints.setReadOnlyText(Application.VERSION))
+                    ),
+                    new AbstractMap.SimpleEntry<>(
+                            ToyBoxLabels.create("ToyBox toolkit version"),
+                            ToyBoxTextComponents.createJTextField(Hints.setReadOnlyText(Application.INTERNAL_VERSION))
                     ),
                     new AbstractMap.SimpleEntry<>(
                             ToyBoxLabels.create("Java version"),
