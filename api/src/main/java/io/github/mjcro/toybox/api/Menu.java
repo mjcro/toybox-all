@@ -13,7 +13,11 @@ public interface Menu extends Labeled, WithOrder {
             TOYBOX_EXAMPLES_SUBMENU = new SystemMenu(-1, "toybox://main/dev/examples", "Examples", null);
 
     static Menu text(String s) {
-        return new TextMenu(0, s);
+        return LabelMenu.ofName(s);
+    }
+
+    static Menu iconText(String icon, String name) {
+        return LabelMenu.ofIconAndName(icon, name);
     }
 
     static Menu toy(int order, Context context, Toy toy) {
