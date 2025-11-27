@@ -2,6 +2,7 @@ package io.github.mjcro.toybox.app.swing;
 
 import io.github.mjcro.toybox.api.Context;
 import io.github.mjcro.toybox.api.Environment;
+import io.github.mjcro.toybox.api.Toy;
 import io.github.mjcro.toybox.app.Application;
 import io.github.mjcro.toybox.app.ApplicationEnvironment;
 import io.github.mjcro.toybox.app.ApplicationFrame;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component;
 import javax.swing.*;
 import java.awt.*;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.function.BiConsumer;
 
 @Primary
 @Component("tabWindow")
@@ -44,7 +46,9 @@ public class TabbedMainWindow extends JFrame implements ApplicationFrame {
         setTitle(Application.MAIN_TITLE);
         getContentPane().setLayout(new BorderLayout());
 
-        getContentPane().add(StatusBarWidget.interactive(daemonExecutor), BorderLayout.PAGE_END);
+        BiConsumer<Class<? extends Toy>, Object> toyRunner = (c, d) -> getContext().findAndShow(c, d, true);
+
+        getContentPane().add(StatusBarWidget.interactive(toyRunner, daemonExecutor), BorderLayout.PAGE_END);
         getContentPane().add(tabbedPane, BorderLayout.CENTER);
 
         setJMenuBar(new NavigationTreeMenuBuilder().buildMenuBar(getContext(), environment.getRegisteredToys()));

@@ -2,6 +2,7 @@ package io.github.mjcro.toybox.app.swing;
 
 import io.github.mjcro.toybox.api.Context;
 import io.github.mjcro.toybox.api.Environment;
+import io.github.mjcro.toybox.api.Toy;
 import io.github.mjcro.toybox.app.Application;
 import io.github.mjcro.toybox.app.ApplicationEnvironment;
 import io.github.mjcro.toybox.app.ApplicationFrame;
@@ -14,6 +15,7 @@ import org.springframework.stereotype.Component;
 import javax.swing.*;
 import java.awt.*;
 import java.util.concurrent.ScheduledExecutorService;
+import java.util.function.BiConsumer;
 
 @Component("mdiWindow")
 @Slf4j
@@ -43,7 +45,9 @@ public class MDIWindow extends JFrame implements ApplicationFrame {
         getContentPane().setLayout(new BorderLayout());
         getContentPane().add(desktop, BorderLayout.CENTER);
 
-        getContentPane().add(StatusBarWidget.interactive(daemonExecutor), BorderLayout.PAGE_END);
+        BiConsumer<Class<? extends Toy>, Object> toyRunner = (c, d) -> getContext().findAndShow(c, d, true);
+
+        getContentPane().add(StatusBarWidget.interactive(toyRunner, daemonExecutor), BorderLayout.PAGE_END);
 
         setJMenuBar(new NavigationTreeMenuBuilder().buildMenuBar(getContext(), environment.getRegisteredToys()));
         pack();
