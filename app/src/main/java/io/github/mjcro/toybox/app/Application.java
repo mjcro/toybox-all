@@ -1,6 +1,5 @@
 package io.github.mjcro.toybox.app;
 
-import io.github.mjcro.toybox.api.AbstractToy;
 import io.github.mjcro.toybox.api.Context;
 import io.github.mjcro.toybox.app.config.MainConfiguration;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxIcons;
@@ -42,15 +41,9 @@ public class Application {
             Context toyContext = applicationContext.getBean(ApplicationFrame.class).getContext();
             for (String arg : args) {
                 if (arg.startsWith("-t")) {
-                    try {
-                        String className = arg.substring(2);
-                        log.info("Showing startup toy {}", className);
-                        Class<?> clazz = Class.forName(className);
-                        Object bean = clazz.getConstructor().newInstance();
-                        toyContext.show((AbstractToy) bean, null);
-                    } catch (ReflectiveOperationException e) {
-                        throw new RuntimeException(e);
-                    }
+                    String className = arg.substring(2);
+                    log.info("Showing startup toy {}", className);
+                    toyContext.findAndShow(className, null, true);
                 }
             }
         }

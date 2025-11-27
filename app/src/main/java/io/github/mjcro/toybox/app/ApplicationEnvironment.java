@@ -1,5 +1,6 @@
 package io.github.mjcro.toybox.app;
 
+import io.github.mjcro.toybox.api.AbstractToy;
 import io.github.mjcro.toybox.api.Context;
 import io.github.mjcro.toybox.api.Environment;
 import io.github.mjcro.toybox.api.Event;
@@ -69,6 +70,36 @@ public class ApplicationEnvironment implements Environment {
     @Override
     public List<Toy> getRegisteredToys() {
         return new ArrayList<>(registeredToys);
+    }
+
+    @Override
+    public Optional<Toy> findRegisteredToy(Class<? extends Toy> clazz) {
+        for (Toy registeredToy : registeredToys) {
+            if (registeredToy.getClass().equals(clazz)) {
+                return Optional.of(registeredToy);
+            }
+        }
+
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<Toy> findRegisteredToy(String name) {
+        // Full class name lookup
+        for (Toy registeredToy : registeredToys) {
+            if (registeredToy.getClass().getName().equals(name)) {
+                return Optional.of(registeredToy);
+            }
+        }
+
+        // Simple class name lookup
+        for (Toy registeredToy : registeredToys) {
+            if (registeredToy.getClass().getSimpleName().equals(name)) {
+                return Optional.of(registeredToy);
+            }
+        }
+
+        return Optional.empty();
     }
 
     @Override

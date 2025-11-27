@@ -68,6 +68,22 @@ public interface Environment extends Executor {
     List<Toy> getRegisteredToys();
 
     /**
+     * Searches for toy with given class.
+     *
+     * @param clazz Toy class.
+     * @return Toy, if found.
+     */
+    Optional<Toy> findRegisteredToy(Class<? extends Toy> clazz);
+
+    /**
+     * Searches for toy with given class name.
+     *
+     * @param name Toy class name.
+     * @return Toy, if found.
+     */
+    Optional<Toy> findRegisteredToy(String name);
+
+    /**
      * Registers event listener.
      *
      * @param listener Event listener.

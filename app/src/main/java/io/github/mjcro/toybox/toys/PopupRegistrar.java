@@ -21,21 +21,21 @@ public class PopupRegistrar implements EnvironmentModifier, Environment.PopupHoo
         if (target instanceof CharSequence) {
             CharSequence x = (CharSequence) target;
             return List.of(
-                    Action.ofName("String analyze", () -> ctx.show(new StringAnalyzerToy(), x)),
-                    Action.ofName("String conversion", () -> ctx.show(new StringConverterToy(), x))
+                    Action.ofName("String analyze", () -> ctx.findAndShow(StringAnalyzerToy.class, x, true)),
+                    Action.ofName("String conversion", () -> ctx.findAndShow(StringConverterToy.class, x, true))
             );
         }
         if (target instanceof JTextComponent) {
-            JTextComponent x = (JTextComponent) target;
+            CharSequence x = ((JTextComponent) target).getText();
             return List.of(
-                    Action.ofName("String analyze", () -> ctx.show(new StringAnalyzerToy(), x.getText())),
-                    Action.ofName("String conversion", () -> ctx.show(new StringConverterToy(), x.getText()))
+                    Action.ofName("String analyze", () -> ctx.findAndShow(StringAnalyzerToy.class, x, true)),
+                    Action.ofName("String conversion", () -> ctx.findAndShow(StringConverterToy.class, x, true))
             );
         }
         if (target instanceof Instant) {
             Instant i = (Instant) target;
             return List.of(
-                    Action.ofName("Instant analyze", () -> ctx.show(new InstantAnalyzerToy(), i))
+                    Action.ofName("Instant analyze", () -> ctx.findAndShow(InstantAnalyzerToy.class, i, true))
             );
         }
         return null;
