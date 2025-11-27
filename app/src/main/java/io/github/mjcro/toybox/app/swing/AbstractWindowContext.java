@@ -82,7 +82,6 @@ abstract class AbstractWindowContext<T extends Component> implements Context {
     }
 
     private void fillPopup(Object target) {
-        System.out.println(target.getClass());
         if (target instanceof Decorator<?>) {
             fillPopup(((Decorator<?>) target).getDecorated());
         }
