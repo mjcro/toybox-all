@@ -1,7 +1,7 @@
 package io.github.mjcro.toybox.app.swing.widgets;
 
-import io.github.mjcro.toybox.app.Application;
 import io.github.mjcro.toybox.app.CustomLoggingAppender;
+import io.github.mjcro.toybox.app.utils.TextFormat;
 import io.github.mjcro.toybox.swing.BorderLayoutMaster;
 import io.github.mjcro.toybox.swing.Components;
 import io.github.mjcro.toybox.swing.hint.Hints;
@@ -9,7 +9,6 @@ import io.github.mjcro.toybox.swing.prefab.ToyBoxLaF;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxLabels;
 
 import javax.swing.*;
-import javax.swing.border.EmptyBorder;
 import java.awt.*;
 import java.time.Duration;
 import java.util.concurrent.Executors;
@@ -17,12 +16,10 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
 public class StatusBarWidget extends JPanel {
-    private final JLabel informationLabel = ToyBoxLabels.create("Welcome", Hints.TEXT_SMALL);
-    private final JLabel lastElapsedLabel = ToyBoxLabels.create("", Hints.TEXT_SMALL, Hints.CENTER);
-    private final JLabel memoryUsageLabel = ToyBoxLabels.create("0M", Hints.TEXT_SMALL, Hints.CENTER);
-    private final JLabel threadsCountLabel = ToyBoxLabels.create("1", Hints.TEXT_SMALL, Hints.CENTER);
-    private final JLabel versionLabel = ToyBoxLabels.create(Application.VERSION, Hints.TEXT_SMALL, Hints.CENTER);
-    private final JProgressBar progressBar = new JProgressBar();
+    private final JLabel informationLabel = ToyBoxLabels.create("Welcome");
+    private final JLabel lastElapsedLabel = ToyBoxLabels.create("", Hints.CENTER);
+    private final JLabel memoryUsageLabel = ToyBoxLabels.create("0M", Hints.CENTER);
+    private final JLabel threadsCountLabel = ToyBoxLabels.create("1", Hints.CENTER);
 
     public static StatusBarWidget interactive(ScheduledExecutorService scheduler) {
         StatusBarWidget w = new StatusBarWidget();
@@ -53,26 +50,19 @@ public class StatusBarWidget extends JPanel {
     public StatusBarWidget() {
         super(new BorderLayout());
         Hints.PADDING_NANO.apply(this);
+        Hints.PADDING_NORMAL.apply(informationLabel);
 
         lastElapsedLabel.setToolTipText("Timing of last operation");
         informationLabel.setToolTipText("Information message");
         memoryUsageLabel.setToolTipText("Current memory usage");
         threadsCountLabel.setToolTipText("Threads count");
-        versionLabel.setToolTipText("Current application version");
 
-        progressBar.setMinimum(0);
-        progressBar.setMaximum(100);
-        progressBar.setValue(0);
-        progressBar.setBorder(new EmptyBorder(3, 1, 3, 1));
-        progressBar.setPreferredSize(new Dimension(70, progressBar.getPreferredSize().height));
-
-        JPanel rightSide = new JPanel(new GridLayout(1, 5));
-        rightSide.add(progressBar);
+        JPanel rightSide = new JPanel(new GridLayout(1, 3));
         rightSide.add(wrapBevel(lastElapsedLabel));
         rightSide.add(wrapBevel(memoryUsageLabel));
         rightSide.add(wrapBevel(threadsCountLabel));
-        rightSide.add(versionLabel);
-        BorderLayoutMaster.addCenterRight(this, wrapBevel(informationLabel), rightSide);
+        add(new JSeparator(), BorderLayout.PAGE_START);
+        BorderLayoutMaster.addCenterRight(this, informationLabel, rightSide);
     }
 
     private static JPanel wrapBevel(JComponent label) {
@@ -83,15 +73,13 @@ public class StatusBarWidget extends JPanel {
         Hints.BORDER_LOWERED_BEVEL.apply(bevel);
         outer.add(bevel, BorderLayout.CENTER);
 
-        Hints.PADDING_MINI.apply(label);
+        Hints.PADDING_NANO.apply(label);
         bevel.add(label, BorderLayout.CENTER);
         return outer;
     }
 
     public void setLastElapsed(Duration duration) {
-        lastElapsedLabel.setText(
-                duration == null ? "" : String.format("%.3fs", duration.toMillis() / 1000.)
-        );
+        lastElapsedLabel.setText(TextFormat.duration(duration));
     }
 
     public void setInformation(String text) {
@@ -99,7 +87,7 @@ public class StatusBarWidget extends JPanel {
     }
 
     public void setMemoryUsage(long total) {
-        memoryUsageLabel.setText(total / 1024 / 1024 + "M");
+        memoryUsageLabel.setText(TextFormat.bytes(total));
     }
 
     public void setThreadCount(int count) {
@@ -113,11 +101,12 @@ public class StatusBarWidget extends JPanel {
             return t;
         });
 
+        ToyBoxLaF.initialize(false);
+
         JPanel container = new JPanel(new BorderLayout());
         container.add(new JPanel(), BorderLayout.CENTER);
         container.add(StatusBarWidget.interactive(service), BorderLayout.PAGE_END);
 
-        ToyBoxLaF.initialize(false);
         Components.show(container);
     }
 }
