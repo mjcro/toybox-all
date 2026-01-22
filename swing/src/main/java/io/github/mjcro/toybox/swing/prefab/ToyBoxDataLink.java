@@ -1,7 +1,11 @@
 package io.github.mjcro.toybox.swing.prefab;
 
+import com.github.lgooddatepicker.components.DatePicker;
+import com.github.lgooddatepicker.components.DateTimePicker;
 import io.github.mjcro.toybox.swing.hint.Hint;
 import io.github.mjcro.toybox.swing.linking.ComponentDataLink;
+import io.github.mjcro.toybox.swing.linking.DatePickerLocalDateDataLink;
+import io.github.mjcro.toybox.swing.linking.DateTimePickerLocalDateTimeDataLink;
 import io.github.mjcro.toybox.swing.linking.JCheckBoxBooleanDataLink;
 import io.github.mjcro.toybox.swing.linking.JTextComponentNumberDataLink;
 import io.github.mjcro.toybox.swing.linking.JTextComponentStringDataLink;
@@ -9,6 +13,8 @@ import io.github.mjcro.toybox.swing.linking.JTextComponentStringDataLink;
 import javax.swing.*;
 import javax.swing.text.JTextComponent;
 import java.lang.reflect.Field;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.Optional;
 import java.util.function.UnaryOperator;
 
@@ -56,6 +62,55 @@ public class ToyBoxDataLink {
         Optional.ofNullable(initial).ifPresent(link::setValue);
         return link;
     }
+
+    @SafeVarargs
+    public static ComponentDataLink<DatePicker, LocalDate> linkLocalDateField(
+            DatePicker component,
+            Field f,
+            Object target,
+            Hint<? super DatePicker>... hints
+    ) {
+        f.setAccessible(true);
+        DatePickerLocalDateDataLink link = new DatePickerLocalDateDataLink(component, ld -> {
+            try {
+                f.set(target, ld.orElse(null));
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        Hint.applyAll(component, hints);
+        try {
+            Optional.ofNullable(f.get(target)).map($ -> (LocalDate) $).ifPresent(link::setValue);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+        return link;
+    }
+
+    @SafeVarargs
+    public static ComponentDataLink<DateTimePicker, LocalDateTime> linkLocalDateTimeField(
+            DateTimePicker component,
+            Field f,
+            Object target,
+            Hint<? super DateTimePicker>... hints
+    ) {
+        f.setAccessible(true);
+        DateTimePickerLocalDateTimeDataLink link = new DateTimePickerLocalDateTimeDataLink(component, ld -> {
+            try {
+                f.set(target, ld.orElse(null));
+            } catch (IllegalAccessException e) {
+                throw new RuntimeException(e);
+            }
+        });
+        Hint.applyAll(component, hints);
+        try {
+            Optional.ofNullable(f.get(target)).map($ -> (LocalDateTime) $).ifPresent(link::setValue);
+        } catch (IllegalAccessException e) {
+            throw new RuntimeException(e);
+        }
+        return link;
+    }
+
 
     @SafeVarargs
     public static <C extends JTextComponent> ComponentDataLink<C, String> linkStringField(
