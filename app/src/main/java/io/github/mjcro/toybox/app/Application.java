@@ -14,7 +14,7 @@ import java.time.Instant;
 
 @Slf4j
 public class Application {
-    public static final String INTERNAL_VERSION = "v0.4.1";
+    public static final String INTERNAL_VERSION = "v0.4.3";
 
     public static boolean
             DEBUG = false,
