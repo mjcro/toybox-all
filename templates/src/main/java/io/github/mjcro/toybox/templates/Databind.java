@@ -26,6 +26,11 @@ public @interface Databind {
     String group() default "";
 
     /**
+     * @return Binding display order. Lesser value displayed first.
+     */
+    int order() default 0;
+
+    /**
      * @return If true, space trimming wherever possible will be applied.
      */
     boolean trim() default true;

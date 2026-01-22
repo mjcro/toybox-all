@@ -19,12 +19,13 @@ import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.math.BigInteger;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 public class BindingResolver {
     public List<Binding> getBindings(Environment environment, @NonNull Object obj) {
         Class<?> clazz = obj.getClass();
-        List<Field> fields = new ArrayList<>();
+        ArrayList<Field> fields = new ArrayList<>();
         while (clazz != Object.class) {
             for (Field field : clazz.getDeclaredFields()) {
                 Databind anno = field.getAnnotation(Databind.class);
@@ -35,6 +36,7 @@ public class BindingResolver {
             }
             clazz = clazz.getSuperclass();
         }
+        fields.sort(Comparator.comparingInt($ -> $.getAnnotation(Databind.class).order()));
 
         List<Binding> out = new ArrayList<>();
         for (Field field : fields) {
