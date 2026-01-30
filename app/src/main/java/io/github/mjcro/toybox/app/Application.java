@@ -15,7 +15,7 @@ import java.util.function.Supplier;
 
 @Slf4j
 public class Application {
-    public static final String INTERNAL_VERSION = "v0.4.3";
+    public static final String INTERNAL_VERSION = "v0.4.4";
 
     public static boolean
             DEBUG = false,
