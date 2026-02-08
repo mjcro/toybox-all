@@ -11,6 +11,7 @@ import io.github.mjcro.toybox.swing.prefab.ToyBoxLaF;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxLabels;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxPanels;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxTextComponents;
+import io.github.mjcro.toybox.swing.util.Slf4jUtil;
 import io.github.mjcro.toybox.swing.widgets.MultiViewTextAreaOrExceptionPanel;
 import lombok.extern.slf4j.Slf4j;
 import net.miginfocom.swing.MigLayout;
@@ -112,7 +113,7 @@ public class RegexReplaceToy implements Toy {
                 String out = p.matcher(input.getText()).replaceAll(replacement.getText().replace("\\n", "\n"));
                 output.setViewText(out);
             } catch (Throwable ex) {
-                log.error("Error applying regex", ex);
+                log.error(Slf4jUtil.TOYBOX_MARKER, "Error applying regex", ex);
                 output.setViewException(ex);
             } finally {
                 Components.setEnabled(true, preset, pattern, replacement, input);

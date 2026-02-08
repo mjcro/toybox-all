@@ -8,6 +8,7 @@ import io.github.mjcro.toybox.swing.hint.Hints;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxButtons;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxPanels;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxTextComponents;
+import io.github.mjcro.toybox.swing.util.Slf4jUtil;
 import io.github.mjcro.toybox.swing.widgets.panels.HorizontalComponentsPanel;
 import lombok.extern.slf4j.Slf4j;
 
@@ -114,6 +115,7 @@ public class StringListToy implements Toy {
 
             resultText.setText(stream.collect(Collectors.joining("\n")));
             log.info(
+                    Slf4jUtil.TOYBOX_MARKER,
                     "Source text with {} bytes and {} lines mapped to {} lines",
                     source.getBytes(StandardCharsets.UTF_8).length,
                     lines.length,

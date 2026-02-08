@@ -1,5 +1,6 @@
 package io.github.mjcro.toybox.swing.prefab;
 
+import io.github.mjcro.toybox.swing.util.Slf4jUtil;
 import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 
@@ -33,9 +34,13 @@ public class ToyBoxIcons {
         try {
             Taskbar.getTaskbar().setIconImage(imageIcon);
         } catch (UnsupportedOperationException e) {
-            log.warn("The OS does not support: 'taskbar.setIconImage'");
+            if (log.isWarnEnabled(Slf4jUtil.TOYBOX_MARKER)) {
+                log.warn(Slf4jUtil.TOYBOX_MARKER, "The OS does not support: 'taskbar.setIconImage'");
+            }
         } catch (SecurityException e) {
-            log.error("Security exception setting taskbar icon", e);
+            if (log.isErrorEnabled(Slf4jUtil.TOYBOX_MARKER)) {
+                log.error(Slf4jUtil.TOYBOX_MARKER, "Security exception setting taskbar icon", e);
+            }
         }
     }
 
@@ -132,7 +137,9 @@ public class ToyBoxIcons {
             }));
         } catch (RuntimeException e) {
             // ignore
-            log.error("Error reading icon " + key.name, e);
+            if (log.isErrorEnabled(Slf4jUtil.TOYBOX_MARKER)) {
+                log.error(Slf4jUtil.TOYBOX_MARKER, "Error reading icon {}", key.name, e);
+            }
             return Optional.empty();
         }
     }

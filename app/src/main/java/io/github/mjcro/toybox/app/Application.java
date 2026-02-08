@@ -4,6 +4,7 @@ import io.github.mjcro.toybox.api.Context;
 import io.github.mjcro.toybox.app.config.MainConfiguration;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxIcons;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxLaF;
+import io.github.mjcro.toybox.swing.util.Slf4jUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
@@ -47,15 +48,15 @@ public class Application {
 
         // Registering exception handler
         Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
-            log.error("Uncaught exception", throwable);
+            log.error(Slf4jUtil.TOYBOX_MARKER, "Uncaught exception", throwable);
         });
 
-        log.info("Starting ToyBox");
+        log.info(Slf4jUtil.TOYBOX_MARKER, "Starting ToyBox");
         Instant instant = Instant.now();
 
         // Installing look and feel
         ToyBoxLaF.initialize(DARK_MODE);
-        log.info("LaF loaded");
+        log.info(Slf4jUtil.TOYBOX_MARKER, "LaF loaded");
 
         // Debugging appender
         if (DEBUG) {
@@ -67,12 +68,12 @@ public class Application {
 
         // Building application context
         ApplicationContext context = applicationContextSupplier.get();
-        log.info("Spring ApplicationContext ready");
+        log.info(Slf4jUtil.TOYBOX_MARKER, "Spring ApplicationContext ready");
 
         // Starting
         ApplicationFrame window = context.getBean(Application.WINDOW, ApplicationFrame.class);
         window.initializeAndShow();
-        SwingUtilities.invokeLater(() -> log.info("ToyBox initialized in {}", Duration.between(instant, Instant.now())));
+        SwingUtilities.invokeLater(() -> log.info(Slf4jUtil.TOYBOX_MARKER, "ToyBox initialized in {}", Duration.between(instant, Instant.now())));
 
         // Running initial toy(s)
         if (args != null) {
@@ -80,7 +81,7 @@ public class Application {
             for (String arg : args) {
                 if (arg.startsWith("-t")) {
                     String className = arg.substring(2);
-                    log.info("Showing startup toy {}", className);
+                    log.info(Slf4jUtil.TOYBOX_MARKER, "Showing startup toy {}", className);
                     SwingUtilities.invokeLater(() -> {
                         toyContext.findAndShow(className, null, true);
                     });

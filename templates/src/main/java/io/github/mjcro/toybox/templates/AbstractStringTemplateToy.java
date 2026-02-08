@@ -8,6 +8,7 @@ import io.github.mjcro.toybox.swing.hint.Hints;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxButtons;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxPanels;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxTextComponents;
+import io.github.mjcro.toybox.swing.util.Slf4jUtil;
 import io.github.mjcro.toybox.swing.widgets.MultiViewTextAreaOrExceptionPanel;
 import io.github.mjcro.toybox.swing.widgets.panels.HorizontalComponentsPanel;
 import io.github.mjcro.toybox.swing.widgets.panels.VerticalRowsPanel;
@@ -109,12 +110,18 @@ public abstract class AbstractStringTemplateToy implements Toy {
             environment.chooseFileToSave(new Environment.FileCallback() {
                 @Override
                 public void onFileChosen(File file) throws IOException {
-                    log.debug("Saving to file {}", file);
+                    if (log.isDebugEnabled(Slf4jUtil.TOYBOX_MARKER)) {
+                        log.debug(Slf4jUtil.TOYBOX_MARKER, "Saving to file {}", file);
+                    }
                     try {
                         Files.write(file.toPath(), output.getViewText().getBytes(StandardCharsets.UTF_8));
-                        log.info("Data saved to file {}", file);
+                        if (log.isErrorEnabled(Slf4jUtil.TOYBOX_MARKER)) {
+                            log.info(Slf4jUtil.TOYBOX_MARKER, "Data saved to file {}", file);
+                        }
                     } catch (IOException err) {
-                        log.error("Error saving data to file", err);
+                        if (log.isErrorEnabled(Slf4jUtil.TOYBOX_MARKER)) {
+                            log.error(Slf4jUtil.TOYBOX_MARKER, "Error saving data to file {}", file, err);
+                        }
                         throw err;
                     }
                 }
@@ -167,10 +174,14 @@ public abstract class AbstractStringTemplateToy implements Toy {
                     saveToFileButton.setEnabled(!text.isEmpty());
                     copyToClipButton.setEnabled(!text.isEmpty());
                     applyButton.setEnabled(true);
-                    log.debug("Template evaluated in {}", Duration.between(before, Instant.now()));
+                    if (log.isDebugEnabled(Slf4jUtil.TOYBOX_MARKER)) {
+                        log.debug(Slf4jUtil.TOYBOX_MARKER, "Template evaluated in {}", Duration.between(before, Instant.now()));
+                    }
                 } catch (Throwable err) {
                     output.setViewException(err);
-                    log.error("Error applying template", err);
+                    if (log.isErrorEnabled(Slf4jUtil.TOYBOX_MARKER)) {
+                        log.error(Slf4jUtil.TOYBOX_MARKER, "Error applying template", err);
+                    }
                 } finally {
                     ui.accept(() -> {
                         applyButton.setEnabled(true);

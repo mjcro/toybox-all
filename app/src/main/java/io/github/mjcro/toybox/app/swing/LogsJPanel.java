@@ -6,6 +6,7 @@ import io.github.mjcro.toybox.swing.hint.Hint;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxIcons;
 import io.github.mjcro.toybox.swing.hint.Hints;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxButtons;
+import io.github.mjcro.toybox.swing.util.Slf4jUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
@@ -101,7 +102,7 @@ public class LogsJPanel extends JPanel {
 
     private void refreshEvents() {
         if (eventSupplier != null) {
-            log.debug("Refreshing logs collection");
+            log.debug(Slf4jUtil.TOYBOX_MARKER, "Refreshing logs collection");
             setEvent(eventSupplier.get());
         }
     }

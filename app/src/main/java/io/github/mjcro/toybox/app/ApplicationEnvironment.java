@@ -1,6 +1,5 @@
 package io.github.mjcro.toybox.app;
 
-import io.github.mjcro.toybox.api.AbstractToy;
 import io.github.mjcro.toybox.api.Context;
 import io.github.mjcro.toybox.api.Environment;
 import io.github.mjcro.toybox.api.Event;
@@ -8,6 +7,7 @@ import io.github.mjcro.toybox.api.SettingsStorage;
 import io.github.mjcro.toybox.api.Toy;
 import io.github.mjcro.toybox.api.events.EventListener;
 import io.github.mjcro.toybox.app.settings.ToyBoxWorkingDirSetting;
+import io.github.mjcro.toybox.swing.util.Slf4jUtil;
 import lombok.Getter;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -112,7 +112,7 @@ public class ApplicationEnvironment implements Environment {
     @Override
     public void handleEvent(Context context, Event event) {
         if (context != null && event != null) {
-            log.info("Handling event {}", event);
+            log.info(Slf4jUtil.TOYBOX_MARKER, "Handling event {}", event);
             for (final EventListener listener : eventListeners) {
                 SwingUtilities.invokeLater(() -> listener.handleEvent(context, event));
             }
@@ -132,14 +132,14 @@ public class ApplicationEnvironment implements Environment {
     @Override
     public void openUrl(String url) {
         if (url != null) {
-            log.info("Opening URL {}", url);
+            log.info(Slf4jUtil.TOYBOX_MARKER, "Opening URL {}", url);
             try {
                 Desktop desktop = Desktop.isDesktopSupported() ? Desktop.getDesktop() : null;
                 if (desktop != null && desktop.isSupported(Desktop.Action.BROWSE)) {
                     desktop.browse(new URI(url));
                 }
             } catch (Exception error) {
-                log.error("Error opening URL", error);
+                log.error(Slf4jUtil.TOYBOX_MARKER, "Error opening URL {}", url, error);
             }
         }
     }
@@ -148,7 +148,7 @@ public class ApplicationEnvironment implements Environment {
     public void clipboardPut(StringSelection selection) {
         Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
         try {
-            log.info("Clipping \"{}\"", selection.getTransferData(DataFlavor.stringFlavor));
+            log.info(Slf4jUtil.TOYBOX_MARKER, "Clipping \"{}\"", selection.getTransferData(DataFlavor.stringFlavor));
         } catch (UnsupportedFlavorException | IOException ignore) {
             // ignore
         }
@@ -163,7 +163,7 @@ public class ApplicationEnvironment implements Environment {
                     ? Optional.of(data.toString())
                     : Optional.empty();
         } catch (UnsupportedFlavorException | IOException e) {
-            log.error("Error reading data from clipboard", e);
+            log.error(Slf4jUtil.TOYBOX_MARKER, "Error reading data from clipboard", e);
         }
 
         return Optional.empty();
@@ -185,11 +185,11 @@ public class ApplicationEnvironment implements Environment {
         if (userSelection == JFileChooser.APPROVE_OPTION) {
             File fileToRead = fileChooser.getSelectedFile();
             getSettingsStorage().put(new ToyBoxWorkingDirSetting(fileToRead.getParentFile()));
-            log.info("Reading file {}", fileToRead.getAbsolutePath());
+            log.info(Slf4jUtil.TOYBOX_MARKER, "Reading file {}", fileToRead.getAbsolutePath());
             try {
                 callback.onFileChosen(fileToRead);
             } catch (IOException e) {
-                log.error("Error reading file", e);
+                log.error(Slf4jUtil.TOYBOX_MARKER, "Error reading file {}", fileToRead.getAbsolutePath(), e);
             }
         } else {
             callback.onNoFileChosen();
@@ -218,18 +218,18 @@ public class ApplicationEnvironment implements Environment {
                         JOptionPane.WARNING_MESSAGE
                 );
                 if (result == JOptionPane.CANCEL_OPTION) {
-                    log.info("Cancelled overwrite");
+                    log.info(Slf4jUtil.TOYBOX_MARKER, "Cancelled overwrite");
                     callback.onNoFileChosen();
                     return;
                 }
             }
 
             getSettingsStorage().put(new ToyBoxWorkingDirSetting(fileToSave.getParentFile()));
-            log.info("Saving file {}", fileToSave.getAbsolutePath());
+            log.info(Slf4jUtil.TOYBOX_MARKER, "Saving file {}", fileToSave.getAbsolutePath());
             try {
                 callback.onFileChosen(fileToSave);
             } catch (IOException e) {
-                log.error("Error saving file", e);
+                log.error(Slf4jUtil.TOYBOX_MARKER, "Error saving file {}", fileToSave.getAbsolutePath(), e);
             }
         } else {
             callback.onNoFileChosen();

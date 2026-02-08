@@ -6,6 +6,7 @@ import io.github.mjcro.toybox.api.Environment;
 import io.github.mjcro.toybox.api.Event;
 import io.github.mjcro.toybox.api.events.ShowToyEvent;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxIcons;
+import io.github.mjcro.toybox.swing.util.Slf4jUtil;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.swing.*;
@@ -40,7 +41,7 @@ class MDIWindowContext extends AbstractWindowContext<MDIWindow> {
     private void showToyWindow(AbstractToy toy, Object data) {
         Context context = this.withInitialData(data);
 
-        log.info("Showing toy \"{}\" backed by \"{}\"", toy.getLabel().getName(), toy.getClass().getSimpleName());
+        log.info(Slf4jUtil.TOYBOX_MARKER, "Showing toy \"{}\" backed by \"{}\"", toy.getLabel().getName(), toy.getClass().getSimpleName());
         JPanel panel = buildToyPanel(toy);
         attachPopup(panel);
 

@@ -12,6 +12,7 @@ import io.github.mjcro.toybox.swing.prefab.ToyBoxLaF;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxLabels;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxPanels;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxTextComponents;
+import io.github.mjcro.toybox.swing.util.Slf4jUtil;
 import io.github.mjcro.toybox.swing.widgets.MultiViewTextAreaOrExceptionPanel;
 import lombok.extern.slf4j.Slf4j;
 import net.miginfocom.swing.MigLayout;
@@ -186,6 +187,7 @@ public class EncryptionToy implements Toy {
                     throw new IllegalArgumentException("Unable to read secret", e);
                 }
                 log.info(
+                        Slf4jUtil.TOYBOX_MARKER,
                         "Applying {} using {} and key size {} bit",
                         encrypt ? "encryption" : "decryption",
                         algo.toString(),

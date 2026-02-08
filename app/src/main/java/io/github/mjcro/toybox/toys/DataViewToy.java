@@ -10,6 +10,7 @@ import io.github.mjcro.toybox.swing.hint.Hints;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxLaF;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxButtons;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxTextComponents;
+import io.github.mjcro.toybox.swing.util.Slf4jUtil;
 import io.github.mjcro.toybox.swing.widgets.ExceptionDetailsJPanel;
 import io.github.mjcro.toybox.swing.widgets.JsonJTree;
 import io.github.mjcro.toybox.swing.widgets.XmlJTree;
@@ -106,7 +107,7 @@ public class DataViewToy implements Toy {
                         break;
                 }
             } catch (Exception e) {
-                log.error("Error parsing JSON", e);
+                log.error(Slf4jUtil.TOYBOX_MARKER, "Error parsing JSON", e);
                 setResult(new ExceptionDetailsJPanel(e));
             }
         }

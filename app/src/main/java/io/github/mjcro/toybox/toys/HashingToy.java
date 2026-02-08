@@ -9,6 +9,7 @@ import io.github.mjcro.toybox.swing.prefab.ToyBoxButtons;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxLabels;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxPanels;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxTextComponents;
+import io.github.mjcro.toybox.swing.util.Slf4jUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.digests.MD5Digest;
@@ -208,9 +209,9 @@ public class HashingToy implements Toy {
                 }
                 String out = h.apply(in, cmp, pw);
                 SwingUtilities.invokeLater(() -> output.setText(out));
-                log.info("Hashing using {} completed in {}", h, Duration.between(before, Instant.now()));
+                log.info(Slf4jUtil.TOYBOX_MARKER, "Hashing using {} completed in {}", h, Duration.between(before, Instant.now()));
             } catch (Throwable e1) {
-                log.error("Error applying hash", e1);
+                log.error(Slf4jUtil.TOYBOX_MARKER, "Error applying hash", e1);
             } finally {
                 SwingUtilities.invokeLater(() -> setEnabled(true));
             }
