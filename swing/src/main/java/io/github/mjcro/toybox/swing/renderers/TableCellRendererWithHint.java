@@ -2,16 +2,26 @@ package io.github.mjcro.toybox.swing.renderers;
 
 import io.github.mjcro.interfaces.strings.WithName;
 import io.github.mjcro.interfaces.strings.WithText;
+import io.github.mjcro.toybox.swing.hint.Hint;
 import io.github.mjcro.toybox.swing.hint.WithHint;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JLabel;
+import javax.swing.JTable;
+import java.awt.Component;
 
+/**
+ * Table cell renderer that applies a {@link WithHint} decoration to labels,
+ * extracting text from {@link WithText} or {@link WithName} interfaces.
+ */
 public class TableCellRendererWithHint extends AbstractTableCellRenderer {
+
+    @SuppressWarnings("unchecked")
     @Override
-    public Component getTableCellRendererComponent(
-            JTable table,
-            Object value,
+    public @NonNull Component getTableCellRendererComponent(
+            @NonNull JTable table,
+            @Nullable Object value,
             boolean isSelected,
             boolean hasFocus,
             int row,
@@ -35,7 +45,10 @@ public class TableCellRendererWithHint extends AbstractTableCellRenderer {
             }
 
             label.setText(text);
-            withHint.getHint().apply(label);
+            final Hint<? super JLabel> hint = withHint.getHint();
+            if (hint != null) {
+                hint.apply(label);
+            }
         }
 
         if (isSelected) {

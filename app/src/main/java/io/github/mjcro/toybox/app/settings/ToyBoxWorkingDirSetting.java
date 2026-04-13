@@ -3,10 +3,14 @@ package io.github.mjcro.toybox.app.settings;
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import org.jspecify.annotations.NonNull;
 
 import java.io.File;
 import java.util.Objects;
 
+/**
+ * Setting that stores the ToyBox working directory path.
+ */
 @JsonAutoDetect(
         fieldVisibility = JsonAutoDetect.Visibility.ANY,  // use fields
         getterVisibility = JsonAutoDetect.Visibility.NONE,
@@ -15,24 +19,34 @@ import java.util.Objects;
 )
 public class ToyBoxWorkingDirSetting extends ToyBoxAbstractSetting {
     @JsonProperty("value")
-    private final String value;
+    private final @NonNull String value;
 
+    /**
+     * Constructs a setting with the given directory path string.
+     *
+     * @param value the absolute directory path
+     */
     @JsonCreator
-    public ToyBoxWorkingDirSetting(@JsonProperty("value") String value) {
+    public ToyBoxWorkingDirSetting(@JsonProperty("value") @NonNull String value) {
         this.value = Objects.requireNonNull(value);
     }
 
-    public ToyBoxWorkingDirSetting(File file) {
+    /**
+     * Constructs a setting from a {@link File}, using its absolute path.
+     *
+     * @param file the directory file
+     */
+    public ToyBoxWorkingDirSetting(@NonNull File file) {
         this(file.getAbsolutePath());
     }
 
     @Override
-    public String getName() {
+    public @NonNull String getName() {
         return "Working Directory";
     }
 
     @Override
-    public String getValue() {
+    public @NonNull String getValue() {
         return value;
     }
 }

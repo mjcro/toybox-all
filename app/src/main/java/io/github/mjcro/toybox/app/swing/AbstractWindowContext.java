@@ -10,17 +10,20 @@ import io.github.mjcro.toybox.api.Environment;
 import io.github.mjcro.toybox.api.Labeled;
 import io.github.mjcro.toybox.app.Application;
 import io.github.mjcro.toybox.swing.Components;
-import lombok.AccessLevel;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
-import javax.swing.*;
+import javax.swing.JMenuItem;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JTable;
+import javax.swing.JTree;
 import javax.swing.event.PopupMenuEvent;
 import javax.swing.event.PopupMenuListener;
 import javax.swing.text.JTextComponent;
 import javax.swing.tree.DefaultMutableTreeNode;
-import java.awt.*;
+import java.awt.Component;
+import java.awt.Rectangle;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.ZoneId;
@@ -30,35 +33,74 @@ import java.time.format.TextStyle;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
-@RequiredArgsConstructor(access = AccessLevel.PROTECTED)
+/**
+ * Abstract base class for window contexts that associate a toy panel
+ * with its environment, popup menu, and initial data.
+ *
+ * @param <T> the main window component type
+ */
 abstract class AbstractWindowContext<T extends Component> implements Context {
-    @Getter
-    @NonNull
-    private final Environment environment;
-    @NonNull
-    protected final T mainWindow;
-    @NonNull
-    protected final JPopupMenu popupMenu;
-    private final Object initialData;
+
+    private final @NonNull Environment environment;
+    protected final @NonNull T mainWindow;
+    protected final @NonNull JPopupMenu popupMenu;
+    private final @Nullable Object initialData;
+
+    /**
+     * Creates a new window context.
+     *
+     * @param environment the application environment
+     * @param mainWindow  the main window component
+     * @param popupMenu   the shared popup menu
+     * @param initialData optional initial data for the toy
+     */
+    protected AbstractWindowContext(
+            @NonNull Environment environment,
+            @NonNull T mainWindow,
+            @NonNull JPopupMenu popupMenu,
+            @Nullable Object initialData
+    ) {
+        this.environment = Objects.requireNonNull(environment, "environment");
+        this.mainWindow = Objects.requireNonNull(mainWindow, "mainWindow");
+        this.popupMenu = Objects.requireNonNull(popupMenu, "popupMenu");
+        this.initialData = initialData;
+    }
 
     @Override
-    public final Optional<Object> getInitialData() {
+    public @NonNull Environment getEnvironment() {
+        return environment;
+    }
+
+    @Override
+    public final @NonNull Optional<@NonNull Object> getInitialData() {
         return Optional.ofNullable(initialData);
     }
 
-    protected void attachPopup(JPanel panel) {
+    /**
+     * Attaches the shared popup menu to the given panel and all its children.
+     *
+     * @param panel the panel to attach the popup to
+     */
+    protected void attachPopup(@NonNull JPanel panel) {
         panel.setComponentPopupMenu(popupMenu);
         Components.setInheritedPopupRecursively(panel);
     }
 
-    private void initPopup(Object target) {
+    private void initPopup(@NonNull Object target) {
         popupMenu.removeAll();
         fillPopup(target);
     }
 
-    protected JPanel buildToyPanel(AbstractToy toy) {
+    /**
+     * Builds the UI panel for the given toy.
+     *
+     * @param toy the toy to build
+     * @return the constructed panel
+     */
+    protected @NonNull JPanel buildToyPanel(@Nullable AbstractToy toy) {
         if (toy == null) {
             throw new IllegalArgumentException("Unable to build panel for null toy");
         }
@@ -81,7 +123,7 @@ abstract class AbstractWindowContext<T extends Component> implements Context {
         return panel;
     }
 
-    private void fillPopup(Object target) {
+    private void fillPopup(@Nullable Object target) {
         if (target instanceof Decorator<?>) {
             fillPopup(((Decorator<?>) target).getDecorated());
         }
@@ -90,21 +132,21 @@ abstract class AbstractWindowContext<T extends Component> implements Context {
             addPopupText(elapsedSinceHuman(i));
             ZoneId zone = ZoneId.systemDefault();
             addPopupText(DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm:ss").withZone(zone).format(i) + " @" + zone.getDisplayName(TextStyle.NARROW, Locale.ROOT));
-            addPopupElement(io.github.mjcro.toybox.api.Action.ofName("Copy instant unix", () -> getEnvironment().clipboardPut(String.valueOf(i.getEpochSecond()))));
-            addPopupElement(io.github.mjcro.toybox.api.Action.ofName("Copy instant RFC-1123", () -> getEnvironment().clipboardPut(DateTimeFormatter.RFC_1123_DATE_TIME.withZone(ZoneOffset.UTC).format(i))));
-            addPopupElement(io.github.mjcro.toybox.api.Action.ofName("Copy instant ISO", () -> getEnvironment().clipboardPut(DateTimeFormatter.ISO_INSTANT.format(i))));
+            addPopupElement(Action.ofName("Copy instant unix", () -> getEnvironment().clipboardPut(String.valueOf(i.getEpochSecond()))));
+            addPopupElement(Action.ofName("Copy instant RFC-1123", () -> getEnvironment().clipboardPut(DateTimeFormatter.RFC_1123_DATE_TIME.withZone(ZoneOffset.UTC).format(i))));
+            addPopupElement(Action.ofName("Copy instant ISO", () -> getEnvironment().clipboardPut(DateTimeFormatter.ISO_INSTANT.format(i))));
         }
         if (target instanceof JTextComponent) {
             JTextComponent x = (JTextComponent) target;
             String selected = x.getSelectedText();
             if (selected == null || selected.isBlank()) {
-                addPopupElement(io.github.mjcro.toybox.api.Action.ofName("Copy", () -> getEnvironment().clipboardPut(x.getText())));
+                addPopupElement(Action.ofName("Copy", () -> getEnvironment().clipboardPut(x.getText())));
             } else {
-                addPopupElement(io.github.mjcro.toybox.api.Action.ofName("Copy Selected", () -> getEnvironment().clipboardPut(selected)));
-                addPopupElement(io.github.mjcro.toybox.api.Action.ofName("Copy All", () -> getEnvironment().clipboardPut(x.getText())));
+                addPopupElement(Action.ofName("Copy Selected", () -> getEnvironment().clipboardPut(selected)));
+                addPopupElement(Action.ofName("Copy All", () -> getEnvironment().clipboardPut(x.getText())));
             }
             if (x.isEditable()) {
-                addPopupElement(io.github.mjcro.toybox.api.Action.ofName("Paste", () -> getEnvironment().clipboardGetString().ifPresent(x::replaceSelection)));
+                addPopupElement(Action.ofName("Paste", () -> getEnvironment().clipboardGetString().ifPresent(x::replaceSelection)));
             }
         }
         if (target instanceof JTable) {
@@ -136,11 +178,11 @@ abstract class AbstractWindowContext<T extends Component> implements Context {
         }
         if (target instanceof CharSequence) {
             CharSequence x = (CharSequence) target;
-            addPopupElement(io.github.mjcro.toybox.api.Action.ofName("Copy", () -> getEnvironment().clipboardPut(x)));
+            addPopupElement(Action.ofName("Copy", () -> getEnvironment().clipboardPut(x)));
             if (x.length() < 2048) {
                 String s = x.toString();
                 if (s.startsWith("http://") || s.startsWith("https://")) {
-                    addPopupElement(io.github.mjcro.toybox.api.Action.ofName("Open URL", () -> getEnvironment().openUrl(s)));
+                    addPopupElement(Action.ofName("Open URL", () -> getEnvironment().openUrl(s)));
                 }
             }
         }
@@ -148,20 +190,20 @@ abstract class AbstractWindowContext<T extends Component> implements Context {
             Object key = ((Map.Entry<?, ?>) target).getKey();
             Object value = ((Map.Entry<?, ?>) target).getValue();
             if (key instanceof CharSequence) {
-                addPopupElement(io.github.mjcro.toybox.api.Action.ofName("Copy key", () -> getEnvironment().clipboardPut(key.toString())));
+                addPopupElement(Action.ofName("Copy key", () -> getEnvironment().clipboardPut(key.toString())));
             }
             if (value instanceof CharSequence) {
-                addPopupElement(io.github.mjcro.toybox.api.Action.ofName("Copy value", () -> getEnvironment().clipboardPut(key.toString())));
+                addPopupElement(Action.ofName("Copy value", () -> getEnvironment().clipboardPut(key.toString())));
             }
         }
 
         if (target instanceof Class<?>) {
-            addPopupElement(io.github.mjcro.toybox.api.Action.ofName("Copy class name", () -> getEnvironment().clipboardPut(((Class<?>) target).getName())));
+            addPopupElement(Action.ofName("Copy class name", () -> getEnvironment().clipboardPut(((Class<?>) target).getName())));
         }
 
         if (target instanceof Exception) {
-            addPopupElement(io.github.mjcro.toybox.api.Action.ofName("Copy exception class name", () -> getEnvironment().clipboardPut(target.getClass().getName())));
-            addPopupElement(io.github.mjcro.toybox.api.Action.ofName("Copy exception message", () -> getEnvironment().clipboardPut(((Exception) target).getMessage())));
+            addPopupElement(Action.ofName("Copy exception class name", () -> getEnvironment().clipboardPut(target.getClass().getName())));
+            addPopupElement(Action.ofName("Copy exception message", () -> getEnvironment().clipboardPut(String.valueOf(((Exception) target).getMessage()))));
         }
 
         if (target instanceof Enum) {
@@ -173,11 +215,11 @@ abstract class AbstractWindowContext<T extends Component> implements Context {
             } else {
                 x = ((Enum<?>) target).name();
             }
-            addPopupElement(io.github.mjcro.toybox.api.Action.ofName("Copy", () -> getEnvironment().clipboardPut(x)));
+            addPopupElement(Action.ofName("Copy", () -> getEnvironment().clipboardPut(x)));
         }
         if (target instanceof Number) {
             Number x = (Number) target;
-            addPopupElement(io.github.mjcro.toybox.api.Action.ofName("Copy", () -> getEnvironment().clipboardPut(String.valueOf(x))));
+            addPopupElement(Action.ofName("Copy", () -> getEnvironment().clipboardPut(String.valueOf(x))));
         }
 
         if (target instanceof Component && Application.DEBUG_COMPONENTS) {
@@ -191,9 +233,12 @@ abstract class AbstractWindowContext<T extends Component> implements Context {
         }
 
         // Using hooks
+        if (target == null) {
+            return;
+        }
         for (Environment.PopupHook hook : getEnvironment().getPopupHooks()) {
             List<Labeled> items = hook.onPopup(this, target);
-            if (items != null && !items.isEmpty()) {
+            if (!items.isEmpty()) {
                 if (popupMenu.getComponents() != null && popupMenu.getComponents().length > 0) {
                     popupMenu.addSeparator();
                 }
@@ -208,21 +253,25 @@ abstract class AbstractWindowContext<T extends Component> implements Context {
         }
     }
 
-    private void addPopupElement(Action action) {
+    private void addPopupElement(@NonNull Action action) {
         JMenuItem item = new JMenuItem(action.getLabel().getName());
         item.addActionListener(e -> action.run());
         popupMenu.add(item);
     }
 
-    private void addPopupText(String s) {
+    private void addPopupText(@NonNull String s) {
         JMenuItem item = new JMenuItem(s);
         item.setEnabled(false);
         popupMenu.add(item);
     }
 
+    /**
+     * Popup menu listener that initializes the popup content based on the invoker.
+     */
     /* non-static */ class OnPopup implements PopupMenuListener {
+
         @Override
-        public void popupMenuWillBecomeVisible(PopupMenuEvent e) {
+        public void popupMenuWillBecomeVisible(@NonNull PopupMenuEvent e) {
             if (e.getSource() == popupMenu) {
                 Component invoker = popupMenu.getInvoker();
                 if (invoker != null) {
@@ -232,17 +281,15 @@ abstract class AbstractWindowContext<T extends Component> implements Context {
         }
 
         @Override
-        public void popupMenuWillBecomeInvisible(PopupMenuEvent e) {
-
+        public void popupMenuWillBecomeInvisible(@NonNull PopupMenuEvent e) {
         }
 
         @Override
-        public void popupMenuCanceled(PopupMenuEvent e) {
-
+        public void popupMenuCanceled(@NonNull PopupMenuEvent e) {
         }
     }
 
-    private static String elapsedSinceHuman(Instant instant) {
+    private static @NonNull String elapsedSinceHuman(@Nullable Instant instant) {
         if (instant == null || instant.getEpochSecond() == 0) {
             return "-";
         }

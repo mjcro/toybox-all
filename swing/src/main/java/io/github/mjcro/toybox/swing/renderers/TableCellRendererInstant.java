@@ -1,18 +1,31 @@
 package io.github.mjcro.toybox.swing.renderers;
 
 import io.github.mjcro.toybox.swing.hint.Hints;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JTable;
+import javax.swing.SwingConstants;
+import javax.swing.UIManager;
+import java.awt.Component;
 import java.time.Instant;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalAccessor;
 
+/**
+ * Table cell renderer that formats {@link Instant} values using a fixed UTC date-time pattern.
+ */
 public class TableCellRendererInstant extends AbstractTableCellRendererLabel {
-    public static final DateTimeFormatter INSTANT_CELL_VALUE_FMT = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")
+    /**
+     * Date-time formatter used for rendering instant values in table cells.
+     */
+    public static final @NonNull DateTimeFormatter INSTANT_CELL_VALUE_FMT = DateTimeFormatter.ofPattern("dd.MM.yyyy HH:mm")
             .withZone(ZoneOffset.UTC);
 
+    /**
+     * Creates a new instant cell renderer with centered, smaller-font styling.
+     */
     public TableCellRendererInstant() {
         super();
         normalFg = UIManager.getColor("TextField.inactiveForeground");
@@ -23,9 +36,9 @@ public class TableCellRendererInstant extends AbstractTableCellRendererLabel {
     }
 
     @Override
-    public Component getTableCellRendererComponent(
-            JTable table,
-            Object value,
+    public @NonNull Component getTableCellRendererComponent(
+            @NonNull JTable table,
+            @Nullable Object value,
             boolean isSelected,
             boolean hasFocus,
             int row,

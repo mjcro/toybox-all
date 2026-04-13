@@ -1,13 +1,26 @@
 package io.github.mjcro.toybox.swing.widgets;
 
-import javax.swing.*;
-import java.awt.*;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
+import javax.swing.JFrame;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import java.awt.BorderLayout;
+
+/**
+ * Panel that displays detailed exception information in a scrollable tree view.
+ */
 public class ExceptionDetailsJPanel extends JPanel {
-    private final ExceptionDetailsJTree view;
+    private final @NonNull ExceptionDetailsJTree view;
 
-    public static void newWindow(Throwable e) {
-        JFrame frame = new JFrame();
+    /**
+     * Opens a new window displaying the exception details.
+     *
+     * @param e the exception to display
+     */
+    public static void newWindow(@NonNull Throwable e) {
+        final JFrame frame = new JFrame();
         frame.setTitle("Exception details: " + e.getMessage());
         frame.getContentPane().add(new ExceptionDetailsJPanel(e));
         frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
@@ -17,17 +30,30 @@ public class ExceptionDetailsJPanel extends JPanel {
         frame.setVisible(true);
     }
 
-    public ExceptionDetailsJPanel(Throwable e) {
+    /**
+     * Creates a panel showing details for the given exception.
+     *
+     * @param e the exception to display, or {@code null} for an empty view
+     */
+    public ExceptionDetailsJPanel(@Nullable Throwable e) {
         super(new BorderLayout());
         view = new ExceptionDetailsJTree(e);
         add(new JScrollPane(view));
     }
 
+    /**
+     * Creates an empty exception details panel.
+     */
     public ExceptionDetailsJPanel() {
         this(null);
     }
 
-    public void setException(Throwable e) {
+    /**
+     * Replaces the displayed exception.
+     *
+     * @param e the exception to display, or {@code null} to clear
+     */
+    public void setException(@Nullable Throwable e) {
         view.setException(e);
     }
 }

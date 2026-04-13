@@ -1,5 +1,7 @@
 package io.github.mjcro.toybox.api;
 
+import org.jspecify.annotations.NonNull;
+
 /**
  * Defines abstract action.
  * <p>
@@ -14,7 +16,7 @@ public interface Action extends Runnable, Labeled {
      * @param action Action runnable.
      * @return Action.
      */
-    static Action of(Label label, Runnable action) {
+    static @NonNull Action of(@NonNull Label label, @NonNull Runnable action) {
         return new ActionImpl(label, action);
     }
 
@@ -26,7 +28,7 @@ public interface Action extends Runnable, Labeled {
      * @param action Action runnable.
      * @return Action.
      */
-    static Action ofName(String name, Runnable action) {
+    static @NonNull Action ofName(@NonNull String name, @NonNull Runnable action) {
         return of(Label.ofName(name), action);
     }
 
@@ -38,7 +40,7 @@ public interface Action extends Runnable, Labeled {
      * @param action Action runnable.
      * @return Action.
      */
-    static Action ofNameAndStyle(String name, String style, Runnable action) {
+    static @NonNull Action ofNameAndStyle(@NonNull String name, @NonNull String style, @NonNull Runnable action) {
         return of(Label.ofNameStyle(name, style), action);
     }
 }

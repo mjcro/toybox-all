@@ -11,9 +11,17 @@ import io.github.mjcro.toybox.swing.prefab.ToyBoxLaF;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxLabels;
 import io.github.mjcro.toybox.toys.LogsToy;
 import io.github.mjcro.toybox.toys.SettingsToy;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JSeparator;
+import javax.swing.SwingUtilities;
+import java.awt.BorderLayout;
+import java.awt.Cursor;
+import java.awt.GridLayout;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.File;
@@ -23,16 +31,27 @@ import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 import java.util.function.BiConsumer;
 
+/**
+ * Status bar panel displayed at the bottom of the main window, showing
+ * information messages, timing, memory usage, thread count, and settings file status.
+ */
 public class StatusBarWidget extends JPanel {
-    private final JLabel informationLabel = ToyBoxLabels.create("Welcome");
-    private final JLabel lastElapsedLabel = ToyBoxLabels.create("", Hints.CENTER);
-    private final JLabel memoryUsageLabel = ToyBoxLabels.create("0M", Hints.CENTER);
-    private final JLabel threadsCountLabel = ToyBoxLabels.create("1", Hints.CENTER);
-    private final JLabel settingsFileLabel = ToyBoxLabels.create("memory", Hints.CENTER);
+    private final @NonNull JLabel informationLabel = ToyBoxLabels.create("Welcome");
+    private final @NonNull JLabel lastElapsedLabel = ToyBoxLabels.create("", Hints.CENTER);
+    private final @NonNull JLabel memoryUsageLabel = ToyBoxLabels.create("0M", Hints.CENTER);
+    private final @NonNull JLabel threadsCountLabel = ToyBoxLabels.create("1", Hints.CENTER);
+    private final @NonNull JLabel settingsFileLabel = ToyBoxLabels.create("memory", Hints.CENTER);
 
-    public static StatusBarWidget interactive(
-            BiConsumer<Class<? extends Toy>, Object> toyRunner,
-            ScheduledExecutorService scheduler
+    /**
+     * Creates an interactive status bar that auto-updates from logging events and a scheduler.
+     *
+     * @param toyRunner a consumer that opens a toy by class and optional initial data
+     * @param scheduler the scheduler for periodic metric updates
+     * @return a configured and self-updating status bar widget
+     */
+    public static @NonNull StatusBarWidget interactive(
+            @NonNull BiConsumer<@NonNull Class<? extends @NonNull Toy>, @Nullable Object> toyRunner,
+            @NonNull ScheduledExecutorService scheduler
     ) {
         StatusBarWidget w = new StatusBarWidget(toyRunner);
         CustomLoggingAppender cla = new CustomLoggingAppender();
@@ -59,7 +78,12 @@ public class StatusBarWidget extends JPanel {
         return w;
     }
 
-    public StatusBarWidget(BiConsumer<Class<? extends Toy>, Object> toyRunner) {
+    /**
+     * Constructs the status bar widget with clickable labels that open toys.
+     *
+     * @param toyRunner a consumer that opens a toy by class and optional initial data
+     */
+    public StatusBarWidget(@NonNull BiConsumer<@NonNull Class<? extends @NonNull Toy>, @Nullable Object> toyRunner) {
         super(new BorderLayout());
         Hints.PADDING_NANO.apply(this);
         Hints.PADDING_NORMAL.apply(informationLabel);
@@ -101,7 +125,13 @@ public class StatusBarWidget extends JPanel {
         BorderLayoutMaster.addCenterRight(this, informationLabel, rightSide);
     }
 
-    private static JPanel wrapBevel(JComponent label) {
+    /**
+     * Wraps a component in a beveled panel for visual separation.
+     *
+     * @param label the component to wrap
+     * @return a panel containing the wrapped component
+     */
+    private static @NonNull JPanel wrapBevel(@NonNull JComponent label) {
         JPanel outer = new JPanel(new BorderLayout());
         Hints.PADDING_NANO.apply(outer);
 
@@ -114,7 +144,12 @@ public class StatusBarWidget extends JPanel {
         return outer;
     }
 
-    public void setSettingsFile(File file) {
+    /**
+     * Updates the settings file indicator label.
+     *
+     * @param file the current settings file, or null if using in-memory storage
+     */
+    public void setSettingsFile(@Nullable File file) {
         if (file == null) {
             ToyBoxIcons.get("lightbulb_off").ifPresent(settingsFileLabel::setIcon);
             settingsFileLabel.setText("mem");
@@ -124,23 +159,48 @@ public class StatusBarWidget extends JPanel {
         }
     }
 
-    public void setLastElapsed(Duration duration) {
+    /**
+     * Updates the last elapsed duration display.
+     *
+     * @param duration the duration to display
+     */
+    public void setLastElapsed(@NonNull Duration duration) {
         lastElapsedLabel.setText(TextFormat.duration(duration));
     }
 
-    public void setInformation(String text) {
+    /**
+     * Updates the information label text.
+     *
+     * @param text the text to display
+     */
+    public void setInformation(@Nullable String text) {
         informationLabel.setText(text);
     }
 
+    /**
+     * Updates the memory usage display.
+     *
+     * @param total total memory in bytes
+     */
     public void setMemoryUsage(long total) {
         memoryUsageLabel.setText(TextFormat.bytes(total));
     }
 
+    /**
+     * Updates the thread count display.
+     *
+     * @param count current thread count
+     */
     public void setThreadCount(int count) {
         threadsCountLabel.setText(" " + count + " ");
     }
 
-    public static void main(String[] args) {
+    /**
+     * Main method for standalone visual testing of the status bar widget.
+     *
+     * @param args command-line arguments (unused)
+     */
+    public static void main(@NonNull String[] args) {
         ScheduledExecutorService service = Executors.newScheduledThreadPool(5, r -> {
             Thread t = new Thread(r);
             t.setDaemon(true);

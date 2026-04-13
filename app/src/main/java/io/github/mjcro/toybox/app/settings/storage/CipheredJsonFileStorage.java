@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.jsontype.BasicPolymorphicTypeValidator;
 import com.google.common.hash.Hashing;
 import io.github.mjcro.toybox.api.Setting;
+import org.jspecify.annotations.NonNull;
 
 import javax.crypto.Cipher;
 import javax.crypto.CipherInputStream;
@@ -21,12 +22,24 @@ import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Objects;
 
+/**
+ * File-based settings storage that encrypts data using a cipher.
+ * Settings are serialized as JSON with Jackson polymorphic typing,
+ * then encrypted with the configured cipher algorithm.
+ */
 public class CipheredJsonFileStorage extends AbstractFileSettingsStorage {
-    private final CipherInitializer cipherInitializer;
+    private final @NonNull CipherInitializer cipherInitializer;
     private final int ivLen;
-    private final ObjectMapper mapper;
+    private final @NonNull ObjectMapper mapper;
 
-    public static CipheredJsonFileStorage Aes256Gcm(File file, String password) {
+    /**
+     * Creates a storage instance using AES-256-GCM encryption with a password-derived key.
+     *
+     * @param file     the file to store encrypted settings in
+     * @param password the password used to derive the encryption key
+     * @return a new AES-256-GCM backed storage
+     */
+    public static @NonNull CipheredJsonFileStorage Aes256Gcm(@NonNull File file, @NonNull String password) {
         SecretKeySpec keySpec = deriveKey(password, 256);
         CipherInitializer cipherInitializer = (mode, iv) -> {
             GCMParameterSpec gcmSpec = new GCMParameterSpec(96, iv);
@@ -37,13 +50,27 @@ public class CipheredJsonFileStorage extends AbstractFileSettingsStorage {
         return new CipheredJsonFileStorage(file, 12, cipherInitializer);
     }
 
-    private static SecretKeySpec deriveKey(String password, int bits) {
+    /**
+     * Derives an AES key from the given password using SHA-256 hashing.
+     *
+     * @param password the password string
+     * @param bits     the key size in bits
+     * @return the derived secret key specification
+     */
+    private static @NonNull SecretKeySpec deriveKey(@NonNull String password, int bits) {
         byte[] untruncated = Hashing.sha256().hashString(password, StandardCharsets.UTF_8).asBytes();
         byte[] truncated = Arrays.copyOf(untruncated, bits / 8);
         return new SecretKeySpec(truncated, "AES");
     }
 
-    public CipheredJsonFileStorage(File file, int ivLen, CipherInitializer cipherInitializer) {
+    /**
+     * Constructs a ciphered JSON file storage.
+     *
+     * @param file              the file to store settings in
+     * @param ivLen             the initialization vector length in bytes
+     * @param cipherInitializer the cipher initializer for encryption and decryption
+     */
+    public CipheredJsonFileStorage(@NonNull File file, int ivLen, @NonNull CipherInitializer cipherInitializer) {
         super(file);
         this.cipherInitializer = Objects.requireNonNull(cipherInitializer, "cipherInitializer");
         this.ivLen = ivLen;
@@ -59,7 +86,7 @@ public class CipheredJsonFileStorage extends AbstractFileSettingsStorage {
     }
 
     @Override
-    protected Setting[] readFile() {
+    protected @NonNull Setting[] readFile() {
         if (!file.exists()) {
             return new Setting[0];
         }
@@ -79,7 +106,7 @@ public class CipheredJsonFileStorage extends AbstractFileSettingsStorage {
     }
 
     @Override
-    protected void writeFile(Setting[] settings) {
+    protected void writeFile(@NonNull Setting[] settings) {
         try (FileOutputStream fos = new FileOutputStream(file)) {
             // Generating and saving IV
             byte[] iv = new byte[ivLen];

@@ -10,8 +10,11 @@ import io.github.mjcro.toybox.swing.layouts.RowsLayout;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxButtons;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxPanels;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxTreeCellRenderers;
+import org.jspecify.annotations.NonNull;
 
-import javax.swing.*;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeCellRenderer;
 import javax.swing.tree.DefaultTreeModel;
@@ -20,23 +23,32 @@ import java.util.AbstractMap;
 import java.util.List;
 import java.util.Map;
 
+/**
+ * Toy that showcases available UI components such as buttons and tree renderers.
+ */
 public class ShowRoomComponentsToy implements Toy {
     @Override
-    public List<Menu> getPath() {
+    public @NonNull List<@NonNull Menu> getPath() {
         return List.of(Menu.TOYBOX_MENU, Menu.TOYBOX_DEVELOPMENT_MENU);
     }
 
     @Override
-    public Label getLabel() {
+    public @NonNull Label getLabel() {
         return Label.ofIconAndName("fam://color_swatch", "Components showroom");
     }
 
     @Override
-    public JPanel build(Context context) {
+    public @NonNull JPanel build(@NonNull Context context) {
         return new Panel();
     }
 
+    /**
+     * Panel displaying the component showcase.
+     */
     private static class Panel extends JPanel {
+        /**
+         * Constructs the showcase panel with buttons and tree examples.
+         */
         public Panel() {
             setLayout(new RowsLayout());
 
@@ -45,7 +57,12 @@ public class ShowRoomComponentsToy implements Toy {
             add(buildJTreePanel());
         }
 
-        private JPanel buildButtonsPanel() {
+        /**
+         * Builds the buttons showcase panel.
+         *
+         * @return a panel containing button examples
+         */
+        private @NonNull JPanel buildButtonsPanel() {
             return ToyBoxPanels.titledBordered("Buttons", ToyBoxPanels.horizontalGrid(
                     8,
                     ToyBoxButtons.create("Common"),
@@ -60,7 +77,12 @@ public class ShowRoomComponentsToy implements Toy {
             ));
         }
 
-        private JPanel buildJTreePanel() {
+        /**
+         * Builds the JTree showcase panel with custom cell renderers.
+         *
+         * @return a panel containing a tree example
+         */
+        private @NonNull JPanel buildJTreePanel() {
             JTree tree = new JTree();
             tree.setCellRenderer(ToyBoxTreeCellRenderers.typeSelector(Map.ofEntries(
                     new AbstractMap.SimpleEntry<>(TreeNodeType.NORMAL, new DefaultTreeCellRenderer()),
@@ -77,19 +99,40 @@ public class ShowRoomComponentsToy implements Toy {
             return ToyBoxPanels.titledBordered("JTree", pane);
         }
 
-        private void nothing(ActionEvent e) {
+        /**
+         * No-op action handler for demo buttons.
+         *
+         * @param e the action event
+         */
+        private void nothing(@NonNull ActionEvent e) {
         }
     }
 
+    /**
+     * Enumeration of tree node types used in the showcase to demonstrate
+     * custom cell renderers.
+     */
     private enum TreeNodeType {
         NORMAL,
         ICON;
 
-        TypedDecorator<TreeNodeType, String> v(String value) {
+        /**
+         * Wraps a string value in a typed decorator with this node type.
+         *
+         * @param value the display value
+         * @return a typed decorator
+         */
+        @NonNull TypedDecorator<@NonNull TreeNodeType, @NonNull String> v(@NonNull String value) {
             return new TypedDecorator<>(this, value);
         }
 
-        DefaultMutableTreeNode n(String value) {
+        /**
+         * Creates a tree node with this type and the given display value.
+         *
+         * @param value the display value
+         * @return a new mutable tree node
+         */
+        @NonNull DefaultMutableTreeNode n(@NonNull String value) {
             return new DefaultMutableTreeNode(v(value));
         }
     }

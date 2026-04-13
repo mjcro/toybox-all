@@ -7,19 +7,26 @@ import io.github.mjcro.toybox.swing.prefab.ToyBoxIcons;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxLaF;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxLabels;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxTreeCellRenderers;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.w3c.dom.Document;
 import org.w3c.dom.NamedNodeMap;
 import org.w3c.dom.Node;
 import org.w3c.dom.NodeList;
 import org.xml.sax.SAXException;
 
-import javax.swing.*;
+import javax.swing.Icon;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
-import java.awt.*;
+import java.awt.Component;
+import java.awt.FlowLayout;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -27,97 +34,147 @@ import java.util.AbstractMap;
 import java.util.EnumMap;
 import java.util.Map;
 
+/**
+ * A {@link JTree} that renders an XML {@link Document} as a navigable tree
+ * with distinct icons for elements, attributes, ID attributes, and namespace attributes.
+ */
 public class XmlJTree extends JTree {
+    /**
+     * Creates a new empty XML tree.
+     */
     public XmlJTree() {
         super(new DefaultTreeModel(null));
         setRootVisible(true);
         setCellRenderer(new Renderer());
     }
 
-    public XmlJTree(Document data) {
+    /**
+     * Creates a new XML tree displaying the given DOM document.
+     *
+     * @param data the XML document to display
+     */
+    public XmlJTree(@NonNull Document data) {
         this();
         setData(data);
     }
 
-    public XmlJTree(String data) throws ParserConfigurationException, IOException, SAXException {
+    /**
+     * Creates a new XML tree by parsing the given XML string.
+     *
+     * @param data the XML string to parse and display
+     * @throws ParserConfigurationException if the parser cannot be configured
+     * @throws IOException                  if an I/O error occurs during parsing
+     * @throws SAXException                 if the XML is malformed
+     */
+    public XmlJTree(@NonNull String data) throws ParserConfigurationException, IOException, SAXException {
         this();
         setData(data);
     }
 
-    public void setData(Document data) {
-        DefaultMutableTreeNode root = new DefaultMutableTreeNode("Document");
+    /**
+     * Replaces the tree content with the given DOM document.
+     *
+     * @param data the XML document to display
+     */
+    public void setData(@NonNull Document data) {
+        final DefaultMutableTreeNode root = new DefaultMutableTreeNode("Document");
         setDataRecursively(root, data);
         setModel(new DefaultTreeModel(root));
     }
 
-    public void setData(String data) throws ParserConfigurationException, IOException, SAXException {
-        DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
+    /**
+     * Parses the given XML string and replaces the tree content.
+     *
+     * @param data the XML string to parse and display
+     * @throws ParserConfigurationException if the parser cannot be configured
+     * @throws IOException                  if an I/O error occurs during parsing
+     * @throws SAXException                 if the XML is malformed
+     */
+    public void setData(@NonNull String data) throws ParserConfigurationException, IOException, SAXException {
+        final DocumentBuilder db = DocumentBuilderFactory.newInstance().newDocumentBuilder();
         setData(db.parse(new ByteArrayInputStream(data.getBytes(StandardCharsets.UTF_8))));
     }
 
+    /**
+     * Expands all rows in the tree.
+     */
     public void openAll() {
         for (int i = 0; i < getRowCount(); i++) {
             expandRow(i);
         }
     }
 
-    private void setDataRecursively(DefaultMutableTreeNode parent, Node data) {
-        short nodeType = data.getNodeType();
-        String nodeName = data.getNodeName();
+    /**
+     * Recursively converts DOM nodes into tree nodes.
+     *
+     * @param parent the parent tree node to add children to
+     * @param data   the DOM node to convert
+     */
+    private void setDataRecursively(@NonNull DefaultMutableTreeNode parent, @NonNull Node data) {
+        final short nodeType = data.getNodeType();
+        final String nodeName = data.getNodeName();
 
         if (nodeType == Node.COMMENT_NODE) {
             return;
         }
 
         if (nodeType == Node.ELEMENT_NODE) {
-            DefaultMutableTreeNode x = new DefaultMutableTreeNode(new TypedDecorator<>(Type.ELEMENT, nodeName));
+            final DefaultMutableTreeNode x = new DefaultMutableTreeNode(new TypedDecorator<>(Type.ELEMENT, nodeName));
             parent.add(x);
             parent = x;
         }
         if (nodeType == Node.TEXT_NODE) {
-            String s = data.getTextContent();
+            final String s = data.getTextContent();
             if (s != null && !s.isBlank()) {
-                DefaultMutableTreeNode x = new DefaultMutableTreeNode(s.strip());
+                final DefaultMutableTreeNode x = new DefaultMutableTreeNode(s.strip());
                 parent.add(x);
             }
             return;
         }
 
-        NamedNodeMap attributes = data.getAttributes();
+        final NamedNodeMap attributes = data.getAttributes();
         if (attributes != null && attributes.getLength() > 0) {
             for (int i = 0; i < attributes.getLength(); i++) {
-                Node item = attributes.item(i);
-                String name = item.getNodeName();
+                final Node item = attributes.item(i);
+                final String name = item.getNodeName();
 
-                Map.Entry<String, String> entry = new AbstractMap.SimpleEntry<>(name, item.getTextContent());
+                final Map.Entry<@NonNull String, @NonNull String> entry = new AbstractMap.SimpleEntry<>(name, item.getTextContent());
 
                 if ("id".equalsIgnoreCase(name)) {
-                    DefaultMutableTreeNode x = new DefaultMutableTreeNode(new TypedDecorator<>(Type.ATTR_ID, entry));
+                    final DefaultMutableTreeNode x = new DefaultMutableTreeNode(new TypedDecorator<>(Type.ATTR_ID, entry));
                     parent.add(x);
                 } else if (name.startsWith("xmlns")) {
-                    DefaultMutableTreeNode x = new DefaultMutableTreeNode(new TypedDecorator<>(Type.ATTR_NS, entry));
+                    final DefaultMutableTreeNode x = new DefaultMutableTreeNode(new TypedDecorator<>(Type.ATTR_NS, entry));
                     parent.add(x);
                 } else {
-                    DefaultMutableTreeNode x = new DefaultMutableTreeNode(new TypedDecorator<>(Type.ATTR, entry));
+                    final DefaultMutableTreeNode x = new DefaultMutableTreeNode(new TypedDecorator<>(Type.ATTR, entry));
                     parent.add(x);
                 }
             }
         }
 
-        NodeList childNodes = data.getChildNodes();
+        final NodeList childNodes = data.getChildNodes();
         if (childNodes != null && childNodes.getLength() > 0) {
             for (int i = 0; i < childNodes.getLength(); i++) {
-                Node item = childNodes.item(i);
+                final Node item = childNodes.item(i);
                 setDataRecursively(parent, item);
             }
         }
     }
 
+    /** Enum distinguishing XML node categories for rendering. */
     public enum Type {
         ELEMENT, ATTR, ATTR_ID, ATTR_NS;
     }
 
+    /**
+     * Default tree cell renderer for {@link XmlJTree} that unwraps
+     * {@link DefaultMutableTreeNode} user objects before delegating.
+     */
     public static class Renderer extends TypedDecoratorCustomTreeCellRenderer<Type> {
+        /**
+         * Creates a new renderer with icon mappings for each XML node type.
+         */
         public Renderer() {
             super(new EnumMap<>(Map.of(
                     Type.ELEMENT,
@@ -132,9 +189,9 @@ public class XmlJTree extends JTree {
         }
 
         @Override
-        public Component getTreeCellRendererComponent(
-                JTree tree,
-                Object value,
+        public @NonNull Component getTreeCellRendererComponent(
+                @NonNull JTree tree,
+                @Nullable Object value,
                 boolean selected,
                 boolean expanded,
                 boolean leaf,
@@ -148,12 +205,20 @@ public class XmlJTree extends JTree {
         }
     }
 
+    /**
+     * Renders key-value attribute pairs as two side-by-side labels.
+     */
     private static class KeyValueRenderer extends CustomTreeCellRenderer {
-        private final JPanel panel;
-        private final JLabel key;
-        private final JLabel value;
+        private final @NonNull JPanel panel;
+        private final @NonNull JLabel key;
+        private final @NonNull JLabel value;
 
-        private KeyValueRenderer(Icon icon) {
+        /**
+         * Creates a new key-value renderer with the given icon.
+         *
+         * @param icon the icon to display beside the key label, or {@code null} for no icon
+         */
+        private KeyValueRenderer(@Nullable Icon icon) {
             this.panel = new JPanel(new FlowLayout(FlowLayout.LEFT, 10, 0));
             this.key = ToyBoxLabels.create();
             this.value = ToyBoxLabels.create();
@@ -165,9 +230,9 @@ public class XmlJTree extends JTree {
         }
 
         @Override
-        public Component getTreeCellRendererComponent(
-                JTree tree,
-                Object value,
+        public @NonNull Component getTreeCellRendererComponent(
+                @NonNull JTree tree,
+                @Nullable Object value,
                 boolean sel,
                 boolean expanded,
                 boolean leaf,
@@ -175,7 +240,7 @@ public class XmlJTree extends JTree {
                 boolean hasFocus
         ) {
             if (value instanceof Map.Entry<?, ?>) {
-                Map.Entry<?, ?> entry = (Map.Entry<?, ?>) value;
+                final Map.Entry<?, ?> entry = (Map.Entry<?, ?>) value;
                 this.key.setText(entry.getKey() == null ? null : entry.getKey().toString() + ":");
                 this.value.setText(entry.getValue() == null ? null : entry.getValue().toString());
 
@@ -188,10 +253,16 @@ public class XmlJTree extends JTree {
         }
     }
 
-    public static void main(String[] args) throws Exception {
+    /**
+     * Demo entry point for testing the XML tree component.
+     *
+     * @param args command-line arguments (unused)
+     * @throws Exception if XML parsing fails
+     */
+    public static void main(@NonNull String[] args) throws Exception {
         ToyBoxLaF.initialize(false);
 
-        var xml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
+        final var xml = "<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"no\"?>\n" +
                 "<EDoc></EDoc>";
 
         Components.show(new JScrollPane(new XmlJTree(xml)));

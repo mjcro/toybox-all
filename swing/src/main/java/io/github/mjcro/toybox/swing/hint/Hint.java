@@ -1,41 +1,43 @@
 package io.github.mjcro.toybox.swing.hint;
 
-import javax.swing.*;
+import org.jspecify.annotations.NonNull;
+
+import javax.swing.JComponent;
 
 /**
- * Defines Java Swing JComponent hint - something that can be used
- * to decorate, assign listeners or change state of {@link JComponent}.
+ * Defines a Java Swing {@link JComponent} hint -- something that can be used
+ * to decorate, assign listeners, or change the state of a component.
  *
- * @param <T>
+ * @param <T> the type of component this hint applies to
  */
 @FunctionalInterface
 public interface Hint<T extends JComponent> {
     /**
-     * Applies all given hints to component.
+     * Applies all given hints to the component.
      *
-     * @param component Component to apply hints on.
-     * @param hints     Hints to apply.
-     * @param <T>       Component type.
+     * @param component component to apply hints on
+     * @param hints     hints to apply
+     * @param <T>       component type
      */
     @SafeVarargs
-    static <T extends JComponent> void applyAll(T component, Hint<? super T>... hints) {
-        for (Hint<? super T> style : hints) {
+    static <T extends JComponent> void applyAll(@NonNull T component, @NonNull Hint<? super T> @NonNull ... hints) {
+        for (final Hint<? super T> style : hints) {
             style.apply(component);
         }
     }
 
     /**
-     * Combines multiple hints into single one.
+     * Combines multiple hints into a single one.
      *
-     * @param hints Hints to combine.
-     * @param <T>   Component type.
-     * @return Hint.
+     * @param hints hints to combine
+     * @param <T>   component type
+     * @return combined hint
      */
     @SafeVarargs
-    static <T extends JComponent> Hint<T> combine(Hint<? super T>... hints) {
+    static <T extends JComponent> @NonNull Hint<@NonNull T> combine(@NonNull Hint<? super T> @NonNull ... hints) {
         return c -> {
             if (hints != null) {
-                for (Hint<? super T> s : hints) {
+                for (final Hint<? super T> s : hints) {
                     s.apply(c);
                 }
             }
@@ -43,19 +45,19 @@ public interface Hint<T extends JComponent> {
     }
 
     /**
-     * Applies hint on given component.
+     * Applies this hint to the given component.
      *
-     * @param component Component to apply hint on.
+     * @param component component to apply the hint on
      */
-    void apply(T component);
+    void apply(@NonNull T component);
 
     /**
-     * Applies hint on given component and returns it.
+     * Applies this hint to the given component and returns it.
      *
-     * @param component Component to apply hint on.
-     * @return Component.
+     * @param component component to apply the hint on
+     * @return the same component
      */
-    default T wrap(T component) {
+    default @NonNull T wrap(@NonNull T component) {
         apply(component);
         return component;
     }

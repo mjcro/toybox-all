@@ -2,13 +2,16 @@ package io.github.mjcro.toybox.swing;
 
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.binary.Hex;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import javax.swing.text.JTextComponent;
 import java.nio.charset.StandardCharsets;
 import java.util.Base64;
 
 /**
- * Defines bytes representation.
+ * Defines bytes representation formats and provides conversion
+ * between byte arrays and their string representations.
  */
 public enum BytesRepresentation {
     PLAINTEXT,
@@ -16,22 +19,22 @@ public enum BytesRepresentation {
     BASE64;
 
     /**
-     * Reads byte data from given text component using byte representation.
+     * Reads byte data from the given text component using this representation.
      *
-     * @param c Source text component.
-     * @return Byte representation of component text.
+     * @param c source text component
+     * @return byte representation of the component text
      */
-    public byte[] asBytes(JTextComponent c) {
+    public byte @NonNull [] asBytes(@NonNull JTextComponent c) {
         return asBytes(c.getText());
     }
 
     /**
-     * Returns bytes from given char sequence using byte representation.
+     * Returns bytes from the given char sequence using this representation.
      *
-     * @param cs Source char sequence.
-     * @return Byte representation of char sequence.
+     * @param cs source char sequence, may be {@code null}
+     * @return byte representation of the char sequence
      */
-    public byte[] asBytes(CharSequence cs) {
+    public byte @NonNull [] asBytes(@Nullable CharSequence cs) {
         if (cs == null || cs.length() == 0) {
             return new byte[0];
         }
@@ -53,12 +56,12 @@ public enum BytesRepresentation {
     }
 
     /**
-     * Constructs string from given bytes using byte representation.
+     * Constructs a string from the given bytes using this representation.
      *
-     * @param bytes Source bytes.
-     * @return Output string.
+     * @param bytes source bytes, may be {@code null}
+     * @return output string
      */
-    public String fromBytes(byte[] bytes) {
+    public @NonNull String fromBytes(byte @Nullable [] bytes) {
         if (bytes == null || bytes.length == 0) {
             return "";
         }
@@ -76,7 +79,7 @@ public enum BytesRepresentation {
     }
 
     @Override
-    public String toString() {
+    public @NonNull String toString() {
         switch (this) {
             case PLAINTEXT:
                 return "Plain text";

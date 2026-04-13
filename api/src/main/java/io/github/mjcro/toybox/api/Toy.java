@@ -1,39 +1,49 @@
 package io.github.mjcro.toybox.api;
 
-import javax.swing.*;
+import org.jspecify.annotations.NonNull;
+
+import javax.swing.JPanel;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Represents a pluggable feature panel in the ToyBox application.
+ *
+ * <p>Each toy provides a menu path for navigation, an optional version,
+ * and a factory method to build its Swing UI panel.</p>
+ */
 public interface Toy extends AbstractToy {
     /**
-     * Returns path how this toy can be located.
+     * Returns the navigation path used to locate this toy in the menu tree.
      *
-     * @return Path.
+     * @return ordered list of menu entries forming the path, never {@code null}
      */
-    List<Menu> getPath();
+    @NonNull List<@NonNull Menu> getPath();
 
     /**
-     * Sets whenever toy is considered persistent and should
-     * be cached after first instantiation.
+     * Indicates whether this toy is persistent and should be cached
+     * after its first instantiation.
      *
-     * @return True if toy is persistent.
+     * @return {@code true} if the toy panel should be reused across activations
      */
     default boolean isPersistent() {
         return false;
     }
 
     /**
-     * @return Toy version.
+     * Returns the version of this toy, if available.
+     *
+     * @return an {@link Optional} containing the version string, or empty
      */
-    default Optional<String> getVersion() {
+    default @NonNull Optional<@NonNull String> getVersion() {
         return Optional.empty();
     }
 
     /**
-     * Builds Java Swing panel.
+     * Builds and returns the Swing panel for this toy.
      *
-     * @param context ToyBox context.
-     * @return JPanel to render.
+     * @param context the current ToyBox context
+     * @return the constructed panel, never {@code null}
      */
-    JPanel build(Context context);
+    @NonNull JPanel build(@NonNull Context context);
 }

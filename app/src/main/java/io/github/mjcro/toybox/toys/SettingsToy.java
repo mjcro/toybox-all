@@ -11,44 +11,62 @@ import io.github.mjcro.toybox.swing.prefab.ToyBoxButtons;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxPanels;
 import io.github.mjcro.toybox.swing.widgets.FileChooserInput;
 import io.github.mjcro.toybox.swing.widgets.MultiViewTableOrExceptionPanel;
+import org.jspecify.annotations.NonNull;
 
-import javax.swing.*;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JPasswordField;
 import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
+/**
+ * Toy for viewing and managing application settings, including binding
+ * or creating encrypted settings files.
+ */
 public class SettingsToy implements Toy {
     @Override
-    public List<Menu> getPath() {
+    public @NonNull List<@NonNull Menu> getPath() {
         return List.of(Menu.TOYBOX_MENU);
     }
 
     @Override
-    public Label getLabel() {
+    public @NonNull Label getLabel() {
         return Label.ofIconAndName("fam://cog", "Settings");
     }
 
     @Override
-    public JPanel build(Context context) {
+    public @NonNull JPanel build(@NonNull Context context) {
         return new Panel(context);
     }
 
+    /**
+     * Inner panel providing the settings management UI with file binding,
+     * creation, and a table view of current settings.
+     */
     private static class Panel extends JPanel {
-        private final Context context;
-        private final MultiViewTableOrExceptionPanel multiView = new MultiViewTableOrExceptionPanel();
-        private final JButton
+        private final @NonNull Context context;
+        private final @NonNull MultiViewTableOrExceptionPanel multiView = new MultiViewTableOrExceptionPanel();
+        private final @NonNull JButton
                 buttonLoad = ToyBoxButtons.createPrimary("Load settings", this::onLoadClick),
                 buttonCreate = ToyBoxButtons.createPrimary("Create settings", this::onCreateClick),
                 buttonRefresh = ToyBoxButtons.create("Refresh", this::onRefreshClick);
-        private final JPasswordField secretField = new JPasswordField();
-        private final FileChooserInput fileChooserInput;
+        private final @NonNull JPasswordField secretField = new JPasswordField();
+        private final @NonNull FileChooserInput fileChooserInput;
 
-        Panel(Context context) {
+        /**
+         * Constructs the settings panel.
+         *
+         * @param context the current application context
+         */
+        Panel(@NonNull Context context) {
             super(new BorderLayout());
             this.context = context;
             this.fileChooserInput = new FileChooserInput(
@@ -68,7 +86,12 @@ public class SettingsToy implements Toy {
             refresh();
         }
 
-        private JPanel buildHeader() {
+        /**
+         * Builds the header panel containing file selection, password input, and action buttons.
+         *
+         * @return the header panel
+         */
+        private @NonNull JPanel buildHeader() {
             JPanel inputs = ToyBoxPanels.twoColumnsRight(
                     new AbstractMap.SimpleEntry<>(new JLabel("Settings file"), fileChooserInput),
                     new AbstractMap.SimpleEntry<>(new JLabel("Settings file secret"), secretField)
@@ -86,7 +109,12 @@ public class SettingsToy implements Toy {
             return ToyBoxPanels.titledBordered("Application settings configuration", panel);
         }
 
-        void onLoadClick(ActionEvent a) {
+        /**
+         * Handles the load button click, binding an existing settings file.
+         *
+         * @param a the action event
+         */
+        void onLoadClick(@NonNull ActionEvent a) {
             SettingsStorage storage = context.getEnvironment().getSettingsStorage();
             setEnabled(false);
             try {
@@ -103,7 +131,12 @@ public class SettingsToy implements Toy {
             }
         }
 
-        void onCreateClick(ActionEvent a) {
+        /**
+         * Handles the create button click, creating a new settings file.
+         *
+         * @param a the action event
+         */
+        void onCreateClick(@NonNull ActionEvent a) {
             SettingsStorage storage = context.getEnvironment().getSettingsStorage();
             setEnabled(false);
             try {
@@ -120,6 +153,7 @@ public class SettingsToy implements Toy {
             }
         }
 
+        @Override
         public void setEnabled(boolean enabled) {
             super.setEnabled(enabled);
             multiView.setEnabled(enabled);
@@ -130,7 +164,12 @@ public class SettingsToy implements Toy {
             secretField.setEnabled(enabled);
         }
 
-        void onRefreshClick(ActionEvent a) {
+        /**
+         * Handles the refresh button click by reloading the settings table.
+         *
+         * @param a the action event
+         */
+        void onRefreshClick(@NonNull ActionEvent a) {
             Panel.this.setEnabled(false);
             try {
                 Panel.this.refresh();
@@ -139,6 +178,9 @@ public class SettingsToy implements Toy {
             }
         }
 
+        /**
+         * Reloads the settings table from the current storage.
+         */
         void refresh() {
             setEnabled(false);
             try {

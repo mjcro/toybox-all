@@ -14,11 +14,21 @@ import io.github.mjcro.toybox.swing.prefab.ToyBoxLabels;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxPanels;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxTextComponents;
 import io.github.mjcro.toybox.swing.widgets.panels.ShortInformationPanel;
-import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
-import javax.swing.*;
+import javax.swing.DefaultListModel;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.MouseAdapter;
@@ -34,31 +44,35 @@ import java.time.format.DateTimeFormatterBuilder;
 import java.time.format.TextStyle;
 import java.time.temporal.ChronoUnit;
 import java.time.temporal.TemporalAdjusters;
-import java.util.Map;
 import java.util.AbstractMap;
-import java.util.HashMap;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import java.util.Vector;
 import java.util.function.BiFunction;
 import java.util.function.Consumer;
 import java.util.function.UnaryOperator;
 
+/**
+ * Toy for parsing, displaying, and manipulating {@link Instant} values
+ * across different time zones.
+ */
 public class InstantAnalyzerToy implements Toy {
     @Override
-    public List<Menu> getPath() {
+    public @NonNull List<@NonNull Menu> getPath() {
         return List.of(Menu.TOYBOX_BASIC_TOOLS_MENU);
     }
 
     @Override
-    public Label getLabel() {
+    public @NonNull Label getLabel() {
         return Label.ofIconAndName("fam://time", "Instant Analyzer");
     }
 
     @Override
-    public JPanel build(Context context) {
+    public @NonNull JPanel build(@NonNull Context context) {
         Instant instant = context.getInitialData()
                 .filter($ -> $ instanceof Instant)
                 .map($ -> (Instant) $)
@@ -110,7 +124,7 @@ public class InstantAnalyzerToy implements Toy {
 
         private final List<BiFunction<String, ZoneId, Instant>> instantParsers = List.of(
                 (s, zoneId) -> Instant.from(LocalDateTime.parse(s).atZone(zoneId)),
-                (s, zoneId) -> Instant.from(LocalDateTime.parse(s.replaceAll("\\.", "-").replaceAll(" ", "T")).atZone(zoneId)),
+                (s, zoneId) -> Instant.from(LocalDateTime.parse(s.replaceAll("\\.", "-").replace(" ", "T")).atZone(zoneId)),
                 (s, zoneId) -> Instant.from(LocalDate.parse(s).atStartOfDay().atZone(zoneId)),
                 (s, zoneId) -> Instant.parse(s),
                 (s, zoneId) -> Instant.ofEpochSecond(Long.parseLong(s)),
@@ -134,7 +148,7 @@ public class InstantAnalyzerToy implements Toy {
             this(null);
         }
 
-        public Panel(Instant instant) {
+        public Panel(@Nullable Instant instant) {
             super();
             if (instant != null) {
                 inputField.setText(instant.toString());
@@ -143,7 +157,7 @@ public class InstantAnalyzerToy implements Toy {
             initComponents();
         }
 
-        private void modifyInstant(Instant instant) {
+        private void modifyInstant(@Nullable Instant instant) {
             applyInstant(instant, null, false);
         }
 
@@ -154,11 +168,11 @@ public class InstantAnalyzerToy implements Toy {
             };
         }
 
-        public void setInstant(Instant instant, ZoneId zoneId) {
+        public void setInstant(@Nullable Instant instant, @Nullable ZoneId zoneId) {
             applyInstant(instant, zoneId, true);
         }
 
-        private void applyInstant(Instant instant, ZoneId zoneId, boolean storeHistory) {
+        private void applyInstant(@Nullable Instant instant, @Nullable ZoneId zoneId, boolean storeHistory) {
             informationPanel.setNone();
             if (instant == null) {
                 return;
@@ -276,12 +290,20 @@ public class InstantAnalyzerToy implements Toy {
         }
     }
 
-    @RequiredArgsConstructor
+    /**
+     * Combo box item representing a time zone selection.
+     */
     private static class TimeZoneSelection {
-        final String name;
-        final ZoneId zoneId;
 
-        TimeZoneSelection(ZoneId zoneId) {
+        final @NonNull String name;
+        final @Nullable ZoneId zoneId;
+
+        TimeZoneSelection(@NonNull String name, @Nullable ZoneId zoneId) {
+            this.name = name;
+            this.zoneId = zoneId;
+        }
+
+        TimeZoneSelection(@NonNull ZoneId zoneId) {
             this(zoneId.getDisplayName(TextStyle.NARROW, Locale.ROOT), zoneId);
         }
 
@@ -312,8 +334,8 @@ public class InstantAnalyzerToy implements Toy {
     private static class ModificationSet extends JPanel {
         private final JComboBox<TimeZoneSelection> tz = new JComboBox<>(TimeZoneSelection.items(false));
 
-        private Consumer<Instant> setter;
-        private Instant instant;
+        private @Nullable Consumer<@NonNull Instant> setter;
+        private @Nullable Instant instant;
 
         ModificationSet() {
             super(new BorderLayout());
@@ -351,7 +373,7 @@ public class InstantAnalyzerToy implements Toy {
             setInstant(null);
         }
 
-        private void setInstant(Instant instant) {
+        private void setInstant(@Nullable Instant instant) {
             this.instant = instant;
             boolean enabled = instant != null;
             for (Component c : getComponents()) {
@@ -370,7 +392,7 @@ public class InstantAnalyzerToy implements Toy {
             }
         }
 
-        public void setSetter(Consumer<Instant> setter) {
+        public void setSetter(@Nullable Consumer<@NonNull Instant> setter) {
             this.setter = setter;
         }
 
@@ -430,7 +452,7 @@ public class InstantAnalyzerToy implements Toy {
             super.add(tokyo);
         }
 
-        public void setInstant(Instant instant, ZoneId zoneId) {
+        public void setInstant(@NonNull Instant instant, @Nullable ZoneId zoneId) {
             unix.setText(String.valueOf(instant.getEpochSecond()));
             utc.setText(fmt.withZone(ZoneOffset.UTC).format(instant));
             iso.setText(DateTimeFormatter.ISO_DATE_TIME.withZone(zoneId == null ? ZoneOffset.UTC : zoneId).format(instant));

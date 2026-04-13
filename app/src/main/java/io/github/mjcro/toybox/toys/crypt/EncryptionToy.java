@@ -14,60 +14,95 @@ import io.github.mjcro.toybox.swing.prefab.ToyBoxPanels;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxTextComponents;
 import io.github.mjcro.toybox.swing.util.Slf4jUtil;
 import io.github.mjcro.toybox.swing.widgets.MultiViewTextAreaOrExceptionPanel;
-import lombok.extern.slf4j.Slf4j;
 import net.miginfocom.swing.MigLayout;
 import org.bouncycastle.util.encoders.Hex;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JComponent;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.util.List;
 import java.util.concurrent.Executor;
 
-@Slf4j
+/**
+ * Toy providing symmetric encryption and decryption using AES algorithms
+ * (GCM, ECB, CBC) with configurable key transformations and byte representations.
+ */
 public class EncryptionToy implements Toy {
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public List<Menu> getPath() {
+    public @NonNull List<@NonNull Menu> getPath() {
         return List.of(Menu.TOYBOX_BASIC_TOOLS_MENU, Menu.TOYBOX_BASIC_TOOLS_CRYPTO_SUBMENU);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public Label getLabel() {
+    public @NonNull Label getLabel() {
         return Label.ofIconAndName("fam://key", "Encrypt/Decrypt");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public JPanel build(Context context) {
+    public @NonNull JPanel build(@NonNull Context context) {
         return new Panel(context.getEnvironment());
     }
 
+    /**
+     * Inner panel providing the encryption/decryption UI with algorithm selection,
+     * key/IV fields, byte-representation choosers and input/output areas.
+     */
     private static class Panel extends JPanel {
-        private final Executor executor;
-        private final JComboBox<Algo> algorithms = new JComboBox<>(new Algo[]{
+        private static final @NonNull Logger log = LoggerFactory.getLogger(Panel.class);
+
+        private final @NonNull Executor executor;
+        private final @NonNull JComboBox<@NonNull Algo> algorithms = new JComboBox<>(new Algo[]{
                 new AesGcm(),
                 new GeneralAesAlgo("AES/ECB/NoPadding"),
                 new GeneralAesAlgo("AES/ECB/PKCS5Padding"),
                 new GeneralAesAlgo("AES/CBC/NoPadding"),
                 new GeneralAesAlgo("AES/CBC/PKCS5Padding"),
         });
-        private final JComboBox<BytesRepresentation>
+        private final @NonNull JComboBox<@NonNull BytesRepresentation>
                 representationSecret = new JComboBox<>(BytesRepresentation.values()),
                 representationIV = new JComboBox<>(BytesRepresentation.values()),
                 representationInput = new JComboBox<>(BytesRepresentation.values()),
                 representationOutput = new JComboBox<>(BytesRepresentation.values());
-        private final JComboBox<KeyTransformation> keyTransformations = new JComboBox<>(KeyTransformation.values());
-        private final JTextArea
+        private final @NonNull JComboBox<@NonNull KeyTransformation> keyTransformations = new JComboBox<>(KeyTransformation.values());
+        private final @NonNull JTextArea
                 inputTextArea = ToyBoxTextComponents.createJTextAreaMonospaced();
-        private final JTextField
+        private final @NonNull JTextField
                 inputFieldSecret = ToyBoxTextComponents.createJTextField(),
                 inputFieldIV = ToyBoxTextComponents.createJTextField(),
                 outputFieldIV = ToyBoxTextComponents.createJTextField(Hints.NOT_EDITABLE_TEXT);
-        private final JButton
+        private final @NonNull JButton
                 buttonEncrypt = ToyBoxButtons.createPrimary("Encrypt", this::onEncryptClick),
                 buttonDecrypt = ToyBoxButtons.createPrimary("Decrypt", this::onDecryptClick);
-        private final MultiViewTextAreaOrExceptionPanel outputArea = new MultiViewTextAreaOrExceptionPanel("");
+        private final @NonNull MultiViewTextAreaOrExceptionPanel outputArea = new MultiViewTextAreaOrExceptionPanel("");
 
-        Panel(Executor executor) {
+        /**
+         * Constructs the encryption panel.
+         *
+         * @param executor the executor for running crypto operations off the EDT, may be {@code null}
+         */
+        Panel(@Nullable Executor executor) {
             super(new BorderLayout());
 
             this.executor = executor == null ? Runnable::run : executor;
@@ -77,6 +112,11 @@ public class EncryptionToy implements Toy {
             add(buildInputOutputs(), BorderLayout.CENTER);
         }
 
+        /**
+         * Enables or disables all interactive components in the panel.
+         *
+         * @param enabled whether to enable the components
+         */
         @Override
         public void setEnabled(boolean enabled) {
             algorithms.setEnabled(enabled);
@@ -92,7 +132,13 @@ public class EncryptionToy implements Toy {
             keyTransformations.setEnabled(enabled);
         }
 
-        private void setResult(byte[] iv, byte[] data) {
+        /**
+         * Displays the encryption/decryption result (IV and data) in the output area.
+         *
+         * @param iv   the initialization vector bytes
+         * @param data the result data bytes
+         */
+        private void setResult(byte @NonNull [] iv, byte @NonNull [] data) {
             // Converting to string
             try {
                 outputFieldIV.setText(Hex.toHexString(iv));
@@ -104,11 +150,21 @@ public class EncryptionToy implements Toy {
             }
         }
 
-        private void setResult(Throwable t) {
+        /**
+         * Displays an exception in the output area.
+         *
+         * @param t the throwable to display
+         */
+        private void setResult(@NonNull Throwable t) {
             SwingUtilities.invokeLater(() -> outputArea.setViewException(t));
         }
 
-        private JComponent buildHeader() {
+        /**
+         * Builds the header panel containing algorithm, key/IV, and button controls.
+         *
+         * @return the header component
+         */
+        private @NonNull JComponent buildHeader() {
             JPanel panel = new JPanel(new MigLayout());
 
             panel.add(ToyBoxLabels.create("Algorithm"));
@@ -131,7 +187,12 @@ public class EncryptionToy implements Toy {
             return ToyBoxPanels.titledBordered("Settings", panel);
         }
 
-        private JComponent buildInputOutputs() {
+        /**
+         * Builds the split pane containing the input and output areas.
+         *
+         * @return the input/output component
+         */
+        private @NonNull JComponent buildInputOutputs() {
             JPanel inputPanel = new JPanel(new BorderLayout());
             JPanel inputRepresentationPanel = new JPanel(new MigLayout());
             inputRepresentationPanel.add(ToyBoxLabels.create("Format"));
@@ -159,14 +220,29 @@ public class EncryptionToy implements Toy {
             return pane;
         }
 
-        private void onEncryptClick(ActionEvent e) {
+        /**
+         * Handles the encrypt button click.
+         *
+         * @param e the action event
+         */
+        private void onEncryptClick(@NonNull ActionEvent e) {
             prepareCrypto(true);
         }
 
-        private void onDecryptClick(ActionEvent e) {
+        /**
+         * Handles the decrypt button click.
+         *
+         * @param e the action event
+         */
+        private void onDecryptClick(@NonNull ActionEvent e) {
             prepareCrypto(false);
         }
 
+        /**
+         * Prepares and executes the encryption or decryption operation.
+         *
+         * @param encrypt {@code true} to encrypt, {@code false} to decrypt
+         */
         private void prepareCrypto(boolean encrypt) {
             setEnabled(false);
             try {
@@ -212,14 +288,15 @@ public class EncryptionToy implements Toy {
                     throw new IllegalArgumentException("Unable to read input data", e);
                 }
 
+                final byte[] ivFinal = iv != null ? iv : new byte[0];
                 executor.execute(() -> {
                     try {
                         if (encrypt) {
-                            IVData encrypted = algo.encrypt(secret, iv, data);
+                            IVData encrypted = algo.encrypt(secret, ivFinal, data);
                             setResult(encrypted.getIv(), encrypted.getData());
                         } else {
-                            byte[] plaintext = algo.decrypt(secret, new IVData(iv, data));
-                            setResult(iv, plaintext);
+                            byte[] plaintext = algo.decrypt(secret, new IVData(ivFinal, data));
+                            setResult(ivFinal, plaintext);
                         }
                     } catch (Exception e) {
                         setResult(e);
@@ -234,7 +311,12 @@ public class EncryptionToy implements Toy {
         }
     }
 
-    public static void main(String[] args) {
+    /**
+     * Standalone entry point for testing the encryption panel.
+     *
+     * @param args command-line arguments (unused)
+     */
+    public static void main(@NonNull String[] args) {
         ToyBoxLaF.initialize(false);
         Components.show(new Panel(null));
     }

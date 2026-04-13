@@ -8,16 +8,18 @@ import io.github.mjcro.toybox.api.Toy;
 import io.github.mjcro.toybox.api.events.EventListener;
 import io.github.mjcro.toybox.app.settings.ToyBoxWorkingDirSetting;
 import io.github.mjcro.toybox.swing.util.Slf4jUtil;
-import lombok.Getter;
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
-import lombok.Setter;
-import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
 
-import javax.swing.*;
+import javax.swing.JFileChooser;
+import javax.swing.JOptionPane;
+import javax.swing.SwingUtilities;
 import javax.swing.filechooser.FileFilter;
-import java.awt.*;
+import java.awt.Desktop;
+import java.awt.Toolkit;
 import java.awt.datatransfer.Clipboard;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.StringSelection;
@@ -27,39 +29,74 @@ import java.io.IOException;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
 
+/**
+ * Spring-managed implementation of {@link Environment} that provides
+ * the global application state including toy registry, event dispatch,
+ * settings storage, clipboard access, and file dialogs.
+ */
 @Component
-@Slf4j
-@RequiredArgsConstructor
 public class ApplicationEnvironment implements Environment {
-    private final ConcurrentLinkedQueue<PopupHook> popupHooks = new ConcurrentLinkedQueue<>();
-    private final ConcurrentLinkedQueue<EventListener> eventListeners = new ConcurrentLinkedQueue<>();
-    private final ConcurrentLinkedQueue<Toy> registeredToys = new ConcurrentLinkedQueue<>();
 
-    private final SettingsStorage settingsStorage;
-    private final ExecutorService executorService;
+    private static final @NonNull Logger log = LoggerFactory.getLogger(ApplicationEnvironment.class);
 
-    @Getter
-    @Setter
-    private java.awt.Component modalParent = null;
+    private final @NonNull ConcurrentLinkedQueue<@NonNull PopupHook> popupHooks = new ConcurrentLinkedQueue<>();
+    private final @NonNull ConcurrentLinkedQueue<@NonNull EventListener> eventListeners = new ConcurrentLinkedQueue<>();
+    private final @NonNull ConcurrentLinkedQueue<@NonNull Toy> registeredToys = new ConcurrentLinkedQueue<>();
+    private final @NonNull SettingsStorage settingsStorage;
+    private final @NonNull ExecutorService executorService;
+    private java.awt.@Nullable Component modalParent = null;
+
+    /**
+     * Creates a new application environment.
+     *
+     * @param settingsStorage the settings storage backend
+     * @param executorService the executor for background tasks
+     */
+    public ApplicationEnvironment(
+            @NonNull SettingsStorage settingsStorage,
+            @NonNull ExecutorService executorService
+    ) {
+        this.settingsStorage = settingsStorage;
+        this.executorService = executorService;
+    }
+
+    /**
+     * Returns the modal parent component for dialogs.
+     *
+     * @return the modal parent, or {@code null}
+     */
+    public java.awt.@Nullable Component getModalParent() {
+        return modalParent;
+    }
+
+    /**
+     * Sets the modal parent component for dialogs.
+     *
+     * @param modalParent the modal parent, or {@code null}
+     */
+    public void setModalParent(java.awt.@Nullable Component modalParent) {
+        this.modalParent = modalParent;
+    }
 
     @Override
-    public void execute(Runnable r) {
+    public void execute(@Nullable Runnable r) {
         if (r != null) {
             executorService.submit(r);
         }
     }
 
     @Override
-    public SettingsStorage getSettingsStorage() {
+    public @NonNull SettingsStorage getSettingsStorage() {
         return settingsStorage;
     }
 
     @Override
-    public void registerToys(Toy... toys) {
+    public void registerToys(@NonNull Toy @Nullable ... toys) {
         if (toys != null) {
             for (Toy toy : toys) {
                 registeredToys.add(toy);
@@ -68,12 +105,12 @@ public class ApplicationEnvironment implements Environment {
     }
 
     @Override
-    public List<Toy> getRegisteredToys() {
+    public @NonNull List<@NonNull Toy> getRegisteredToys() {
         return new ArrayList<>(registeredToys);
     }
 
     @Override
-    public Optional<Toy> findRegisteredToy(Class<? extends Toy> clazz) {
+    public @NonNull Optional<@NonNull Toy> findRegisteredToy(@NonNull Class<? extends Toy> clazz) {
         for (Toy registeredToy : registeredToys) {
             if (registeredToy.getClass().equals(clazz)) {
                 return Optional.of(registeredToy);
@@ -84,7 +121,7 @@ public class ApplicationEnvironment implements Environment {
     }
 
     @Override
-    public Optional<Toy> findRegisteredToy(String name) {
+    public @NonNull Optional<@NonNull Toy> findRegisteredToy(@NonNull String name) {
         // Full class name lookup
         for (Toy registeredToy : registeredToys) {
             if (registeredToy.getClass().getName().equals(name)) {
@@ -103,14 +140,14 @@ public class ApplicationEnvironment implements Environment {
     }
 
     @Override
-    public void addEventListener(EventListener listener) {
+    public void addEventListener(@Nullable EventListener listener) {
         if (listener != null) {
             eventListeners.add(listener);
         }
     }
 
     @Override
-    public void handleEvent(Context context, Event event) {
+    public void handleEvent(@Nullable Context context, @Nullable Event event) {
         if (context != null && event != null) {
             log.info(Slf4jUtil.TOYBOX_MARKER, "Handling event {}", event);
             for (final EventListener listener : eventListeners) {
@@ -120,17 +157,17 @@ public class ApplicationEnvironment implements Environment {
     }
 
     @Override
-    public void addPopupHook(PopupHook hook) {
+    public void addPopupHook(@NonNull PopupHook hook) {
         popupHooks.add(hook);
     }
 
     @Override
-    public List<PopupHook> getPopupHooks() {
+    public @NonNull List<@NonNull PopupHook> getPopupHooks() {
         return new ArrayList<>(popupHooks);
     }
 
     @Override
-    public void openUrl(String url) {
+    public void openUrl(@Nullable String url) {
         if (url != null) {
             log.info(Slf4jUtil.TOYBOX_MARKER, "Opening URL {}", url);
             try {
@@ -145,7 +182,7 @@ public class ApplicationEnvironment implements Environment {
     }
 
     @Override
-    public void clipboardPut(StringSelection selection) {
+    public void clipboardPut(@NonNull StringSelection selection) {
         Clipboard clipboard = Toolkit.getDefaultToolkit().getSystemClipboard();
         try {
             log.info(Slf4jUtil.TOYBOX_MARKER, "Clipping \"{}\"", selection.getTransferData(DataFlavor.stringFlavor));
@@ -156,7 +193,7 @@ public class ApplicationEnvironment implements Environment {
     }
 
     @Override
-    public Optional<String> clipboardGetString() {
+    public @NonNull Optional<@NonNull String> clipboardGetString() {
         try {
             Object data = Toolkit.getDefaultToolkit().getSystemClipboard().getData(DataFlavor.stringFlavor);
             return data instanceof String
@@ -170,7 +207,8 @@ public class ApplicationEnvironment implements Environment {
     }
 
     @Override
-    public void chooseFileToRead(@NonNull FileCallback callback, FileFilter... fileFilters) {
+    public void chooseFileToRead(@NonNull FileCallback callback, @NonNull FileFilter @Nullable ... fileFilters) {
+        Objects.requireNonNull(callback, "callback");
         JFileChooser fileChooser = new JFileChooser();
         getSettingsStorage().get(ToyBoxWorkingDirSetting.class)
                 .map(ToyBoxWorkingDirSetting::getValue)
@@ -197,7 +235,8 @@ public class ApplicationEnvironment implements Environment {
     }
 
     @Override
-    public void chooseFileToSave(@NonNull FileCallback callback, File file) {
+    public void chooseFileToSave(@NonNull FileCallback callback, @Nullable File file) {
+        Objects.requireNonNull(callback, "callback");
         JFileChooser fileChooser = new JFileChooser();
         if (file != null) {
             fileChooser.setSelectedFile(file);

@@ -4,10 +4,10 @@ import com.formdev.flatlaf.FlatDarkLaf;
 import com.formdev.flatlaf.FlatLaf;
 import com.formdev.flatlaf.FlatLightLaf;
 
-import javax.swing.*;
+import javax.swing.UIManager;
 
 /**
- * Static utility for Java Look and Feel.
+ * Static utility for Java Look and Feel initialization.
  */
 public class ToyBoxLaF {
     /**

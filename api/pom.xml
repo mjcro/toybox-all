@@ -26,5 +26,9 @@
             <artifactId>interfaces</artifactId>
             <version>1.0.25</version>
         </dependency>
+        <dependency>
+            <groupId>org.jspecify</groupId>
+            <artifactId>jspecify</artifactId>
+        </dependency>
     </dependencies>
 </project>

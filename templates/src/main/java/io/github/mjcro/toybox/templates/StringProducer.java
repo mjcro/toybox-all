@@ -1,45 +1,43 @@
 package io.github.mjcro.toybox.templates;
 
+import org.jspecify.annotations.NonNull;
+
 import java.util.Optional;
 
 /**
- * Defines string producers that can be used in string templates.
+ * Produces string output from data fields annotated with {@link Databind}.
  * <p>
- * Standard usecase:
- * - Mutable class
- * - Having fields with {@link Databind} annotation.
- * - Implements {@link StringProducer} to generate string using data from fields.
+ * Typical usage: a mutable class with {@link Databind}-annotated fields
+ * implements this interface to generate a string from those field values.
  */
 public interface StringProducer {
     /**
-     * Produces string result and writes it into given string builds.
+     * Produces string output and appends it to the given builder.
      *
-     * @param sb String builder to write data into.
-     * @throws Exception Any exception.
+     * @param sb the string builder to write data into
+     * @throws Exception on any error during production
      */
-    void produce(StringBuilder sb) throws Exception;
+    void produce(@NonNull StringBuilder sb) throws Exception;
 
     /**
-     * Produces and returns string result.
+     * Produces and returns the string result.
      *
-     * @return Produced result.
-     * @throws Exception Any exception.
+     * @return the produced string
+     * @throws Exception on any error during production
      */
-    default String produceString() throws Exception {
+    default @NonNull String produceString() throws Exception {
         StringBuilder sb = new StringBuilder();
         produce(sb);
         return sb.toString();
     }
 
     /**
-     * Defines initial string that can be read during
-     * component initialization. This string will be
-     * displayed on template output and may contain
-     * help information or hints.
+     * Returns an initial string displayed on the template output during
+     * component initialization. May contain help information or hints.
      *
-     * @return Initial string.
+     * @return the initial string, or empty if none
      */
-    default Optional<String> getInitialString() {
+    default @NonNull Optional<@NonNull String> getInitialString() {
         return Optional.empty();
     }
 }

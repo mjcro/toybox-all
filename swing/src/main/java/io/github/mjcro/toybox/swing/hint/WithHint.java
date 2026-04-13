@@ -1,13 +1,19 @@
 package io.github.mjcro.toybox.swing.hint;
 
-import javax.swing.*;
+import org.jspecify.annotations.Nullable;
+
+import javax.swing.JComponent;
 
 /**
- * Defines data objects containing {@link Hint}.
+ * Defines data objects that contain a {@link Hint}.
+ *
+ * @param <T> the type of component the hint applies to
  */
 public interface WithHint<T extends JComponent> {
     /**
-     * @return Hint instance.
+     * Returns the hint instance, or {@code null} if none is set.
+     *
+     * @return hint instance, may be {@code null}
      */
-    Hint<? super T> getHint();
+    @Nullable Hint<? super T> getHint();
 }

@@ -2,6 +2,7 @@ package io.github.mjcro.toybox.templates.example;
 
 import io.github.mjcro.toybox.templates.Databind;
 import io.github.mjcro.toybox.templates.StringProducer;
+import org.jspecify.annotations.NonNull;
 
 import java.lang.reflect.Field;
 import java.util.ArrayList;
@@ -11,9 +12,16 @@ import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+/**
+ * Abstract helper that produces a formatted summary of all
+ * {@link Databind}-annotated fields and their current values.
+ */
 abstract class AbstractTemplateHelper implements StringProducer {
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public void produce(StringBuilder sb) throws Exception {
+    public void produce(@NonNull StringBuilder sb) throws Exception {
         ArrayList<String> names = new ArrayList<>();
         ArrayList<Object> values = new ArrayList<>();
         for (Field field : this.getClass().getDeclaredFields()) {
@@ -50,8 +58,11 @@ abstract class AbstractTemplateHelper implements StringProducer {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public Optional<String> getInitialString() {
+    public @NonNull Optional<@NonNull String> getInitialString() {
         return Optional.of("Change values and hit \"Apply\" button");
     }
 }

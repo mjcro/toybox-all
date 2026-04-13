@@ -2,22 +2,39 @@ package io.github.mjcro.toybox.swing.hint;
 
 import io.github.mjcro.toybox.swing.Components;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxIcons;
-import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import javax.swing.*;
+import javax.swing.AbstractButton;
+import javax.swing.BorderFactory;
+import javax.swing.JComponent;
+import javax.swing.JLabel;
+import javax.swing.SwingConstants;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.text.JTextComponent;
 import javax.swing.tree.DefaultTreeCellRenderer;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Font;
 import java.awt.event.ActionListener;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
-@Slf4j
+/**
+ * Collection of reusable UI hints for configuring Swing components.
+ *
+ * <p>Hints are functional decorators that apply visual or behavioral
+ * modifications to Swing components in a composable manner.
+ */
 public class Hints {
-    public static final Hint<JComponent>
+    private static final @NonNull Logger log = LoggerFactory.getLogger(Hints.class);
+
+    /** Padding hint with 1px on each side. */
+    public static final @NonNull Hint<@NonNull JComponent>
             PADDING_NANO = c -> c.setBorder(new EmptyBorder(1, 1, 1, 1)),
             PADDING_MINI = c -> c.setBorder(new EmptyBorder(2, 2, 2, 2)),
             PADDING_NORMAL = c -> c.setBorder(new EmptyBorder(4, 4, 4, 4)),
@@ -33,14 +50,16 @@ public class Hints {
             NONE = $ -> {
             };
 
-    public static final Hint<JLabel>
+    /** Center-aligned label hint. */
+    public static final @NonNull Hint<@NonNull JLabel>
             CENTER = c -> {
         c.setHorizontalAlignment(SwingConstants.CENTER);
         c.setVerticalAlignment(SwingConstants.CENTER);
     },
             RIGHT = c -> c.setHorizontalAlignment(SwingConstants.RIGHT);
 
-    public static final LaFStyle
+    /** FlatLaf style hints for component styling. */
+    public static final @NonNull LaFStyle
             TEXT_MINI = new LaFStyle("mini"),
             TEXT_SMALL = new LaFStyle("small"),
             TEXT_LIGHT = new LaFStyle("light"),
@@ -55,42 +74,73 @@ public class Hints {
             TABLE_CELL_INSTANT = new LaFStyle("tableCellInstant"),
 
     LAF_STUB = new LaFStyle("");
-    
-    public static final Hint<JTextComponent>
+
+    /** Hint that makes a text component non-editable. */
+    public static final @NonNull Hint<@NonNull JTextComponent>
             NOT_EDITABLE_TEXT = c -> c.setEditable(false);
 
 
-    public static Hint<JComponent> titledBorder(String title) {
+    /**
+     * Creates a hint that wraps the component with a titled border.
+     *
+     * @param title the border title
+     * @return a hint applying a titled border
+     */
+    public static @NonNull Hint<@NonNull JComponent> titledBorder(@NonNull String title) {
         return c -> c.setBorder(new TitledBorder(new EtchedBorder(), title));
     }
 
-    public static Hint<JComponent> setPreferredWidth(int width) {
+    /**
+     * Creates a hint that sets the preferred width of a component.
+     *
+     * @param width the preferred width in pixels
+     * @return a hint applying the preferred width
+     */
+    public static @NonNull Hint<@NonNull JComponent> setPreferredWidth(int width) {
         return c -> c.setPreferredSize(new Dimension(width, c.getPreferredSize().height));
     }
 
-    public static Hint<JTextComponent> setReadOnlyText(String s) {
+    /**
+     * Creates a hint that sets read-only text on a text component.
+     *
+     * @param s the text to set
+     * @return a hint applying read-only text
+     */
+    public static @NonNull Hint<@NonNull JTextComponent> setReadOnlyText(@NonNull String s) {
         return c -> {
             c.setText(s);
             c.setEditable(false);
         };
     }
 
-    public static Hint<JComponent> setToolTipText(String s) {
+    /**
+     * Creates a hint that sets the tooltip text.
+     *
+     * @param s the tooltip text
+     * @return a hint applying the tooltip
+     */
+    public static @NonNull Hint<@NonNull JComponent> setToolTipText(@NonNull String s) {
         return c -> c.setToolTipText(s);
     }
 
-    public static Hint<JTextComponent> onEnterKeyPress(Runnable r) {
+    /**
+     * Creates a hint that triggers a runnable when the Enter key is released.
+     *
+     * @param r the runnable to invoke on Enter key press
+     * @return a hint adding an Enter key listener
+     */
+    public static @NonNull Hint<@NonNull JTextComponent> onEnterKeyPress(@Nullable Runnable r) {
         return c -> c.addKeyListener(new KeyListener() {
             @Override
-            public void keyTyped(final KeyEvent e) {
+            public void keyTyped(final @NonNull KeyEvent e) {
             }
 
             @Override
-            public void keyPressed(final KeyEvent e) {
+            public void keyPressed(final @NonNull KeyEvent e) {
             }
 
             @Override
-            public void keyReleased(final KeyEvent e) {
+            public void keyReleased(final @NonNull KeyEvent e) {
                 if (e.getKeyCode() == KeyEvent.VK_ENTER && r != null) {
                     r.run();
                 }
@@ -98,23 +148,53 @@ public class Hints {
         });
     }
 
-    public static Hint<JTextComponent> onEnterKeyPress(ActionListener listener) {
+    /**
+     * Creates a hint that triggers an action listener when the Enter key is released.
+     *
+     * @param listener the action listener to invoke
+     * @return a hint adding an Enter key listener
+     */
+    public static @NonNull Hint<@NonNull JTextComponent> onEnterKeyPress(@NonNull ActionListener listener) {
         return onEnterKeyPress(() -> listener.actionPerformed(null));
     }
 
-    public static Hint<AbstractButton> onAction(Runnable r) {
+    /**
+     * Creates a hint that runs a given runnable when the button is clicked.
+     *
+     * @param r the runnable to invoke on action
+     * @return a hint adding an action listener
+     */
+    public static @NonNull Hint<@NonNull AbstractButton> onAction(@NonNull Runnable r) {
         return c -> c.addActionListener(e -> r.run());
     }
 
-    public static Hint<JLabel> labelIcon(String uri) {
+    /**
+     * Creates a hint that sets an icon on a label from the given URI.
+     *
+     * @param uri the icon URI
+     * @return a hint applying the icon
+     */
+    public static @NonNull Hint<@NonNull JLabel> labelIcon(@NonNull String uri) {
         return c -> ToyBoxIcons.get(uri).ifPresent(c::setIcon);
     }
 
-    public static Hint<AbstractButton> buttonIcon(String uri) {
+    /**
+     * Creates a hint that sets an icon on a button from the given URI.
+     *
+     * @param uri the icon URI
+     * @return a hint applying the icon
+     */
+    public static @NonNull Hint<@NonNull AbstractButton> buttonIcon(@NonNull String uri) {
         return c -> ToyBoxIcons.get(uri).ifPresent(c::setIcon);
     }
 
-    public static Hint<DefaultTreeCellRenderer> treeIcon(String uri) {
+    /**
+     * Creates a hint that sets tree cell renderer icons from the given URI.
+     *
+     * @param uri the icon URI
+     * @return a hint applying tree icons
+     */
+    public static @NonNull Hint<@NonNull DefaultTreeCellRenderer> treeIcon(@NonNull String uri) {
         return c -> {
             ToyBoxIcons.get(uri).ifPresent(i -> {
                 c.setOpenIcon(i);
@@ -124,7 +204,13 @@ public class Hints {
         };
     }
 
-    public static Hint<JLabel> derivedColor(Object value) {
+    /**
+     * Creates a hint that sets a foreground color derived from the given value.
+     *
+     * @param value the value to derive a color from
+     * @return a hint applying the derived foreground color
+     */
+    public static @NonNull Hint<@NonNull JLabel> derivedColor(@Nullable Object value) {
         Color color = Components.deriveColor(value);
         return l -> {
             if (color != null) {
@@ -133,19 +219,32 @@ public class Hints {
         };
     }
 
-    public static class LaFStyle implements Hint<JComponent> {
-        private final String value;
+    /**
+     * A hint that applies a FlatLaf style class to a component.
+     */
+    public static class LaFStyle implements Hint<@NonNull JComponent> {
+        private final @NonNull String value;
 
-        public LaFStyle(String value) {
+        /**
+         * Creates a new FlatLaf style hint.
+         *
+         * @param value the FlatLaf style class name
+         */
+        public LaFStyle(@NonNull String value) {
             this.value = value;
         }
 
-        public String getValue() {
+        /**
+         * Returns the FlatLaf style class value.
+         *
+         * @return the style class name
+         */
+        public @NonNull String getValue() {
             return value;
         }
 
         @Override
-        public void apply(JComponent component) {
+        public void apply(@Nullable JComponent component) {
             if (component != null) {
                 Object prev = component.getClientProperty("FlatLaf.styleClass");
                 String style = getValue();
@@ -158,7 +257,7 @@ public class Hints {
         }
 
         @Override
-        public String toString() {
+        public @NonNull String toString() {
             return "[LaFStyle +" + value + "]";
         }
     }

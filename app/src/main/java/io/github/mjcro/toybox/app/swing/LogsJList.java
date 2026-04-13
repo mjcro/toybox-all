@@ -4,30 +4,57 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.pattern.Abbreviator;
 import ch.qos.logback.classic.pattern.TargetLengthBasedClassNameAbbreviator;
 import ch.qos.logback.classic.spi.ILoggingEvent;
-import io.github.mjcro.toybox.swing.prefab.ToyBoxIcons;
 import io.github.mjcro.toybox.swing.hint.Hints;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxIcons;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxLabels;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.DefaultListModel;
+import javax.swing.Icon;
+import javax.swing.JLabel;
+import javax.swing.JList;
+import javax.swing.JPanel;
+import javax.swing.ListCellRenderer;
+import javax.swing.UIManager;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.FlowLayout;
 import java.time.ZoneOffset;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Collection;
 
+/**
+ * A JList component that displays logging events with color-coded level icons,
+ * timestamps, messages, and abbreviated logger names.
+ */
 public class LogsJList extends JList<ILoggingEvent> {
-    public LogsJList(Collection<ILoggingEvent> events) {
+    /**
+     * Constructs a logs list pre-populated with the given events.
+     *
+     * @param events the initial logging events to display, or null for an empty list
+     */
+    public LogsJList(@Nullable Collection<@NonNull ILoggingEvent> events) {
         super();
 
         setCellRenderer(new Renderer());
         setEvents(events);
     }
 
+    /**
+     * Constructs an empty logs list.
+     */
     public LogsJList() {
         this(null);
     }
 
-    public void setEvents(Collection<ILoggingEvent> events) {
+    /**
+     * Replaces the displayed events with the given collection, sorted newest first.
+     *
+     * @param events the events to display, or null to clear
+     */
+    public void setEvents(@Nullable Collection<@NonNull ILoggingEvent> events) {
         ArrayList<ILoggingEvent> list = events == null || events.isEmpty() ? null : new ArrayList<>(events);
         if (list != null) {
             list.sort((a, b) -> -Long.compare(a.getTimeStamp(), b.getTimeStamp()));
@@ -35,7 +62,12 @@ public class LogsJList extends JList<ILoggingEvent> {
         applyEvents(list);
     }
 
-    private void applyEvents(ArrayList<ILoggingEvent> events) {
+    /**
+     * Applies a sorted list of events to the underlying list model.
+     *
+     * @param events the sorted events, or null to clear
+     */
+    private void applyEvents(@Nullable ArrayList<@NonNull ILoggingEvent> events) {
         DefaultListModel<ILoggingEvent> model = new DefaultListModel<>();
         if (events != null) {
             model.addAll(events);
@@ -43,27 +75,34 @@ public class LogsJList extends JList<ILoggingEvent> {
         setModel(model);
     }
 
+    /**
+     * Custom cell renderer that displays each logging event as a panel with
+     * an icon, timestamp, message, and abbreviated logger name.
+     */
     private static class Renderer extends JPanel implements ListCellRenderer<ILoggingEvent> {
-        private final JLabel iconLabel = ToyBoxLabels.create();
-        private final JLabel timeLabel = ToyBoxLabels.create();
-        private final JLabel messageLabel = ToyBoxLabels.create();
-        private final JLabel loggerLabel = ToyBoxLabels.create();
+        private final @NonNull JLabel iconLabel = ToyBoxLabels.create();
+        private final @NonNull JLabel timeLabel = ToyBoxLabels.create();
+        private final @NonNull JLabel messageLabel = ToyBoxLabels.create();
+        private final @NonNull JLabel loggerLabel = ToyBoxLabels.create();
 
-        private final Icon iconTrace = ToyBoxIcons.get("fam://bullet_white").orElse(null);
-        private final Icon iconDebug = ToyBoxIcons.get("fam://bullet_black").orElse(null);
-        private final Icon iconInfo = ToyBoxIcons.get("fam://bullet_green").orElse(null);
-        private final Icon iconWarn = ToyBoxIcons.get("fam://bullet_orange").orElse(null);
-        private final Icon iconError = ToyBoxIcons.get("fam://bullet_red").orElse(null);
+        private final @Nullable Icon iconTrace = ToyBoxIcons.get("fam://bullet_white").orElse(null);
+        private final @Nullable Icon iconDebug = ToyBoxIcons.get("fam://bullet_black").orElse(null);
+        private final @Nullable Icon iconInfo = ToyBoxIcons.get("fam://bullet_green").orElse(null);
+        private final @Nullable Icon iconWarn = ToyBoxIcons.get("fam://bullet_orange").orElse(null);
+        private final @Nullable Icon iconError = ToyBoxIcons.get("fam://bullet_red").orElse(null);
 
-        private final DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSS");
+        private final @NonNull DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSS");
 
-        private final Color normalBackground = UIManager.getColor("List.background");
-        private final Color normalForeground = UIManager.getColor("List.foreground");
-        private final Color selectedBackground = UIManager.getColor("List.selectionBackground");
-        private final Color selectedForeground = UIManager.getColor("List.selectionForeground");
+        private final @Nullable Color normalBackground = UIManager.getColor("List.background");
+        private final @Nullable Color normalForeground = UIManager.getColor("List.foreground");
+        private final @Nullable Color selectedBackground = UIManager.getColor("List.selectionBackground");
+        private final @Nullable Color selectedForeground = UIManager.getColor("List.selectionForeground");
 
-        private final Abbreviator abbreviator = new TargetLengthBasedClassNameAbbreviator(20);
+        private final @NonNull Abbreviator abbreviator = new TargetLengthBasedClassNameAbbreviator(20);
 
+        /**
+         * Constructs the renderer and lays out its child labels.
+         */
         Renderer() {
             super(new FlowLayout(FlowLayout.LEFT, 4, 1));
             add(iconLabel);
@@ -77,9 +116,9 @@ public class LogsJList extends JList<ILoggingEvent> {
         }
 
         @Override
-        public Component getListCellRendererComponent(
-                JList<? extends ILoggingEvent> list,
-                ILoggingEvent e,
+        public @NonNull Component getListCellRendererComponent(
+                @NonNull JList<? extends ILoggingEvent> list,
+                @NonNull ILoggingEvent e,
                 int index,
                 boolean isSelected,
                 boolean cellHasFocus

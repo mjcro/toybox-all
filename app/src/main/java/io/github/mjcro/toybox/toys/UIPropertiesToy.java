@@ -9,31 +9,50 @@ import io.github.mjcro.toybox.swing.prefab.ToyBoxLabels;
 import io.github.mjcro.toybox.swing.renderers.AbstractTableCellRendererLabel;
 import io.github.mjcro.toybox.swing.renderers.TableCellRendererString;
 import io.github.mjcro.toybox.swing.renderers.ToyBoxTableCellRenderer;
-import lombok.Getter;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
-import javax.swing.*;
+import javax.swing.AbstractAction;
+import javax.swing.Icon;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
+import javax.swing.UIDefaults;
+import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.table.DefaultTableModel;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
 
+/**
+ * Toy that displays the current Swing UI Manager properties
+ * with filtering by type.
+ */
 public class UIPropertiesToy implements Toy {
+
     @Override
-    public List<Menu> getPath() {
+    public @NonNull List<@NonNull Menu> getPath() {
         return List.of(Menu.TOYBOX_MENU, Menu.TOYBOX_DEVELOPMENT_MENU);
     }
 
     @Override
-    public Label getLabel() {
+    public @NonNull Label getLabel() {
         return Label.ofIconAndName("fam://palette", "Swing UI properties");
     }
 
     @Override
-    public JPanel build(Context context) {
+    public @NonNull JPanel build(@NonNull Context context) {
         return new UIPropertiesPanel();
     }
 
@@ -107,9 +126,9 @@ public class UIPropertiesToy implements Toy {
             }
 
             @Override
-            public Component getTableCellRendererComponent(
-                    JTable table,
-                    Object value,
+            public @NonNull Component getTableCellRendererComponent(
+                    @NonNull JTable table,
+                    @Nullable Object value,
                     boolean isSelected,
                     boolean hasFocus,
                     int row,
@@ -208,12 +227,15 @@ public class UIPropertiesToy implements Toy {
             }
         }
 
-        @Getter
+        /**
+         * Represents a single UI property with its resolved value.
+         */
         private static class Property {
-            private final String name;
-            private final Object value;
 
-            public Property(Object name, Object value) {
+            private final @NonNull String name;
+            private final @NonNull Object value;
+
+            Property(@NonNull Object name, @NonNull Object value) {
                 this.name = name.toString();
                 if (value instanceof UIDefaults.LazyValue) {
                     this.value = ((UIDefaults.LazyValue) value).createValue(UIManager.getLookAndFeelDefaults());
@@ -224,7 +246,30 @@ public class UIPropertiesToy implements Toy {
                 }
             }
 
-            public String getValueClass() {
+            /**
+             * Returns the property name.
+             *
+             * @return the name
+             */
+            public @NonNull String getName() {
+                return name;
+            }
+
+            /**
+             * Returns the resolved property value.
+             *
+             * @return the value
+             */
+            public @NonNull Object getValue() {
+                return value;
+            }
+
+            /**
+             * Returns the simple class name of the value.
+             *
+             * @return the value class name
+             */
+            public @NonNull String getValueClass() {
                 return value.getClass().getSimpleName();
             }
         }

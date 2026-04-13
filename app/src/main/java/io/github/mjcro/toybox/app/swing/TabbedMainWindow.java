@@ -8,40 +8,66 @@ import io.github.mjcro.toybox.app.ApplicationEnvironment;
 import io.github.mjcro.toybox.app.ApplicationFrame;
 import io.github.mjcro.toybox.app.swing.widgets.StatusBarWidget;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxIcons;
-import lombok.NonNull;
-import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Component;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JFrame;
+import javax.swing.JTabbedPane;
+import javax.swing.WindowConstants;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.util.Objects;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.function.BiConsumer;
 
+/**
+ * Tabbed main window for the ToyBox application.
+ *
+ * <p>Each toy is displayed as a tab inside a shared {@link JTabbedPane}.
+ * This is the default (primary) window implementation.
+ */
 @Primary
 @Component("tabWindow")
-@Slf4j
 public class TabbedMainWindow extends JFrame implements ApplicationFrame {
-    private final Environment environment;
-    private final ScheduledExecutorService daemonExecutor;
-    private final TabbedMainWindowContext context;
-    final JTabbedPane tabbedPane = new JTabbedPane();
+    private static final @NonNull Logger log = LoggerFactory.getLogger(TabbedMainWindow.class);
 
+    private final @NonNull Environment environment;
+    private final @NonNull ScheduledExecutorService daemonExecutor;
+    private final @NonNull TabbedMainWindowContext context;
+    final @NonNull JTabbedPane tabbedPane = new JTabbedPane();
+
+    /**
+     * Constructs the tabbed main window.
+     *
+     * @param environment    the application environment
+     * @param daemonExecutor the scheduled executor for background daemon tasks
+     */
     public TabbedMainWindow(
             @NonNull Environment environment,
             @NonNull ScheduledExecutorService daemonExecutor
     ) {
-        this.environment = environment;
+        this.environment = Objects.requireNonNull(environment, "environment");
         this.context = new TabbedMainWindowContext(environment, this);
-        this.daemonExecutor = daemonExecutor;
+        this.daemonExecutor = Objects.requireNonNull(daemonExecutor, "daemonExecutor");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public Context getContext() {
+    public @NonNull Context getContext() {
         return context;
     }
 
-    private void initComponents(Environment environment) {
+    /**
+     * Initializes the window's UI components.
+     *
+     * @param environment the application environment used for toy registration
+     */
+    private void initComponents(@NonNull Environment environment) {
         setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
         setTitle(Application.MAIN_TITLE);
         getContentPane().setLayout(new BorderLayout());
@@ -55,6 +81,9 @@ public class TabbedMainWindow extends JFrame implements ApplicationFrame {
         pack();
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void initializeAndShow() {
         initComponents(environment);
@@ -63,7 +92,7 @@ public class TabbedMainWindow extends JFrame implements ApplicationFrame {
         }
 
         ToyBoxIcons.setMainApplicationIcon(this, Application.MAIN_ICON);
-        setMinimumSize(new java.awt.Dimension(800, 600));
+        setMinimumSize(new Dimension(800, 600));
         setLocationRelativeTo(null);
         setVisible(true);
     }

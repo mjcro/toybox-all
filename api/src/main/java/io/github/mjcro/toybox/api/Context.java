@@ -1,6 +1,8 @@
 package io.github.mjcro.toybox.api;
 
 import io.github.mjcro.toybox.api.events.ShowToyEvent;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Optional;
 
@@ -11,14 +13,18 @@ import java.util.Optional;
  */
 public interface Context {
     /**
+     * Returns the environment associated with this context.
+     *
      * @return Environment associated with context.
      */
-    Environment getEnvironment();
+    @NonNull Environment getEnvironment();
 
     /**
+     * Returns initial data passed to the toy, if any.
+     *
      * @return Initial data for toy.
      */
-    Optional<Object> getInitialData();
+    @NonNull Optional<@NonNull Object> getInitialData();
 
     /**
      * Sends arbitrary event to context.
@@ -30,15 +36,15 @@ public interface Context {
      *
      * @param event Event to send.
      */
-    void sendEvent(Event event);
+    void sendEvent(@NonNull Event event);
 
     /**
      * Shows given toy.
      *
      * @param toy  Toy to show.
-     * @param data Initial data to pass.
+     * @param data Initial data to pass, may be null.
      */
-    default void show(AbstractToy toy, Object data) {
+    default void show(@NonNull AbstractToy toy, @Nullable Object data) {
         sendEvent(new ShowToyEvent(toy, data));
     }
 
@@ -46,12 +52,16 @@ public interface Context {
      * Searches for toy with given class and shows it.
      *
      * @param clazz          Toy class to show.
-     * @param data           Initial data to pass.
+     * @param data           Initial data to pass, may be null.
      * @param throwIfMissing If set to true, {@link IllegalStateException} will be thrown if no toy
      *                       with given class is found.
      * @throws IllegalStateException If no toy with given class is found.
      */
-    default void findAndShow(Class<? extends Toy> clazz, Object data, boolean throwIfMissing) {
+    default void findAndShow(
+            @NonNull Class<? extends @NonNull Toy> clazz,
+            @Nullable Object data,
+            boolean throwIfMissing
+    ) {
         Optional<Toy> opt = getEnvironment().findRegisteredToy(clazz);
         if (!opt.isPresent()) {
             if (throwIfMissing) {
@@ -64,15 +74,15 @@ public interface Context {
     }
 
     /**
-     * Searches for toy with given class and shows it.
+     * Searches for toy with given class name and shows it.
      *
      * @param name           Toy class name to show.
-     * @param data           Initial data to pass.
+     * @param data           Initial data to pass, may be null.
      * @param throwIfMissing If set to true, {@link IllegalStateException} will be thrown if no toy
      *                       with given class is found.
      * @throws IllegalStateException If no toy with given class is found.
      */
-    default void findAndShow(String name, Object data, boolean throwIfMissing) {
+    default void findAndShow(@NonNull String name, @Nullable Object data, boolean throwIfMissing) {
         Optional<Toy> opt = getEnvironment().findRegisteredToy(name);
         if (!opt.isPresent()) {
             if (throwIfMissing) {

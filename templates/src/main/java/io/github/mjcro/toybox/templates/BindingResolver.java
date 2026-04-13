@@ -12,7 +12,7 @@ import io.github.mjcro.toybox.templates.bindings.LongArrayBinding;
 import io.github.mjcro.toybox.templates.bindings.NumberBinding;
 import io.github.mjcro.toybox.templates.bindings.StringArrayCsvBinding;
 import io.github.mjcro.toybox.templates.bindings.StringBinding;
-import lombok.NonNull;
+import org.jspecify.annotations.NonNull;
 
 import java.io.File;
 import java.lang.reflect.AnnotatedType;
@@ -27,9 +27,24 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 
+/**
+ * Resolves {@link Binding} instances from fields annotated with {@link Databind}
+ * on a given data object.
+ */
 public class BindingResolver {
-    public List<Binding> getBindings(Environment environment, @NonNull Object obj) {
+
+    /**
+     * Scans the given object for {@link Databind}-annotated fields and creates
+     * corresponding bindings.
+     *
+     * @param environment the application environment
+     * @param obj         the data object to inspect
+     * @return list of bindings in declaration order
+     */
+    public @NonNull List<@NonNull Binding> getBindings(@NonNull Environment environment, @NonNull Object obj) {
+        Objects.requireNonNull(obj, "obj");
         Class<?> clazz = obj.getClass();
         ArrayList<Field> fields = new ArrayList<>();
         while (clazz != Object.class) {
@@ -55,7 +70,13 @@ public class BindingResolver {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private Binding getBinding(Environment environment, Object obj, Field field, Class<?> fieldType, AnnotatedType annotatedType) {
+    private @NonNull Binding getBinding(
+            @NonNull Environment environment,
+            @NonNull Object obj,
+            @NonNull Field field,
+            @NonNull Class<?> fieldType,
+            @NonNull AnnotatedType annotatedType
+    ) {
         if (field.getAnnotation(Databind.class).enumerationProvider() != VoidEnumerationValues.class) {
             try {
                 Constructor<? extends Iterable<OptionalPair<?, Label>>> ctor = field.getAnnotation(Databind.class).enumerationProvider().getConstructor();

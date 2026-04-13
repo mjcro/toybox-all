@@ -7,7 +7,15 @@ import org.junit.jupiter.params.provider.MethodSource;
 
 import java.util.stream.Stream;
 
+/**
+ * Unit tests for {@link SegmentedHeightTranslator}.
+ */
 class SegmentedHeightTranslatorTest {
+    /**
+     * Provides test cases of expected pixel height and input value pairs.
+     *
+     * @return stream of test arguments
+     */
     static Stream<Arguments> translateDataProvider() {
         return Stream.of(
                 Arguments.of(0, -100f),
@@ -27,6 +35,12 @@ class SegmentedHeightTranslatorTest {
         );
     }
 
+    /**
+     * Verifies that translate produces the expected pixel height for each value.
+     *
+     * @param expected the expected pixel height
+     * @param value    the input value to translate
+     */
     @ParameterizedTest
     @MethodSource("translateDataProvider")
     public void testTranslate(int expected, float value) {

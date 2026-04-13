@@ -2,21 +2,37 @@ package io.github.mjcro.toybox.templates.bindings;
 
 import io.github.mjcro.toybox.swing.Components;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxTextComponents;
+import org.jspecify.annotations.NonNull;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JComponent;
+import javax.swing.JTextField;
+import java.awt.Dimension;
 import java.lang.reflect.Field;
 import java.util.Arrays;
 
+/**
+ * Binding for {@code String[]} fields, rendered as a text field accepting
+ * comma-separated values.
+ */
 public class StringArrayCsvBinding extends AbstractLabeledBinding {
-    private JTextField textField;
+    private @NonNull JTextField textField;
 
-    public StringArrayCsvBinding(Object target, Field field) {
+    /**
+     * Creates a new string-array CSV binding for the given target and field.
+     *
+     * @param target the object containing the field
+     * @param field  the annotated field
+     */
+    @SuppressWarnings("NullAway.Init") // textField is initialized via super() -> initComponents() -> createEditor()
+    public StringArrayCsvBinding(@NonNull Object target, @NonNull Field field) {
         super(target, field);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    protected JComponent createEditor() {
+    protected @NonNull JComponent createEditor() {
         textField = ToyBoxTextComponents.createJTextField();
         textField.setToolTipText("Multiple string values separated by comma");
         textField.setPreferredSize(new Dimension(300, textField.getPreferredSize().height));
@@ -33,11 +49,17 @@ public class StringArrayCsvBinding extends AbstractLabeledBinding {
         return textField;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void setEnabled(boolean enabled) {
         textField.setEnabled(enabled);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
     public void applyCurrentValue() throws IllegalAccessException {
         String text = textField.getText();

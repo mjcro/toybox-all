@@ -1,5 +1,8 @@
 package io.github.mjcro.toybox.toys.crypt;
 
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
+
 import javax.crypto.Cipher;
 import javax.crypto.spec.GCMParameterSpec;
 import javax.crypto.spec.IvParameterSpec;
@@ -7,23 +10,50 @@ import javax.crypto.spec.SecretKeySpec;
 import java.security.SecureRandom;
 import java.security.spec.AlgorithmParameterSpec;
 
+/**
+ * Base class for cipher-based encryption/decryption algorithms providing
+ * common encrypt/decrypt logic with pluggable IV and key preparation.
+ */
 abstract class AbstractCipherBasedAlgo implements Algo {
-    private final SecureRandom random = new SecureRandom();
+    private final @NonNull SecureRandom random = new SecureRandom();
 
-    protected abstract String getCipherName();
+    /**
+     * Returns the JCA cipher transformation name (e.g., "AES/GCM/NoPadding").
+     *
+     * @return the cipher name
+     */
+    protected abstract @NonNull String getCipherName();
 
-    protected abstract AlgorithmParameterSpec prepareIV(byte[] iv);
+    /**
+     * Prepares an algorithm parameter spec from the given IV bytes.
+     *
+     * @param iv the initialization vector bytes, or null to generate a random IV
+     * @return the algorithm parameter spec, or null if the mode requires none
+     */
+    protected abstract @Nullable AlgorithmParameterSpec prepareIV(byte @Nullable [] iv);
 
-    protected abstract SecretKeySpec prepareSecret(byte[] secret);
+    /**
+     * Prepares a secret key spec from the given secret bytes.
+     *
+     * @param secret the raw secret key bytes
+     * @return a secret key spec suitable for this algorithm
+     */
+    protected abstract @NonNull SecretKeySpec prepareSecret(byte @NonNull [] secret);
 
-    protected byte[] generateRandom(int n) {
+    /**
+     * Generates a random byte array of the specified length.
+     *
+     * @param n the number of random bytes to generate
+     * @return a new byte array filled with random data
+     */
+    protected byte @NonNull [] generateRandom(int n) {
         byte[] bytes = new byte[n];
         random.nextBytes(bytes);
         return bytes;
     }
 
     @Override
-    public IVData encrypt(byte[] secret, byte[] iv, byte[] data) throws Exception {
+    public @NonNull IVData encrypt(byte @NonNull [] secret, byte @Nullable [] iv, byte @NonNull [] data) throws Exception {
         AlgorithmParameterSpec ivParameterSpec = prepareIV(iv);
         SecretKeySpec secretKeySpec = prepareSecret(secret);
 
@@ -37,7 +67,7 @@ abstract class AbstractCipherBasedAlgo implements Algo {
     }
 
     @Override
-    public byte[] decrypt(byte[] secret, IVData data) throws Exception {
+    public byte @NonNull [] decrypt(byte @NonNull [] secret, @NonNull IVData data) throws Exception {
         AlgorithmParameterSpec ivParameterSpec = prepareIV(data.getIv());
         SecretKeySpec secretKeySpec = prepareSecret(secret);
 
@@ -47,7 +77,13 @@ abstract class AbstractCipherBasedAlgo implements Algo {
         return cipher.doFinal(data.getData());
     }
 
-    private byte[] extractIV(AlgorithmParameterSpec spec) {
+    /**
+     * Extracts the IV bytes from an algorithm parameter spec.
+     *
+     * @param spec the algorithm parameter spec
+     * @return the IV bytes, or an empty array if spec is null
+     */
+    private byte @NonNull [] extractIV(@Nullable AlgorithmParameterSpec spec) {
         if (spec instanceof IvParameterSpec) {
             return ((IvParameterSpec) spec).getIV();
         } else if (spec instanceof GCMParameterSpec) {
@@ -60,7 +96,7 @@ abstract class AbstractCipherBasedAlgo implements Algo {
     }
 
     @Override
-    public String toString() {
+    public @NonNull String toString() {
         return getCipherName();
     }
 }

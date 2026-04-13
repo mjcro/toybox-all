@@ -5,32 +5,49 @@ import io.github.mjcro.toybox.app.config.MainConfiguration;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxIcons;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxLaF;
 import io.github.mjcro.toybox.swing.util.Slf4jUtil;
-import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
-import javax.swing.*;
+import javax.swing.SwingUtilities;
 import java.time.Duration;
 import java.time.Instant;
 import java.util.function.Supplier;
 
-@Slf4j
+/**
+ * Main entry point for the ToyBox application.
+ *
+ * <p>Parses command-line arguments, initializes look-and-feel, starts
+ * the Spring application context, and shows the main window.
+ */
 public class Application {
-    public static final String INTERNAL_VERSION = "v0.4.4";
+    private static final @NonNull Logger log = LoggerFactory.getLogger(Application.class);
 
+    /** Internal version string embedded in the build. */
+    public static final @NonNull String INTERNAL_VERSION = "v0.4.4";
+
+    /** Whether debug mode is enabled. */
     public static boolean
             DEBUG = false,
             DEBUG_COMPONENTS = true,
             DARK_MODE = false;
 
-
-    public static String
+    /** Configurable application display properties and window type. */
+    public static @NonNull String
             MAIN_ICON = "toybox-64",
             MAIN_TITLE = "ToyBox",
             WINDOW = "tabWindow",
             VERSION = INTERNAL_VERSION;
 
-    public static void main(String[] args) {
+    /**
+     * Application entry point.
+     *
+     * @param args command-line arguments
+     */
+    public static void main(@Nullable String[] args) {
         // Initializing context and showing main window
         startSpringApplication(args, MainConfiguration.class);
     }
@@ -38,16 +55,20 @@ public class Application {
     /**
      * Starts Spring-based application.
      *
-     * @param applicationContextSupplier Supplier for {@link ApplicationContext}.
-     * @return Given application context.
+     * @param args                         command-line arguments
+     * @param applicationContextSupplier   supplier for {@link ApplicationContext}
+     * @return the created application context
      */
-    public static ApplicationContext startSpringApplication(String[] args, Supplier<ApplicationContext> applicationContextSupplier) {
+    public static @NonNull ApplicationContext startSpringApplication(
+            @Nullable String[] args,
+            @NonNull Supplier<@NonNull ApplicationContext> applicationContextSupplier
+    ) {
         // Obtaining and propagating settings
         changeSettings(args);
         ToyBoxIcons.DARK_MODE = DARK_MODE;
 
         // Registering exception handler
-        Thread.setDefaultUncaughtExceptionHandler((thread, throwable) -> {
+        Thread.setDefaultUncaughtExceptionHandler((@NonNull Thread thread, @NonNull Throwable throwable) -> {
             log.error(Slf4jUtil.TOYBOX_MARKER, "Uncaught exception", throwable);
         });
 
@@ -93,27 +114,33 @@ public class Application {
     }
 
     /**
-     * Starts Spring-based application.
+     * Starts Spring-based application using the given configuration classes.
      *
-     * @param args                 Command line arguments.
-     * @param configurationClasses Spring configuration classes.
-     * @return Created application context.
+     * @param args                 command-line arguments
+     * @param configurationClasses Spring configuration classes
+     * @return the created application context
      */
-    public static ApplicationContext startSpringApplication(String[] args, Class<?>... configurationClasses) {
+    public static @NonNull ApplicationContext startSpringApplication(@Nullable String[] args, @NonNull Class<?>... configurationClasses) {
         return startSpringApplication(args, () -> new AnnotationConfigApplicationContext(configurationClasses));
     }
 
     /**
-     * Starts Spring-based application.
+     * Starts Spring-based application without command-line arguments.
      *
-     * @param configurationClasses Spring configuration classes.
-     * @return Created application context.
+     * @param configurationClasses Spring configuration classes
+     * @return the created application context
      */
-    public static ApplicationContext startSpringApplication(Class<?>... configurationClasses) {
+    @SuppressWarnings("NullAway") // null is valid for @Nullable String[] args in the delegate overload
+    public static @NonNull ApplicationContext startSpringApplication(@NonNull Class<?>... configurationClasses) {
         return startSpringApplication(null, () -> new AnnotationConfigApplicationContext(configurationClasses));
     }
 
-    private static void changeSettings(String[] args) {
+    /**
+     * Parses command-line arguments and updates static configuration fields.
+     *
+     * @param args command-line arguments, may be {@code null}
+     */
+    private static void changeSettings(@Nullable String[] args) {
         if (args == null) {
             return;
         }

@@ -10,10 +10,18 @@ import io.github.mjcro.toybox.swing.prefab.ToyBoxPanels;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxTextComponents;
 import io.github.mjcro.toybox.swing.util.Slf4jUtil;
 import io.github.mjcro.toybox.swing.widgets.panels.HorizontalComponentsPanel;
-import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JCheckBox;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTextArea;
+import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -23,20 +31,31 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@Slf4j
+/**
+ * Toy for sorting, deduplicating, trimming and filtering string lists.
+ */
 public class StringListToy implements Toy {
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public List<Menu> getPath() {
+    public @NonNull List<@NonNull Menu> getPath() {
         return List.of(Menu.TOYBOX_BASIC_TOOLS_MENU);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public Label getLabel() {
+    public @NonNull Label getLabel() {
         return Label.ofIconAndName("fam://text_linespacing", "String List Tools");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public JPanel build(Context context) {
+    public @NonNull JPanel build(@NonNull Context context) {
         Panel panel = new Panel();
         context.getInitialData()
                 .filter($ -> $ instanceof CharSequence)
@@ -46,17 +65,26 @@ public class StringListToy implements Toy {
         return panel;
     }
 
+    /**
+     * Inner panel providing the string-list manipulation UI with checkboxes
+     * for sort, unique, trim and skip-empty, plus source/result text areas.
+     */
     private static final class Panel extends JPanel {
-        private final JTextArea
+        private static final @NonNull Logger log = LoggerFactory.getLogger(Panel.class);
+
+        private final @NonNull JTextArea
                 sourceText = ToyBoxTextComponents.createJTextArea(),
                 resultText = ToyBoxTextComponents.createJTextArea(Hints.NOT_EDITABLE_TEXT);
 
-        private final JCheckBox
+        private final @NonNull JCheckBox
                 useSort = new JCheckBox("Sorted"),
                 useSkipEmptyLines = new JCheckBox("Skip empty lines"),
                 useTrimSpaces = new JCheckBox("Trim spaces"),
                 useUnique = new JCheckBox("Unique");
 
+        /**
+         * Constructs the string list panel.
+         */
         Panel() {
             super(new BorderLayout());
 
@@ -64,7 +92,12 @@ public class StringListToy implements Toy {
             add(buildTextArea(), BorderLayout.CENTER);
         }
 
-        private JPanel buildHeader() {
+        /**
+         * Builds the header panel with option checkboxes and the apply button.
+         *
+         * @return the header panel
+         */
+        private @NonNull JPanel buildHeader() {
             JPanel panel = new JPanel(new BorderLayout());
 
             panel.add(ToyBoxButtons.createPrimary("Apply", this::onApply), BorderLayout.LINE_END);
@@ -83,7 +116,12 @@ public class StringListToy implements Toy {
             return ToyBoxPanels.titledBordered("Settings", panel);
         }
 
-        private Component buildTextArea() {
+        /**
+         * Builds the split pane containing source and result text areas.
+         *
+         * @return the text area component
+         */
+        private @NonNull Component buildTextArea() {
             JSplitPane pane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
             pane.setResizeWeight(.5d);
             pane.add(new JScrollPane(sourceText));
@@ -92,7 +130,12 @@ public class StringListToy implements Toy {
             return pane;
         }
 
-        private void onApply(final ActionEvent e) {
+        /**
+         * Applies the selected transformations to the source text and updates the result.
+         *
+         * @param e the triggering action event
+         */
+        private void onApply(@NonNull ActionEvent e) {
             String source = sourceText.getText();
             String[] lines = source.split("\n");
 
@@ -123,7 +166,12 @@ public class StringListToy implements Toy {
             );
         }
 
-        public void setSourceText(final CharSequence text) {
+        /**
+         * Sets the source text area content.
+         *
+         * @param text the text to set, may be {@code null}
+         */
+        public void setSourceText(@Nullable CharSequence text) {
             sourceText.setText(text == null ? null : text.toString());
         }
     }

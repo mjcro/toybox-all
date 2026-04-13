@@ -4,10 +4,16 @@ import io.github.mjcro.toybox.api.Environment;
 import io.github.mjcro.toybox.swing.BorderLayoutMaster;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxButtons;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxTextComponents;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
-import javax.swing.*;
+import javax.swing.JButton;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.filechooser.FileFilter;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Dimension;
+import java.awt.FlowLayout;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.dnd.DnDConstants;
 import java.awt.dnd.DropTarget;
@@ -18,18 +24,29 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
+/**
+ * Input panel that lets users choose a file via a file dialog, drag-and-drop, or clear the selection.
+ */
 public class FileChooserInput extends JPanel {
-    private final Environment environment;
-    private final String label;
-    private final JButton
+    private final @NonNull Environment environment;
+    private final @Nullable String label;
+    private final @NonNull JButton
             chooseFileButton = ToyBoxButtons.create("Choose", this::onChooseFileButtonClick),
             clearButton = ToyBoxButtons.create("Clear", this::onClearButtonClick);
-    private final JTextField chosenFileNameTextField = ToyBoxTextComponents.createJTextField();
-    private final FileFilter[] fileFilters;
-    private final Runnable onFileChange;
-    private volatile File file;
+    private final @NonNull JTextField chosenFileNameTextField = ToyBoxTextComponents.createJTextField();
+    private final @NonNull FileFilter @NonNull [] fileFilters;
+    private final @NonNull Runnable onFileChange;
+    private volatile @Nullable File file;
 
-    public FileChooserInput(Environment environment, String label, Runnable onFileChange, FileFilter... fileFilters) {
+    /**
+     * Creates a file chooser input with a change callback and optional file filters.
+     *
+     * @param environment  the application environment for file dialog access
+     * @param label        the placeholder text shown when no file is selected
+     * @param onFileChange callback invoked when the selected file changes, or {@code null} for no-op
+     * @param fileFilters  optional file filters for the file chooser dialog
+     */
+    public FileChooserInput(@NonNull Environment environment, @Nullable String label, @Nullable Runnable onFileChange, @NonNull FileFilter @NonNull ... fileFilters) {
         this.environment = Objects.requireNonNull(environment, "environment");
         this.label = label;
         this.fileFilters = fileFilters;
@@ -39,7 +56,14 @@ public class FileChooserInput extends JPanel {
         initComponents();
     }
 
-    public FileChooserInput(Environment environment, String label, FileFilter... fileFilters) {
+    /**
+     * Creates a file chooser input without a change callback.
+     *
+     * @param environment the application environment for file dialog access
+     * @param label       the placeholder text shown when no file is selected
+     * @param fileFilters optional file filters for the file chooser dialog
+     */
+    public FileChooserInput(@NonNull Environment environment, @Nullable String label, @NonNull FileFilter @NonNull ... fileFilters) {
         this(environment, label, null, fileFilters);
     }
 
@@ -51,8 +75,11 @@ public class FileChooserInput extends JPanel {
         chosenFileNameTextField.setEnabled(enabled);
     }
 
+    /**
+     * Initializes and lays out the sub-components.
+     */
     private void initComponents() {
-        JPanel buttons = new JPanel(new FlowLayout(FlowLayout.LEFT, 1, 0));
+        final JPanel buttons = new JPanel(new FlowLayout(FlowLayout.LEFT, 1, 0));
         buttons.add(chooseFileButton);
         buttons.add(clearButton);
 
@@ -64,10 +91,10 @@ public class FileChooserInput extends JPanel {
         chosenFileNameTextField.setDropTarget(new DropTarget() {
             @SuppressWarnings("unchecked")
             @Override
-            public synchronized void drop(final DropTargetDropEvent e) {
+            public synchronized void drop(final @NonNull DropTargetDropEvent e) {
                 e.acceptDrop(DnDConstants.ACTION_COPY);
                 try {
-                    java.util.List<File> droppedFiles = (List<File>) e.getTransferable()
+                    final List<@NonNull File> droppedFiles = (List<File>) e.getTransferable()
                             .getTransferData(DataFlavor.javaFileListFlavor);
                     if (droppedFiles != null && !droppedFiles.isEmpty()) {
                         setFile(droppedFiles.get(0));
@@ -79,18 +106,23 @@ public class FileChooserInput extends JPanel {
         });
         chooseFileButton.setDropTarget(chosenFileNameTextField.getDropTarget());
 
-        JPanel paddedTextField = new JPanel(new BorderLayout());
+        final JPanel paddedTextField = new JPanel(new BorderLayout());
         chosenFileNameTextField.setMinimumSize(new Dimension(200, chosenFileNameTextField.getMinimumSize().height));
         paddedTextField.add(chosenFileNameTextField);
 
         BorderLayoutMaster.addCenterRight(this, paddedTextField, buttons);
     }
 
-    public void onChooseFileButtonClick(ActionEvent e) {
+    /**
+     * Handles the "Choose" button click by opening the file dialog.
+     *
+     * @param e the action event
+     */
+    public void onChooseFileButtonClick(@NonNull ActionEvent e) {
         chooseFileButton.setEnabled(false);
         environment.chooseFileToRead(new Environment.FileCallback() {
             @Override
-            public void onFileChosen(File file) {
+            public void onFileChosen(@NonNull File file) {
                 setFile(file);
                 chooseFileButton.setEnabled(true);
             }
@@ -102,11 +134,21 @@ public class FileChooserInput extends JPanel {
         }, fileFilters);
     }
 
-    public void onClearButtonClick(ActionEvent e) {
+    /**
+     * Handles the "Clear" button click by removing the selected file.
+     *
+     * @param e the action event
+     */
+    public void onClearButtonClick(@NonNull ActionEvent e) {
         setFile(null);
     }
 
-    public void setFile(File file) {
+    /**
+     * Sets or clears the currently selected file and notifies the change callback.
+     *
+     * @param file the file to set, or {@code null} to clear
+     */
+    public void setFile(@Nullable File file) {
         this.file = file;
         chosenFileNameTextField.setText(
                 file == null
@@ -117,7 +159,12 @@ public class FileChooserInput extends JPanel {
         onFileChange.run();
     }
 
-    public Optional<File> getFile() {
+    /**
+     * Returns the currently selected file, if any.
+     *
+     * @return an optional containing the selected file
+     */
+    public @NonNull Optional<@NonNull File> getFile() {
         return Optional.ofNullable(file);
     }
 }

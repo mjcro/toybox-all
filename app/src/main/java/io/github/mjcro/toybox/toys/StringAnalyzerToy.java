@@ -10,32 +10,43 @@ import io.github.mjcro.toybox.swing.hint.Hints;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxLabels;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxTextComponents;
 import io.github.mjcro.toybox.swing.widgets.panels.HorizontalComponentsPanel;
-import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
-import javax.swing.*;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
 import javax.swing.event.DocumentEvent;
 import javax.swing.event.DocumentListener;
-import java.awt.*;
+import java.awt.BorderLayout;
 import java.nio.charset.StandardCharsets;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.function.Predicate;
 import java.util.regex.Pattern;
 
+/**
+ * Toy for analyzing string properties such as length, encoding,
+ * character classes, and hash values.
+ */
 public class StringAnalyzerToy implements Toy {
+
     @Override
-    public List<Menu> getPath() {
+    public @NonNull List<@NonNull Menu> getPath() {
         return List.of(Menu.TOYBOX_BASIC_TOOLS_MENU);
     }
 
     @Override
-    public Label getLabel() {
+    public @NonNull Label getLabel() {
         return Label.ofIconAndName("fam://text_allcaps", "String Analyzer");
     }
 
     @Override
-    public JPanel build(Context context) {
+    public @NonNull JPanel build(@NonNull Context context) {
         Panel panel = new Panel();
         context.getInitialData()
                 .filter($ -> $ instanceof CharSequence)
@@ -45,26 +56,30 @@ public class StringAnalyzerToy implements Toy {
         return panel;
     }
 
+    /**
+     * Main panel containing the source text area and analysis results.
+     */
     private static final class Panel extends JPanel {
-        private final JTextArea sourceText;
-        private final JPanel resultPanel;
 
-        public Panel() {
+        private final @NonNull JTextArea sourceText;
+        private final @NonNull JPanel resultPanel;
+
+        Panel() {
             this.sourceText = ToyBoxTextComponents.createJTextArea(Hints.TEXT_MONOSPACED);
 
             this.sourceText.getDocument().addDocumentListener(new DocumentListener() {
                 @Override
-                public void insertUpdate(DocumentEvent e) {
+                public void insertUpdate(@NonNull DocumentEvent e) {
                     doAnalyze();
                 }
 
                 @Override
-                public void removeUpdate(DocumentEvent e) {
+                public void removeUpdate(@NonNull DocumentEvent e) {
                     doAnalyze();
                 }
 
                 @Override
-                public void changedUpdate(DocumentEvent e) {
+                public void changedUpdate(@NonNull DocumentEvent e) {
                     doAnalyze();
                 }
             });
@@ -81,7 +96,7 @@ public class StringAnalyzerToy implements Toy {
             this.add(textAreasPanel, BorderLayout.CENTER);
         }
 
-        public void setSourceText(String s) {
+        void setSourceText(@NonNull String s) {
             sourceText.setText(s);
             doAnalyze();
         }
@@ -114,10 +129,9 @@ public class StringAnalyzerToy implements Toy {
                 Components.setInheritedPopupRecursively(resultPanel);
                 updateUI();
             }
-
         }
 
-        private static JPanel buildLabelAndText(String string, String value) {
+        private static @NonNull JPanel buildLabelAndText(@NonNull String string, @NonNull String value) {
             JLabel label = ToyBoxLabels.create(string);
             label.setBorder(new EmptyBorder(0, 0, 0, 5));
             JTextField text = ToyBoxTextComponents.createJTextField(value, Hints.NOT_EDITABLE_TEXT);
@@ -129,7 +143,13 @@ public class StringAnalyzerToy implements Toy {
             return panel;
         }
 
-        private static void predicate(StringBuilder sb, String name, String value, String sus, Predicate<String> predicate) {
+        private static void predicate(
+                @NonNull StringBuilder sb,
+                @NonNull String name,
+                @NonNull String value,
+                @Nullable String sus,
+                @NonNull Predicate<@NonNull String> predicate
+        ) {
             boolean test = predicate.test(value);
             sb.append(test ? " [+] " : " [ ] ");
             sb.append(name);
@@ -139,14 +159,21 @@ public class StringAnalyzerToy implements Toy {
             sb.append("\n");
         }
 
-        private static void regexPredicate(StringBuilder sb, String name, String value, Pattern pattern) {
+        private static void regexPredicate(
+                @NonNull StringBuilder sb,
+                @NonNull String name,
+                @NonNull String value,
+                @NonNull Pattern pattern
+        ) {
             boolean test = pattern.matcher(value).find();
             if (test) {
                 sb.append(" [+] ").append(name).append("\n");
             }
         }
 
-        @RequiredArgsConstructor
+        /**
+         * Assertions for detecting character class properties in strings.
+         */
         private enum Assertion {
             LEADING_SPACES("Leading spaces", $ -> Character.isWhitespace($.charAt(0))),
             TRAILING_SPACES("Trailing spaces", $ -> Character.isWhitespace($.charAt($.length() - 1))),
@@ -161,14 +188,22 @@ public class StringAnalyzerToy implements Toy {
             CYR_LATIN_MIX("Both cyrillic and latin", $ -> false),
             VOID("Void", $ -> false);
 
+            private final @NonNull String text;
+            private final @NonNull Predicate<@NonNull String> predicate;
 
-            private final String text;
-            private final Predicate<String> predicate;
+            Assertion(@NonNull String text, @NonNull Predicate<@NonNull String> predicate) {
+                this.text = text;
+                this.predicate = predicate;
+            }
         }
-
     }
 
-    public static void main(String[] args) {
+    /**
+     * Main method for standalone testing.
+     *
+     * @param args command-line arguments
+     */
+    public static void main(@NonNull String @NonNull [] args) {
         var panel = new Panel();
         Components.show(panel);
     }

@@ -3,17 +3,26 @@ package io.github.mjcro.toybox.swing.renderers;
 import io.github.mjcro.toybox.swing.Components;
 import io.github.mjcro.toybox.swing.hint.Hints;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxLaF;
+import org.jspecify.annotations.NonNull;
 
-import javax.swing.*;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
-import java.awt.*;
+import java.awt.BorderLayout;
 import java.time.Instant;
 
+/**
+ * Demonstration panel showcasing various table cell renderers.
+ */
 public class Example extends JPanel {
+    /**
+     * Constructs the example panel with a pre-populated table.
+     */
     public Example() {
         super(new BorderLayout());
 
-        DefaultTableModel model = new DefaultTableModel();
+        final DefaultTableModel model = new DefaultTableModel();
         model.addColumn("Null");
         model.addColumn("String");
         model.addColumn("Bold");
@@ -44,7 +53,7 @@ public class Example extends JPanel {
                 "https://httpbin.org"
         });
 
-        JTable table = new JTable(model);
+        final JTable table = new JTable(model);
         table.getColumnModel().getColumn(0).setCellRenderer(new TableCellRendererNull());
         table.getColumnModel().getColumn(1).setCellRenderer(new TableCellRendererString());
         table.getColumnModel().getColumn(2).setCellRenderer(new TableCellRendererString(Hints.TEXT_SEMIBOLD));
@@ -58,7 +67,12 @@ public class Example extends JPanel {
         super.add(new JScrollPane(table));
     }
 
-    public static void main(String[] args) {
+    /**
+     * Entry point for running the renderer example standalone.
+     *
+     * @param args Command-line arguments (unused).
+     */
+    public static void main(@NonNull String[] args) {
         ToyBoxLaF.initialize(false);
         Components.show(new Example());
     }

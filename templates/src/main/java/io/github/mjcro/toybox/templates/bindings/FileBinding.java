@@ -3,21 +3,34 @@ package io.github.mjcro.toybox.templates.bindings;
 import io.github.mjcro.interfaces.Decorator;
 import io.github.mjcro.toybox.api.Environment;
 import io.github.mjcro.toybox.swing.widgets.FileChooserInput;
-import lombok.NonNull;
+import org.jspecify.annotations.NonNull;
 
 import javax.swing.filechooser.FileFilter;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
+import java.util.Objects;
 
+/**
+ * Binding that provides a file chooser input for {@link java.io.File}-typed fields.
+ */
 public class FileBinding extends AbstractJPanelContainerBinding {
-    private final FileChooserInput fileChooserInput;
 
+    private final @NonNull FileChooserInput fileChooserInput;
+
+    /**
+     * Creates a new file binding.
+     *
+     * @param environment the application environment
+     * @param target      the object containing the field
+     * @param field       the annotated file field
+     */
     public FileBinding(
             @NonNull Environment environment,
             @NonNull Object target,
             @NonNull Field field
     ) {
         super(target, field);
+        Objects.requireNonNull(environment, "environment");
 
         // Reading options
         FileFilter[] fileFilters = new FileFilter[0];
@@ -30,7 +43,7 @@ public class FileBinding extends AbstractJPanelContainerBinding {
         super.add(this.fileChooserInput);
     }
 
-    private FileFilter[] readOptions(Class<?> options) {
+    private @NonNull FileFilter @NonNull [] readOptions(@NonNull Class<?> options) {
         if (options.isEnum()) {
             Object[] constants = options.getEnumConstants();
             ArrayList<FileFilter> filters = new ArrayList<>();

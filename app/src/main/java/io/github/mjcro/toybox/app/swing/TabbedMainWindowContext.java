@@ -12,32 +12,63 @@ import io.github.mjcro.toybox.swing.hint.Hints;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxButtons;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxIcons;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxLabels;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
-import javax.swing.*;
+import javax.swing.JButton;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.SwingUtilities;
 import javax.swing.border.EmptyBorder;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Color;
+import java.awt.Dimension;
+import java.awt.Insets;
 import java.awt.event.ActionListener;
 import java.util.Locale;
 import java.util.Optional;
 
+/**
+ * Context implementation for the tabbed main window, managing per-tab lifecycle
+ * and event dispatching for individual toys.
+ */
 public class TabbedMainWindowContext extends AbstractWindowContext<TabbedMainWindow> {
-    private TabComponent tab = null;
+    private @Nullable TabComponent tab = null;
 
-    TabbedMainWindowContext(Environment environment, TabbedMainWindow mdi) {
+    /**
+     * Constructs the initial context for a tabbed main window.
+     *
+     * @param environment the application environment
+     * @param mdi         the tabbed main window
+     */
+    TabbedMainWindowContext(@NonNull Environment environment, @NonNull TabbedMainWindow mdi) {
         super(environment, mdi, new JPopupMenu(), null);
         this.popupMenu.addPopupMenuListener(new OnPopup());
     }
 
-    private TabbedMainWindowContext(TabbedMainWindowContext previous, Object initialData) {
+    /**
+     * Constructs a child context with initial data from a parent context.
+     *
+     * @param previous    the parent context
+     * @param initialData the initial data for the new context
+     */
+    private TabbedMainWindowContext(@NonNull TabbedMainWindowContext previous, @Nullable Object initialData) {
         super(previous.getEnvironment(), previous.mainWindow, previous.popupMenu, initialData);
     }
 
-    TabbedMainWindowContext withInitialData(Object data) {
+    /**
+     * Creates a new context sharing this context's window but carrying the given initial data.
+     *
+     * @param data the initial data for the new context
+     * @return a new context with the given initial data
+     */
+    @NonNull TabbedMainWindowContext withInitialData(@Nullable Object data) {
         return new TabbedMainWindowContext(this, data);
     }
 
     @Override
-    public void sendEvent(Event event) {
+    public void sendEvent(@Nullable Event event) {
         if (event == null) {
             return;
         }
@@ -63,7 +94,12 @@ public class TabbedMainWindowContext extends AbstractWindowContext<TabbedMainWin
         getEnvironment().handleEvent(this, event);
     }
 
-    private void showInContext(AbstractToy toy) {
+    /**
+     * Opens the given toy in a new tab within this context's window.
+     *
+     * @param toy the toy to display
+     */
+    private void showInContext(@NonNull AbstractToy toy) {
         JPanel panel = buildToyPanel(toy);
         attachPopup(panel);
         mainWindow.tabbedPane.addTab(
@@ -85,12 +121,20 @@ public class TabbedMainWindowContext extends AbstractWindowContext<TabbedMainWin
         mainWindow.tabbedPane.setTabComponentAt(index, tab);
     }
 
+    /**
+     * Custom tab component displaying the toy label, an optional hint, and a close button.
+     */
     private static class TabComponent extends JPanel {
-        private final JLabel label = ToyBoxLabels.create();
-        private final JLabel hint = ToyBoxLabels.create();
-        private final JButton close = ToyBoxButtons.create();
+        private final @NonNull JLabel label = ToyBoxLabels.create();
+        private final @NonNull JLabel hint = ToyBoxLabels.create();
+        private final @NonNull JButton close = ToyBoxButtons.create();
 
-        public TabComponent(AbstractToy toy) {
+        /**
+         * Constructs a tab component for the given toy.
+         *
+         * @param toy the toy whose label to display
+         */
+        public TabComponent(@NonNull AbstractToy toy) {
             super(new BorderLayout());
 
             super.setOpaque(false);
@@ -113,19 +157,34 @@ public class TabbedMainWindowContext extends AbstractWindowContext<TabbedMainWin
             super.add(labels, BorderLayout.LINE_START);
         }
 
-        public void setOnCloseClick(ActionListener l) {
+        /**
+         * Registers a listener to be called when the close button is clicked.
+         *
+         * @param l the action listener
+         */
+        public void setOnCloseClick(@NonNull ActionListener l) {
             close.addActionListener(l);
         }
 
-        public void setLabel(Label l) {
+        /**
+         * Updates the tab's displayed label text and icon.
+         *
+         * @param l the label to display, or null to leave unchanged
+         */
+        public void setLabel(@Nullable Label l) {
             if (l != null) {
                 label.setText(l.getName());
                 l.getIconURI().flatMap(ToyBoxIcons::getSmall).ifPresent(label::setIcon);
             }
         }
 
-        public void setHint(String s) {
-            if (Util.isBlank(s)) {
+        /**
+         * Sets the hint text displayed below the tab label.
+         *
+         * @param s the hint text, or null/blank to clear
+         */
+        public void setHint(@Nullable String s) {
+            if (s == null || s.isBlank()) {
                 hint.setText(null);
             } else {
                 s = s.toUpperCase(Locale.ROOT);

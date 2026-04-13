@@ -1,30 +1,38 @@
 package io.github.mjcro.toybox.swing.layouts;
 
-import java.awt.*;
+import org.jspecify.annotations.NonNull;
 
+import java.awt.Component;
+import java.awt.Container;
+import java.awt.Dimension;
+import java.awt.Insets;
+import java.awt.LayoutManager;
+
+/**
+ * A layout manager that arranges components in an inline-block fashion,
+ * wrapping to the next row when the available width is exceeded.
+ */
 public class InlineBlockLayout implements LayoutManager {
     private final int hGap = 5;
     private final int vGap = 5;
 
     @Override
-    public void addLayoutComponent(String name, Component comp) {
-
+    public void addLayoutComponent(@NonNull String name, @NonNull Component comp) {
     }
 
     @Override
-    public void removeLayoutComponent(Component comp) {
-
+    public void removeLayoutComponent(@NonNull Component comp) {
     }
 
     @Override
-    public Dimension preferredLayoutSize(Container parent) {
+    public @NonNull Dimension preferredLayoutSize(@NonNull Container parent) {
         synchronized (parent.getTreeLock()) {
-            Insets insets = parent.getInsets();
+            final Insets insets = parent.getInsets();
             int parentWidth = parent.getWidth();
             parentWidth = parentWidth == 0 ? Short.MAX_VALUE : parentWidth;
-            int width = parentWidth - insets.left - insets.right;
+            final int width = parentWidth - insets.left - insets.right;
             int height = insets.top + insets.bottom;
-            int[] rows = rowHeights(parent.getComponents(), width);
+            final int[] rows = rowHeights(parent.getComponents(), width);
             for (int i = 0; i < rows.length; i++) {
                 height += rows[i];
                 if (i > 0) {
@@ -36,26 +44,26 @@ public class InlineBlockLayout implements LayoutManager {
     }
 
     @Override
-    public Dimension minimumLayoutSize(Container parent) {
+    public @NonNull Dimension minimumLayoutSize(@NonNull Container parent) {
         return preferredLayoutSize(parent);
     }
 
     @Override
-    public void layoutContainer(Container parent) {
+    public void layoutContainer(@NonNull Container parent) {
         synchronized (parent.getTreeLock()) {
-            Insets insets = parent.getInsets();
-            int width = parent.getWidth() - insets.right - insets.left;
+            final Insets insets = parent.getInsets();
+            final int width = parent.getWidth() - insets.right - insets.left;
 
-            Component[] components = parent.getComponents();
-            int[] rows = rowHeights(parent.getComponents(), width);
+            final Component[] components = parent.getComponents();
+            final int[] rows = rowHeights(parent.getComponents(), width);
 
             int row = 0;
             int offsetX = insets.left;
             int offsetY = insets.top;
             boolean first = true;
-            for (Component c : components) {
-                Dimension d = getDimensions(c);
-                int currentRow = row;
+            for (final Component c : components) {
+                final Dimension d = getDimensions(c);
+                final int currentRow = row;
                 if (!first) {
                     if (offsetX + d.width - insets.left > width) {
                         // Component is out of bounds
@@ -69,7 +77,7 @@ public class InlineBlockLayout implements LayoutManager {
 
                 c.setSize(d);
                 if (d.height < rows[currentRow] - 1) {
-                    int delta = (rows[currentRow] - d.height) / 2;
+                    final int delta = (rows[currentRow] - d.height) / 2;
                     c.setBounds(offsetX, offsetY + delta, d.width, d.height);
                 } else {
                     c.setBounds(offsetX, offsetY, d.width, d.height);
@@ -83,13 +91,13 @@ public class InlineBlockLayout implements LayoutManager {
         }
     }
 
-    private int[] rowHeights(Component[] components, int width) {
+    private int @NonNull [] rowHeights(@NonNull Component @NonNull [] components, int width) {
         int[] heights = new int[1];
         int row = 0;
         int left = 0;
         boolean first = true;
-        for (Component c : components) {
-            Dimension d = getDimensions(c);
+        for (final Component c : components) {
+            final Dimension d = getDimensions(c);
             // Checking if component is out of bounds
             if (!first) {
                 left += hGap;
@@ -101,7 +109,7 @@ public class InlineBlockLayout implements LayoutManager {
                     first = true;
 
                     // Scaling array
-                    int[] larger = new int[heights.length + 1];
+                    final int[] larger = new int[heights.length + 1];
                     System.arraycopy(heights, 0, larger, 0, heights.length);
                     heights = larger;
                 } else {
@@ -122,9 +130,9 @@ public class InlineBlockLayout implements LayoutManager {
         return heights;
     }
 
-    private Dimension getDimensions(Component c) {
-        Dimension p = c.getPreferredSize();
-        Dimension m = c.getMinimumSize();
+    private @NonNull Dimension getDimensions(@NonNull Component c) {
+        final Dimension p = c.getPreferredSize();
+        final Dimension m = c.getMinimumSize();
 
         return new Dimension(Math.max(p.width, m.width), Math.max(p.height, m.height));
     }

@@ -12,12 +12,19 @@ import io.github.mjcro.toybox.swing.util.Slf4jUtil;
 import io.github.mjcro.toybox.swing.widgets.MultiViewTextAreaOrExceptionPanel;
 import io.github.mjcro.toybox.swing.widgets.panels.HorizontalComponentsPanel;
 import io.github.mjcro.toybox.swing.widgets.panels.VerticalRowsPanel;
-import lombok.NonNull;
-import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import javax.swing.*;
+import javax.swing.BorderFactory;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JPanel;
+import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
-import java.awt.*;
+import java.awt.BorderLayout;
+import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.io.File;
 import java.io.IOException;
@@ -29,31 +36,53 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
+import java.util.List;
+import java.util.Objects;
 
-@Slf4j
+/**
+ * Abstract base for toys that produce string output from data objects
+ * with configurable bindings.
+ */
 public abstract class AbstractStringTemplateToy implements Toy {
-    protected abstract StringProducer getDataObject(Context context);
+    private static final @NonNull Logger log = LoggerFactory.getLogger(AbstractStringTemplateToy.class);
+
+    /**
+     * Returns the data object that provides bindings for this template.
+     *
+     * @param context the toy context
+     * @return the string producer data object
+     */
+    protected abstract @NonNull StringProducer getDataObject(@NonNull Context context);
 
     @Override
-    public JPanel build(Context context) {
+    public @NonNull JPanel build(@NonNull Context context) {
         return new Panel(context.getEnvironment(), getDataObject(context));
     }
 
+    /**
+     * Panel that renders template bindings and output.
+     */
     public static class Panel extends JPanel {
-        private final Environment environment;
-        private final JPanel inputs;
-        private final MultiViewTextAreaOrExceptionPanel output = new MultiViewTextAreaOrExceptionPanel();
-        private final JButton applyButton;
-        private final JButton copyToClipButton;
-        private final JButton saveToFileButton;
-        private final JCheckBox autoCheckbox = new JCheckBox("auto");
+        private final @NonNull Environment environment;
+        private final @NonNull JPanel inputs;
+        private final @NonNull MultiViewTextAreaOrExceptionPanel output = new MultiViewTextAreaOrExceptionPanel();
+        private final @NonNull JButton applyButton;
+        private final @NonNull JButton copyToClipButton;
+        private final @NonNull JButton saveToFileButton;
+        private final @NonNull JCheckBox autoCheckbox = new JCheckBox("auto");
 
-        private java.util.List<Binding> bindings = new ArrayList<>();
-        private StringProducer object = null;
+        private @NonNull List<@NonNull Binding> bindings = new ArrayList<>();
+        private @Nullable StringProducer object = null;
 
-        private final JTextField hash;
+        private final @NonNull JTextField hash;
 
-        public Panel(Environment environment, StringProducer dataObject) {
+        /**
+         * Creates a new template panel.
+         *
+         * @param environment the application environment
+         * @param dataObject  the initial data object, or {@code null}
+         */
+        public Panel(@NonNull Environment environment, @Nullable StringProducer dataObject) {
             super.setLayout(new BorderLayout());
             Hints.PADDING_NORMAL.apply(this);
             this.environment = environment;
@@ -102,14 +131,14 @@ public abstract class AbstractStringTemplateToy implements Toy {
             }
         }
 
-        private void onCopyToClipboardClick(ActionEvent e) {
+        private void onCopyToClipboardClick(@NonNull ActionEvent e) {
             environment.clipboardPut(output.getViewText());
         }
 
-        private void onSaveToFileClick(ActionEvent e) {
+        private void onSaveToFileClick(@NonNull ActionEvent e) {
             environment.chooseFileToSave(new Environment.FileCallback() {
                 @Override
-                public void onFileChosen(File file) throws IOException {
+                public void onFileChosen(@NonNull File file) throws IOException {
                     if (log.isDebugEnabled(Slf4jUtil.TOYBOX_MARKER)) {
                         log.debug(Slf4jUtil.TOYBOX_MARKER, "Saving to file {}", file);
                     }
@@ -133,7 +162,7 @@ public abstract class AbstractStringTemplateToy implements Toy {
             }, null);
         }
 
-        private void onApplyButtonClick(ActionEvent e) {
+        private void onApplyButtonClick(@NonNull ActionEvent e) {
             doApply();
         }
 
@@ -144,7 +173,8 @@ public abstract class AbstractStringTemplateToy implements Toy {
         }
 
         private void doApply() {
-            if (object == null) {
+            final StringProducer producer = object;
+            if (producer == null) {
                 return;
             }
             applyButton.setEnabled(false);
@@ -167,7 +197,7 @@ public abstract class AbstractStringTemplateToy implements Toy {
                             throw new BindingValueApplyException(b, err);
                         }
                     }
-                    object.produce(sb);
+                    producer.produce(sb);
                     String text = sb.toString();
                     hash.setText(md5Hex(text));
                     output.setViewText(text);
@@ -194,13 +224,18 @@ public abstract class AbstractStringTemplateToy implements Toy {
             });
         }
 
+        /**
+         * Sets the data object providing template bindings.
+         *
+         * @param object the string producer to bind
+         */
         public void setDataObject(@NonNull StringProducer object) {
-            this.object = object;
+            this.object = Objects.requireNonNull(object, "object");
             inputs.removeAll();
             updateInputs(object);
         }
 
-        private void updateInputs(StringProducer object) {
+        private void updateInputs(@NonNull StringProducer object) {
             bindings = new BindingResolver().getBindings(environment, object);
             LinkedHashSet<String> groups = new LinkedHashSet<>();
             bindings.forEach($ -> groups.add($.getGroup().orElse("")));
@@ -239,7 +274,7 @@ public abstract class AbstractStringTemplateToy implements Toy {
         }
     }
 
-    private static String md5Hex(String source) {
+    private static @NonNull String md5Hex(@NonNull String source) {
         try {
             MessageDigest md5 = MessageDigest.getInstance("MD5");
             byte[] bytes = md5.digest(source.getBytes(StandardCharsets.UTF_8));
@@ -250,8 +285,11 @@ public abstract class AbstractStringTemplateToy implements Toy {
         }
     }
 
+    /**
+     * Exception wrapper for binding value application failures.
+     */
     private static class BindingValueApplyException extends RuntimeException {
-        private BindingValueApplyException(Binding b, Throwable cause) {
+        private BindingValueApplyException(@NonNull Binding b, @NonNull Throwable cause) {
             super("Exception applying value for " + b, cause);
         }
     }

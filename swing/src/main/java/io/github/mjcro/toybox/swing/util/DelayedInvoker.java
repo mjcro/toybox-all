@@ -1,25 +1,40 @@
 package io.github.mjcro.toybox.swing.util;
 
-import lombok.NonNull;
-import lombok.RequiredArgsConstructor;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.time.Duration;
+import java.util.Objects;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.ScheduledFuture;
 import java.util.concurrent.TimeUnit;
 
-@RequiredArgsConstructor
+/**
+ * An executor that delays command execution, cancelling any previously
+ * scheduled but not yet started command when a new one arrives.
+ *
+ * <p>Useful for debouncing rapid user input events such as
+ * keystroke-triggered searches.
+ */
 public class DelayedInvoker implements Executor {
-    private static final ScheduledExecutorService delays = Executors.newScheduledThreadPool(2);
+    private static final @NonNull ScheduledExecutorService delays = Executors.newScheduledThreadPool(2);
 
-    @NonNull
-    private final Duration delay;
-    private volatile ScheduledFuture<?> future;
+    private final @NonNull Duration delay;
+    private volatile @Nullable ScheduledFuture<?> future;
+
+    /**
+     * Creates a new delayed invoker with the specified delay.
+     *
+     * @param delay the delay before executing commands
+     */
+    public DelayedInvoker(@NonNull Duration delay) {
+        this.delay = Objects.requireNonNull(delay, "delay");
+    }
 
     @Override
-    public synchronized void execute(Runnable r) {
+    public synchronized void execute(@NonNull Runnable r) {
         if (future != null) {
             future.cancel(false);
             future = null;

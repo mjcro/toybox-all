@@ -11,25 +11,34 @@ import io.github.mjcro.toybox.swing.hint.Hints;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxLabels;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxPanels;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxTextComponents;
+import org.jspecify.annotations.NonNull;
 
-import javax.swing.*;
+import javax.swing.BoxLayout;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTable;
 import javax.swing.table.DefaultTableModel;
 import javax.swing.table.TableColumnModel;
-import java.awt.*;
+import java.awt.BorderLayout;
 import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Toy that displays application information, version details, and a list
+ * of all installed toys.
+ */
 public class AboutToy implements Toy {
     @Override
-    public List<Menu> getPath() {
+    public @NonNull List<@NonNull Menu> getPath() {
         return List.of(Menu.TOYBOX_MENU);
     }
 
     @Override
-    public Label getLabel() {
+    public @NonNull Label getLabel() {
         return new OrderedLabel(
                 Integer.MAX_VALUE,
                 Label.ofIconAndName("toybox-64", "About")
@@ -37,19 +46,27 @@ public class AboutToy implements Toy {
     }
 
     @Override
-    public Optional<String> getVersion() {
+    public @NonNull Optional<@NonNull String> getVersion() {
         return Optional.of(Application.INTERNAL_VERSION);
     }
 
     @Override
-    public JPanel build(Context context) {
+    public @NonNull JPanel build(@NonNull Context context) {
         return new AboutPanel(context.getEnvironment());
     }
 
+    /**
+     * Panel displaying the About information including version and installed toys table.
+     */
     public static class AboutPanel extends JPanel {
-        private final Environment environment;
+        private final @NonNull Environment environment;
 
-        public AboutPanel(Environment environment) {
+        /**
+         * Constructs the about panel.
+         *
+         * @param environment the application environment to query for installed toys
+         */
+        public AboutPanel(@NonNull Environment environment) {
             super();
 
             this.environment = environment;
@@ -66,7 +83,12 @@ public class AboutToy implements Toy {
             BorderLayoutMaster.addTopCenter(this, top, buildInstalledToysPanel());
         }
 
-        private JPanel buildInstalledToysPanel() {
+        /**
+         * Builds the panel listing all installed toys in a table.
+         *
+         * @return a panel containing the installed toys table
+         */
+        private @NonNull JPanel buildInstalledToysPanel() {
             JPanel panel = new JPanel(new BorderLayout());
             Hints.PADDING_NORMAL.apply(panel);
 
@@ -100,7 +122,12 @@ public class AboutToy implements Toy {
             return panel;
         }
 
-        private static JPanel buildShortEnvPanel() {
+        /**
+         * Builds a panel showing application and system version information.
+         *
+         * @return a panel with version details
+         */
+        private static @NonNull JPanel buildShortEnvPanel() {
             return ToyBoxPanels.twoColumnsRight(
                     new AbstractMap.SimpleEntry<>(
                             ToyBoxLabels.create("Application version"),

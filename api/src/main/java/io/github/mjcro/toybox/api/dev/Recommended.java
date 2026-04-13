@@ -6,7 +6,10 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 /**
- * Marker for types and methods recommended to use.
+ * Source-level marker annotation indicating that the annotated type or method
+ * is the recommended approach for its use case.
+ *
+ * <p>This annotation is retained only in source code and has no runtime effect.</p>
  */
 @Retention(RetentionPolicy.SOURCE)
 @Target({ElementType.TYPE, ElementType.METHOD})

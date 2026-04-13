@@ -1,10 +1,22 @@
 package io.github.mjcro.toybox.app.utils;
 
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
+
 import java.time.Duration;
 import java.util.Locale;
 
+/**
+ * Utility class for formatting byte sizes and durations into human-readable strings.
+ */
 public class TextFormat {
-    public static String bytes(long bytes) {
+    /**
+     * Formats a byte count into a compact human-readable string (e.g., "128Kb", "4Mb").
+     *
+     * @param bytes the number of bytes
+     * @return a formatted string representation
+     */
+    public static @NonNull String bytes(long bytes) {
         if (bytes < 1) {
             return "";
         } else if (bytes < 10_000) {
@@ -18,7 +30,14 @@ public class TextFormat {
         return bytes / 1024 / 1024 / 1024 + " Gb";
     }
 
-    public static String duration(Duration duration) {
+    /**
+     * Formats a duration into a compact human-readable string (e.g., "1.2ms", "3.4s").
+     * Returns "0ns" for null, zero, or negative durations.
+     *
+     * @param duration the duration to format, or null
+     * @return a formatted string representation
+     */
+    public static @NonNull String duration(@Nullable Duration duration) {
         if (duration == null || duration.isZero() || duration.isNegative()) {
             return "0ns";
         }
@@ -38,7 +57,12 @@ public class TextFormat {
     private TextFormat() {
     }
 
-    public static void main(String[] args) {
+    /**
+     * Main method for standalone testing of formatting utilities.
+     *
+     * @param args command-line arguments (unused)
+     */
+    public static void main(@NonNull String[] args) {
         long x = 2;
         while (x < 100_000_000_000L) {
             Duration d= Duration.ofNanos(x);

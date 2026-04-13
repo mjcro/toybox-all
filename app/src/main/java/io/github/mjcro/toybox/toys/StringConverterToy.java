@@ -1,6 +1,5 @@
 package io.github.mjcro.toybox.toys;
 
-import com.google.common.hash.Hashing;
 import com.google.common.io.BaseEncoding;
 import io.github.mjcro.toybox.api.Context;
 import io.github.mjcro.toybox.api.Label;
@@ -11,27 +10,40 @@ import io.github.mjcro.toybox.swing.Components;
 import io.github.mjcro.toybox.swing.hint.Hints;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxButtons;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxTextComponents;
-import lombok.Data;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTextArea;
+import java.awt.BorderLayout;
+import java.awt.GridLayout;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Vector;
 import java.util.function.Function;
 
+/**
+ * Toy for converting strings between different encodings and representations.
+ */
 public class StringConverterToy implements Toy {
-    private static final List<SourceToBytes> toBytesConverters = List.of(
+
+    private static final @NonNull List<@NonNull SourceToBytes> toBytesConverters = List.of(
             new SourceToBytes("String", s -> s.getBytes(StandardCharsets.UTF_8)),
             new SourceToBytes("Hexadecimal", s -> BaseEncoding.base16().decode(s.toUpperCase(Locale.ROOT))),
             new SourceToBytes("Base 32", s -> BaseEncoding.base32().decode(s.toUpperCase(Locale.ROOT))),
             new SourceToBytes("Base 64", s -> BaseEncoding.base64().decode(s))
     );
-    private static final List<BytesToResult> fromBytesConverters = List.of(
+    private static final @NonNull List<@NonNull BytesToResult> fromBytesConverters = List.of(
             new BytesToResult("String", b -> new String(b, StandardCharsets.UTF_8)),
             new BytesToResult("Lowercase", b -> new String(b, StandardCharsets.UTF_8).toLowerCase(Locale.ROOT)),
             new BytesToResult("Uppercase", b -> new String(b, StandardCharsets.UTF_8).toUpperCase(Locale.ROOT)),
@@ -54,22 +66,22 @@ public class StringConverterToy implements Toy {
     );
 
     @Override
-    public List<Menu> getPath() {
+    public @NonNull List<@NonNull Menu> getPath() {
         return List.of(Menu.TOYBOX_BASIC_TOOLS_MENU);
     }
 
     @Override
-    public Label getLabel() {
+    public @NonNull Label getLabel() {
         return Label.ofIconAndName("fam://text_replace", "String Convert");
     }
 
     @Override
-    public Optional<String> getVersion() {
+    public @NonNull Optional<@NonNull String> getVersion() {
         return Optional.of("v0.2");
     }
 
     @Override
-    public JPanel build(Context context) {
+    public @NonNull JPanel build(@NonNull Context context) {
         Panel panel = new Panel();
         context.getInitialData()
                 .filter($ -> $ instanceof CharSequence)
@@ -79,8 +91,8 @@ public class StringConverterToy implements Toy {
         return panel;
     }
 
-    private static String hexTable(byte[] bytes) {
-        if (Util.isEmpty(bytes)) {
+    private static @NonNull String hexTable(byte @Nullable [] bytes) {
+        if (bytes == null || bytes.length == 0) {
             return "";
         }
 
@@ -112,15 +124,20 @@ public class StringConverterToy implements Toy {
         return sb.toString();
     }
 
+    /**
+     * Main panel containing source/result text areas and conversion selectors.
+     */
     private static final class Panel extends JPanel {
-        private final JTextArea sourceText, resultText;
-        private final JComboBox<SourceToBytes> sourceTypeSelector;
-        private final JComboBox<BytesToResult> bytesToResultSelector;
-        private final JButton convertButton;
 
-        public Panel() {
+        private final @NonNull JTextArea sourceText;
+        private final @NonNull JTextArea resultText;
+        private final @NonNull JComboBox<@NonNull SourceToBytes> sourceTypeSelector;
+        private final @NonNull JComboBox<@NonNull BytesToResult> bytesToResultSelector;
+        private final @NonNull JButton convertButton;
+
+        Panel() {
             this.sourceText = ToyBoxTextComponents.createJTextArea(Hints.TEXT_MONOSPACED);
-            this.resultText =  ToyBoxTextComponents.createJTextArea(Hints.TEXT_MONOSPACED, Hints.NOT_EDITABLE_TEXT);
+            this.resultText = ToyBoxTextComponents.createJTextArea(Hints.TEXT_MONOSPACED, Hints.NOT_EDITABLE_TEXT);
             this.convertButton = ToyBoxButtons.createPrimary("Convert To", e -> doConvert());
             this.sourceTypeSelector = new JComboBox<>(new Vector<>(toBytesConverters));
             this.bytesToResultSelector = new JComboBox<>(new Vector<>(fromBytesConverters));
@@ -160,11 +177,11 @@ public class StringConverterToy implements Toy {
             this.add(textAreasPanel, BorderLayout.CENTER);
         }
 
-        public void setSourceText(String s) {
+        void setSourceText(@NonNull String s) {
             sourceText.setText(s);
         }
 
-        public void doConvert() {
+        void doConvert() {
             SourceToBytes from = (SourceToBytes) this.sourceTypeSelector.getSelectedItem();
             BytesToResult to = (BytesToResult) this.bytesToResultSelector.getSelectedItem();
 
@@ -189,32 +206,105 @@ public class StringConverterToy implements Toy {
         }
     }
 
-    @Data
+    /**
+     * Converter from source string to byte array.
+     */
     private static final class SourceToBytes {
-        private final String name;
-        private final Function<String, byte[]> converter;
+
+        private final @NonNull String name;
+        private final @NonNull Function<@NonNull String, byte @NonNull []> converter;
+
+        SourceToBytes(@NonNull String name, @NonNull Function<@NonNull String, byte @NonNull []> converter) {
+            this.name = name;
+            this.converter = converter;
+        }
+
+        @NonNull String getName() {
+            return name;
+        }
+
+        @NonNull Function<@NonNull String, byte @NonNull []> getConverter() {
+            return converter;
+        }
 
         @Override
-        public String toString() {
+        public boolean equals(@Nullable Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            SourceToBytes that = (SourceToBytes) o;
+            return Objects.equals(name, that.name)
+                    && Objects.equals(converter, that.converter);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(name, converter);
+        }
+
+        @Override
+        public @NonNull String toString() {
             return name;
         }
     }
 
-    @Data
+    /**
+     * Converter from byte array to result string.
+     */
     private static final class BytesToResult {
-        private final String name;
-        private final Function<byte[], String> converter;
+
+        private final @NonNull String name;
+        private final @NonNull Function<byte @Nullable [], @NonNull String> converter;
+
+        BytesToResult(@NonNull String name, @NonNull Function<byte @Nullable [], @NonNull String> converter) {
+            this.name = name;
+            this.converter = converter;
+        }
+
+        @NonNull String getName() {
+            return name;
+        }
+
+        @NonNull Function<byte @Nullable [], @NonNull String> getConverter() {
+            return converter;
+        }
 
         @Override
-        public String toString() {
+        public boolean equals(@Nullable Object o) {
+            if (this == o) {
+                return true;
+            }
+            if (o == null || getClass() != o.getClass()) {
+                return false;
+            }
+            BytesToResult that = (BytesToResult) o;
+            return Objects.equals(name, that.name)
+                    && Objects.equals(converter, that.converter);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(name, converter);
+        }
+
+        @Override
+        public @NonNull String toString() {
             return name;
         }
     }
 
-    public static void main(String[] args) {
+    /**
+     * Main method for standalone testing.
+     *
+     * @param args command-line arguments
+     */
+    public static void main(@NonNull String @NonNull [] args) {
         var panel = new Panel();
         JPopupMenu menu = new JPopupMenu();
-        menu.add(new JMenuItem("Hello"));
+        menu.add(new javax.swing.JMenuItem("Hello"));
 
         panel.setComponentPopupMenu(menu);
         Components.show(panel);

@@ -1,16 +1,13 @@
 package io.github.mjcro.toybox.api;
 
 import io.github.mjcro.interfaces.strings.WithName;
+import org.jspecify.annotations.NonNull;
 
 import java.util.Optional;
 
 /**
- * Defines some label, that can be later rendered as:
- * - Label
- * - Button
- * - Menu
- * - Window title
- * - etc...
+ * Defines a display label that can be rendered as a label component, button,
+ * menu item, window title, or other UI element.
  */
 public interface Label extends WithName, Labeled {
     /**
@@ -19,7 +16,7 @@ public interface Label extends WithName, Labeled {
      * @param name Name to display.
      * @return Label instance.
      */
-    static Label ofName(String name) {
+    static @NonNull Label ofName(@NonNull String name) {
         return new LabelImpl(name, null, null);
     }
 
@@ -30,7 +27,7 @@ public interface Label extends WithName, Labeled {
      * @param name Name to display.
      * @return Label instance.
      */
-    static Label ofIconAndName(String icon, String name) {
+    static @NonNull Label ofIconAndName(@NonNull String icon, @NonNull String name) {
         return new LabelImpl(name, icon, null);
     }
 
@@ -41,34 +38,43 @@ public interface Label extends WithName, Labeled {
      * @param style Style of label.
      * @return Label instance.
      */
-    static Label ofNameStyle(String name, String style) {
+    static @NonNull Label ofNameStyle(@NonNull String name, @NonNull String style) {
         return new LabelImpl(name, null, style);
     }
 
     /**
-     * Construct label with icon name and style.
+     * Constructs label with icon, name, and style.
      *
      * @param icon  Icon URI.
      * @param name  Name to display.
      * @param style Style of label.
      * @return Label instance.
      */
-    static Label ofIconNameStyle(String icon, String name, String style) {
+    static @NonNull Label ofIconNameStyle(@NonNull String icon, @NonNull String name, @NonNull String style) {
         return new LabelImpl(name, icon, style);
     }
 
     /**
+     * Returns the icon URI for this label, if one has been set.
+     *
      * @return Label icon URI, optional.
      */
-    Optional<String> getIconURI();
+    @NonNull Optional<@NonNull String> getIconURI();
 
     /**
+     * Returns the style identifier for this label, if one has been set.
+     *
      * @return Label style, optional.
      */
-    Optional<String> getStyle();
+    @NonNull Optional<@NonNull String> getStyle();
 
+    /**
+     * Returns this label instance.
+     *
+     * @return This label.
+     */
     @Override
-    default Label getLabel() {
+    default @NonNull Label getLabel() {
         return this;
     }
 }

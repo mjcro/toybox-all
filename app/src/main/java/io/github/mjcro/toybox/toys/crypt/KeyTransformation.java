@@ -1,13 +1,24 @@
 package io.github.mjcro.toybox.toys.crypt;
 
 import com.google.common.hash.Hashing;
+import org.jspecify.annotations.NonNull;
 
+/**
+ * Enumeration of key transformation strategies that hash raw key bytes
+ * into a fixed-size key suitable for cipher algorithms.
+ */
 enum KeyTransformation {
     NO,
     MD5,
     SHA256;
 
-    public byte[] transform(byte[] in) {
+    /**
+     * Transforms the input key bytes according to this transformation strategy.
+     *
+     * @param in the raw key bytes
+     * @return the transformed key bytes
+     */
+    public byte @NonNull [] transform(byte @NonNull [] in) {
         switch (this) {
             case NO:
                 return in;
@@ -21,7 +32,7 @@ enum KeyTransformation {
     }
 
     @Override
-    public String toString() {
+    public @NonNull String toString() {
         switch (this) {
             case NO:
                 return "No transformation";

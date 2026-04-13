@@ -6,15 +6,24 @@ import io.github.mjcro.toybox.api.Menu;
 import io.github.mjcro.toybox.templates.AbstractStringTemplateToy;
 import io.github.mjcro.toybox.templates.Databind;
 import io.github.mjcro.toybox.templates.StringProducer;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
-public class TemporalExampleStringTemplate extends AbstractStringTemplateToy  {
+/**
+ * Example string template demonstrating {@link LocalDate} and
+ * {@link LocalDateTime} field bindings.
+ */
+public class TemporalExampleStringTemplate extends AbstractStringTemplateToy {
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public List<Menu> getPath() {
+    public @NonNull List<@NonNull Menu> getPath() {
         ArrayList<Menu> path = new ArrayList<>();
         path.add(Menu.TOYBOX_MENU);
         path.add(Menu.TOYBOX_DEVELOPMENT_MENU);
@@ -22,31 +31,43 @@ public class TemporalExampleStringTemplate extends AbstractStringTemplateToy  {
         return path;
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public Label getLabel() {
+    public @NonNull Label getLabel() {
         return Label.ofName("Temporal Template");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    protected StringProducer getDataObject(final Context context) {
+    protected @NonNull StringProducer getDataObject(@NonNull Context context) {
         return new Data();
     }
 
+    /**
+     * Data template holding temporal fields for the example.
+     */
     private static class Data implements StringProducer {
         @Databind(name = "Local Date")
-        private LocalDate localDate;
+        private @Nullable LocalDate localDate;
 
         @Databind(name = "Preset Local Date")
-        private LocalDate presetLocalDate = LocalDate.now();
+        private @NonNull LocalDate presetLocalDate = LocalDate.now();
 
         @Databind(name = "Local DateTime")
-        private LocalDateTime localDateTime;
+        private @Nullable LocalDateTime localDateTime;
 
         @Databind(name = "Preset Local DateTime")
-        private LocalDateTime presetLocalDateTime = LocalDateTime.now();
+        private @NonNull LocalDateTime presetLocalDateTime = LocalDateTime.now();
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
-        public void produce(StringBuilder sb) {
+        public void produce(@NonNull StringBuilder sb) {
             sb.append("Local Date: ").append(localDate).append("\n");
             sb.append("Preset Local Date: ").append(presetLocalDate).append("\n");
             sb.append("Local DateTime: ").append(localDateTime).append("\n");

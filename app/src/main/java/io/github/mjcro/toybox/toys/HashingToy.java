@@ -10,7 +10,6 @@ import io.github.mjcro.toybox.swing.prefab.ToyBoxLabels;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxPanels;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxTextComponents;
 import io.github.mjcro.toybox.swing.util.Slf4jUtil;
-import lombok.extern.slf4j.Slf4j;
 import org.bouncycastle.crypto.Digest;
 import org.bouncycastle.crypto.digests.MD5Digest;
 import org.bouncycastle.crypto.digests.RIPEMD128Digest;
@@ -27,9 +26,21 @@ import org.bouncycastle.crypto.generators.OpenBSDBCrypt;
 import org.bouncycastle.crypto.macs.HMac;
 import org.bouncycastle.crypto.params.KeyParameter;
 import org.bouncycastle.util.encoders.Hex;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JButton;
+import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
+import java.awt.BorderLayout;
+import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.nio.charset.StandardCharsets;
 import java.security.SecureRandom;
@@ -46,25 +57,43 @@ import java.util.function.UnaryOperator;
 import java.util.zip.CRC32;
 import java.util.zip.Checksum;
 
-@Slf4j
+/**
+ * Toy providing various hashing algorithms including CRC32, MD5, SHA family,
+ * RIPEMD family, HMAC variants, BCrypt and Java's built-in hash.
+ */
 public class HashingToy implements Toy {
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public List<Menu> getPath() {
+    public @NonNull List<@NonNull Menu> getPath() {
         return List.of(Menu.TOYBOX_BASIC_TOOLS_MENU, Menu.TOYBOX_BASIC_TOOLS_CRYPTO_SUBMENU);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public Label getLabel() {
+    public @NonNull Label getLabel() {
         return Label.ofIconAndName("fam://asterisk_orange", "Hashing");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public JPanel build(final Context context) {
+    public @NonNull JPanel build(@NonNull Context context) {
         return new Panel(context.getEnvironment());
     }
 
+    /**
+     * Inner panel providing the hashing UI with algorithm selection,
+     * input area, password/complexity fields, and hash output.
+     */
     private static class Panel extends JPanel {
-        private final List<Hash> hashes = List.of(
+        private static final @NonNull Logger log = LoggerFactory.getLogger(Panel.class);
+
+        private final @NonNull List<@NonNull Hash> hashes = List.of(
                 new CRC32Hash(),
                 new BCDigestHash(MD5Digest::new),
                 TransformOutput.uppercase(new BCDigestHash(MD5Digest::new)),
@@ -98,18 +127,22 @@ public class HashingToy implements Toy {
                 new JavaHash()
         );
 
-        private final Executor executor;
+        private final @NonNull Executor executor;
 
-        private final JTextArea input = ToyBoxTextComponents.createJTextArea();
-        private final JTextField password = ToyBoxTextComponents.createJTextField();
-        private final JTextField complexity = ToyBoxTextComponents.createJTextField();
-        private final JTextField output = ToyBoxTextComponents.createJTextField(Hints.NOT_EDITABLE_TEXT);
-        private final JCheckBox trimInput = new JCheckBox("Trim input");
-        private final JButton hashButton = ToyBoxButtons.createPrimary("Hash", this::onHash);
-        private final JComboBox<Hash> hashSelector = new JComboBox<>(new Vector<>(hashes));
+        private final @NonNull JTextArea input = ToyBoxTextComponents.createJTextArea();
+        private final @NonNull JTextField password = ToyBoxTextComponents.createJTextField();
+        private final @NonNull JTextField complexity = ToyBoxTextComponents.createJTextField();
+        private final @NonNull JTextField output = ToyBoxTextComponents.createJTextField(Hints.NOT_EDITABLE_TEXT);
+        private final @NonNull JCheckBox trimInput = new JCheckBox("Trim input");
+        private final @NonNull JButton hashButton = ToyBoxButtons.createPrimary("Hash", this::onHash);
+        private final @NonNull JComboBox<@NonNull Hash> hashSelector = new JComboBox<>(new Vector<>(hashes));
 
-
-        public Panel(Executor executor) {
+        /**
+         * Constructs the hashing panel.
+         *
+         * @param executor the executor for running slow hash operations off the EDT
+         */
+        public Panel(@NonNull Executor executor) {
             super(new BorderLayout());
             this.executor = executor;
 
@@ -117,7 +150,13 @@ public class HashingToy implements Toy {
             add(buildInputPanel());
         }
 
-        private JPanel buildHeaderPanel() {
+        /**
+         * Builds the header containing algorithm selector, password/complexity fields,
+         * the hash button and the output field.
+         *
+         * @return the header panel
+         */
+        private @NonNull JPanel buildHeaderPanel() {
             JPanel additional = new JPanel(new FlowLayout(FlowLayout.LEFT));
             additional.add(trimInput);
 
@@ -155,7 +194,12 @@ public class HashingToy implements Toy {
             );
         }
 
-        private JPanel buildInputPanel() {
+        /**
+         * Builds the input panel containing the text area for data to hash.
+         *
+         * @return the input panel
+         */
+        private @NonNull JPanel buildInputPanel() {
             // Realtime changes
             input.getDocument().addUndoableEditListener(e -> doTryRealtime());
 
@@ -165,6 +209,11 @@ public class HashingToy implements Toy {
             );
         }
 
+        /**
+         * Enables or disables the panel's interactive components.
+         *
+         * @param enabled whether to enable the components
+         */
         @Override
         public void setEnabled(boolean enabled) {
             Hash h = (Hash) hashSelector.getSelectedItem();
@@ -177,6 +226,10 @@ public class HashingToy implements Toy {
             password.setEnabled(enabled && h != null && h.isPasswordSupported());
         }
 
+        /**
+         * Attempts real-time hashing if the selected algorithm is fast,
+         * otherwise clears the output.
+         */
         private void doTryRealtime() {
             setEnabled(true);
             Hash h = (Hash) hashSelector.getSelectedItem();
@@ -187,7 +240,12 @@ public class HashingToy implements Toy {
             }
         }
 
-        private void onHash(ActionEvent e) {
+        /**
+         * Handles the hash button click or realtime trigger.
+         *
+         * @param e the action event, may be {@code null} for realtime triggers
+         */
+        private void onHash(@Nullable ActionEvent e) {
             Hash h = (Hash) hashSelector.getSelectedItem();
             boolean trim = trimInput.isSelected();
             if (h.isFast()) {
@@ -198,7 +256,13 @@ public class HashingToy implements Toy {
             }
         }
 
-        private void doHash(Hash h, boolean trim) {
+        /**
+         * Performs the actual hashing operation.
+         *
+         * @param h    the hash algorithm to apply
+         * @param trim whether to trim the input before hashing
+         */
+        private void doHash(@NonNull Hash h, boolean trim) {
             Instant before = Instant.now();
             try {
                 String in = input.getText();
@@ -218,123 +282,204 @@ public class HashingToy implements Toy {
         }
     }
 
+    /**
+     * Contract for hash algorithm implementations used by the hashing panel.
+     */
     private interface Hash {
-        String apply(String input, String complexity, String password) throws Exception;
+        /**
+         * Applies the hash to the given input.
+         *
+         * @param input      the text to hash
+         * @param complexity the complexity parameter (algorithm-specific)
+         * @param password   the password/key parameter (algorithm-specific)
+         * @return the hash result as a string
+         * @throws Exception if hashing fails
+         */
+        @NonNull String apply(@NonNull String input, @NonNull String complexity, @NonNull String password) throws Exception;
 
         /**
-         * @return True if hashing so fast that it could be done in UI thread.
+         * @return {@code true} if hashing is fast enough to run on the EDT
          */
         boolean isFast();
 
         /**
-         * @return True if complexity parameter is supported.
+         * @return {@code true} if the complexity parameter is supported
          */
         default boolean isComplexitySupported() {
             return false;
         }
 
         /**
-         * @return True if password parameter is supported.
+         * @return {@code true} if the password parameter is supported
          */
         default boolean isPasswordSupported() {
             return false;
         }
     }
 
+    /**
+     * Hash implementation using Java's built-in {@link String#hashCode()}.
+     */
     private static class JavaHash implements Hash {
+        /**
+         * {@inheritDoc}
+         */
         @Override
-        public String apply(String input, String complexity, String password) {
+        public @NonNull String apply(@NonNull String input, @NonNull String complexity, @NonNull String password) {
             return String.valueOf(input.hashCode());
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public boolean isFast() {
             return true;
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
-        public String toString() {
+        public @NonNull String toString() {
             return "Java String hash";
         }
     }
 
+    /**
+     * Hash implementation using Java's {@link CRC32} checksum.
+     */
     private static class CRC32Hash implements Hash {
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public boolean isFast() {
             return true;
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
-        public String apply(String input, String complexity, String password) {
+        public @NonNull String apply(@NonNull String input, @NonNull String complexity, @NonNull String password) {
             Checksum checksum = new CRC32();
             byte[] source = input.getBytes(StandardCharsets.UTF_8);
             checksum.update(source, 0, source.length);
             return String.valueOf(checksum.getValue());
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
-        public String toString() {
+        public @NonNull String toString() {
             return "CRC32";
         }
     }
 
+    /**
+     * Decorator that transforms the output of another {@link Hash} (e.g. to uppercase).
+     */
     private static class TransformOutput implements Hash {
-        private final Hash real;
-        private final String suffix;
-        private final UnaryOperator<String> transformation;
+        private final @NonNull Hash real;
+        private final @NonNull String suffix;
+        private final @NonNull UnaryOperator<@NonNull String> transformation;
 
-        public static TransformOutput uppercase(Hash h) {
+        /**
+         * Creates a transform that converts the delegate's output to uppercase.
+         *
+         * @param h the delegate hash
+         * @return a new transform-output hash
+         */
+        public static @NonNull TransformOutput uppercase(@NonNull Hash h) {
             return new TransformOutput(h, "uppercase", $ -> $.toUpperCase(Locale.ROOT));
         }
 
-        private TransformOutput(Hash real, String suffix, UnaryOperator<String> transformation) {
+        /**
+         * Constructs a transform-output wrapper.
+         *
+         * @param real           the delegate hash
+         * @param suffix         display-name suffix
+         * @param transformation the string transformation to apply
+         */
+        private TransformOutput(@NonNull Hash real, @NonNull String suffix, @NonNull UnaryOperator<@NonNull String> transformation) {
             this.real = real;
             this.suffix = suffix;
             this.transformation = transformation;
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
-        public String apply(String input, String complexity, String password) throws Exception {
+        public @NonNull String apply(@NonNull String input, @NonNull String complexity, @NonNull String password) throws Exception {
             return transformation.apply(real.apply(input, complexity, password));
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public boolean isFast() {
             return real.isFast();
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
-        public String toString() {
+        public @NonNull String toString() {
             return real.toString() + " " + suffix;
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public boolean isComplexitySupported() {
             return real.isComplexitySupported();
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public boolean isPasswordSupported() {
             return real.isPasswordSupported();
         }
     }
 
+    /**
+     * Hash implementation backed by a BouncyCastle {@link Digest}.
+     */
     private static class BCDigestHash implements Hash {
-        final Supplier<Digest> supplier;
-        private final String name;
+        final @NonNull Supplier<@NonNull Digest> supplier;
+        private final @NonNull String name;
 
-        private BCDigestHash(Supplier<Digest> supplier) {
+        /**
+         * Constructs a digest hash from the given supplier.
+         *
+         * @param supplier supplier that creates fresh digest instances
+         */
+        private BCDigestHash(@NonNull Supplier<@NonNull Digest> supplier) {
             this.supplier = supplier;
             this.name = supplier.get().getAlgorithmName();
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public boolean isFast() {
             return true;
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
-        public String apply(String input, String complexity, String password) {
+        public @NonNull String apply(@NonNull String input, @NonNull String complexity, @NonNull String password) {
             Digest d = supplier.get();
             byte[] b = input.getBytes(StandardCharsets.UTF_8);
             d.update(b, 0, b.length);
@@ -343,19 +488,33 @@ public class HashingToy implements Toy {
             return Hex.toHexString(hash);
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
-        public String toString() {
+        public @NonNull String toString() {
             return name;
         }
     }
 
+    /**
+     * HMAC implementation backed by a BouncyCastle {@link Digest}.
+     */
     private static class BCHMac extends BCDigestHash {
-        private BCHMac(Supplier<Digest> supplier) {
+        /**
+         * Constructs an HMAC hash from the given digest supplier.
+         *
+         * @param supplier supplier that creates fresh digest instances
+         */
+        private BCHMac(@NonNull Supplier<@NonNull Digest> supplier) {
             super(supplier);
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
-        public String apply(String input, String complexity, String password) {
+        public @NonNull String apply(@NonNull String input, @NonNull String complexity, @NonNull String password) {
             Digest digest = super.supplier.get();
 
             HMac hMac = new HMac(digest);
@@ -369,25 +528,40 @@ public class HashingToy implements Toy {
             return Hex.toHexString(hmacOut);
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public boolean isFast() {
             return false;
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public boolean isPasswordSupported() {
             return true;
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
-        public String toString() {
+        public @NonNull String toString() {
             return "HMAC " + super.toString();
         }
     }
 
+    /**
+     * BCrypt (OpenBSD) hash implementation.
+     */
     private static class BCryptHash implements Hash {
+        /**
+         * {@inheritDoc}
+         */
         @Override
-        public String apply(String input, String complexity, String password) {
+        public @NonNull String apply(@NonNull String input, @NonNull String complexity, @NonNull String password) {
             SecureRandom r = new SecureRandom();
             byte[] salt = new byte[16];
             r.nextBytes(salt);
@@ -405,18 +579,27 @@ public class HashingToy implements Toy {
             return OpenBSDBCrypt.generate(input.getBytes(StandardCharsets.UTF_8), salt, cost);
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public boolean isFast() {
             return false;
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
         public boolean isComplexitySupported() {
             return true;
         }
 
+        /**
+         * {@inheritDoc}
+         */
         @Override
-        public String toString() {
+        public @NonNull String toString() {
             return "BCrypt (OpenBSD)";
         }
     }

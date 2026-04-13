@@ -5,19 +5,25 @@ import io.github.mjcro.toybox.api.Context;
 import io.github.mjcro.toybox.api.Environment;
 import io.github.mjcro.toybox.api.Labeled;
 import io.github.mjcro.toybox.api.services.EnvironmentModifier;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import javax.swing.text.JTextComponent;
 import java.time.Instant;
 import java.util.List;
 
+/**
+ * Registers popup menu hooks that provide contextual actions for strings,
+ * text components, and instants.
+ */
 public class PopupRegistrar implements EnvironmentModifier, Environment.PopupHook {
     @Override
-    public void modify(Environment environment) {
+    public void modify(@NonNull Environment environment) {
         environment.addPopupHook(this);
     }
 
     @Override
-    public List<Labeled> onPopup(Context ctx, Object target) {
+    public @NonNull List<@NonNull Labeled> onPopup(@NonNull Context ctx, @NonNull Object target) {
         if (target instanceof CharSequence) {
             CharSequence x = (CharSequence) target;
             return List.of(
@@ -38,6 +44,6 @@ public class PopupRegistrar implements EnvironmentModifier, Environment.PopupHoo
                     Action.ofName("Instant analyze", () -> ctx.findAndShow(InstantAnalyzerToy.class, i, true))
             );
         }
-        return null;
+        return List.of();
     }
 }

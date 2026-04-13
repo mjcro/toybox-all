@@ -4,10 +4,13 @@ import io.github.mjcro.toybox.api.Context;
 import io.github.mjcro.toybox.api.Label;
 import io.github.mjcro.toybox.api.Menu;
 import io.github.mjcro.toybox.api.Toy;
+import org.jspecify.annotations.NonNull;
 
-import javax.swing.*;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTree;
 import javax.swing.tree.DefaultMutableTreeNode;
-import java.awt.*;
+import java.awt.BorderLayout;
 import java.security.Provider;
 import java.security.Security;
 import java.util.Comparator;
@@ -15,23 +18,33 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+/**
+ * Toy that displays all available cipher algorithms grouped by provider and type
+ * in a tree view.
+ */
 public class CipherListToy implements Toy {
     @Override
-    public List<Menu> getPath() {
+    public @NonNull List<@NonNull Menu> getPath() {
         return List.of(Menu.TOYBOX_BASIC_TOOLS_MENU, Menu.TOYBOX_BASIC_TOOLS_CRYPTO_SUBMENU);
     }
 
     @Override
-    public Label getLabel() {
+    public @NonNull Label getLabel() {
         return Label.ofIconAndName("fam://shield", "Cipher List");
     }
 
     @Override
-    public JPanel build(Context context) {
+    public @NonNull JPanel build(@NonNull Context context) {
         return new Panel();
     }
 
+    /**
+     * Panel that builds and displays the cipher algorithm tree.
+     */
     private static class Panel extends JPanel {
+        /**
+         * Constructs the panel, populating the tree from the JCA security providers.
+         */
         public Panel() {
             super(new BorderLayout());
             var root = new DefaultMutableTreeNode("Cipher List");

@@ -1,16 +1,26 @@
 package io.github.mjcro.toybox.api;
 
 import io.github.mjcro.interfaces.strings.WithName;
+import org.jspecify.annotations.NonNull;
 
 /**
- * Defines entities with label.
+ * Defines entities that have a displayable {@link Label}.
  */
 public interface Labeled extends WithName {
     /**
+     * Returns the label associated with this entity.
+     *
      * @return Label.
      */
-    Label getLabel();
+    @NonNull Label getLabel();
 
+    /**
+     * Returns the display name derived from the label.
+     *
+     * @return Display name.
+     */
     @Override
-    default String getName() { return getLabel().getName(); }
+    default @NonNull String getName() {
+        return getLabel().getName();
+    }
 }

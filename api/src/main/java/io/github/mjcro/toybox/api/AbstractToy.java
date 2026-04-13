@@ -1,6 +1,8 @@
 package io.github.mjcro.toybox.api;
 
-import javax.swing.*;
+import org.jspecify.annotations.NonNull;
+
+import javax.swing.JPanel;
 
 /**
  * Defines minimal renderable toy that has only builder function
@@ -16,5 +18,5 @@ public interface AbstractToy extends Labeled {
      * @param context ToyBox context.
      * @return JPanel to render.
      */
-    JPanel build(Context context);
+    @NonNull JPanel build(@NonNull Context context);
 }

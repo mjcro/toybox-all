@@ -7,29 +7,67 @@ import io.github.mjcro.toybox.api.Event;
 import io.github.mjcro.toybox.api.events.ShowToyEvent;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxIcons;
 import io.github.mjcro.toybox.swing.util.Slf4jUtil;
-import lombok.extern.slf4j.Slf4j;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.JInternalFrame;
+import javax.swing.JPanel;
+import javax.swing.JPopupMenu;
+import javax.swing.WindowConstants;
+import java.awt.BorderLayout;
+import java.awt.Container;
 import java.beans.PropertyVetoException;
 
-@Slf4j
+/**
+ * MDI-specific implementation of the window context.
+ *
+ * <p>Handles {@link ShowToyEvent} by opening each toy inside a new
+ * {@link JInternalFrame} on the MDI desktop.
+ */
 class MDIWindowContext extends AbstractWindowContext<MDIWindow> {
-    MDIWindowContext(Environment environment, MDIWindow mdi) {
+    private static final @NonNull Logger log = LoggerFactory.getLogger(MDIWindowContext.class);
+
+    /**
+     * Creates a new root MDI window context.
+     *
+     * @param environment the application environment
+     * @param mdi         the parent MDI window
+     */
+    MDIWindowContext(@NonNull Environment environment, @NonNull MDIWindow mdi) {
         super(environment, mdi, new JPopupMenu(), null);
         this.popupMenu.addPopupMenuListener(new OnPopup());
     }
 
-    private MDIWindowContext(MDIWindowContext previous, Object initialData) {
+    /**
+     * Creates a child context carrying initial data.
+     *
+     * @param previous    the parent context to fork from
+     * @param initialData optional data to seed the new context
+     */
+    private MDIWindowContext(@NonNull MDIWindowContext previous, @Nullable Object initialData) {
         super(previous.getEnvironment(), previous.mainWindow, previous.popupMenu, initialData);
     }
 
-    MDIWindowContext withInitialData(Object data) {
+    /**
+     * Returns a new context that carries the given initial data.
+     *
+     * @param data the initial data to attach
+     * @return a new {@link MDIWindowContext} with the specified data
+     */
+    @NonNull MDIWindowContext withInitialData(@Nullable Object data) {
         return new MDIWindowContext(this, data);
     }
 
+    /**
+     * Dispatches the given event. {@link ShowToyEvent} instances are handled
+     * by opening a new internal frame; all events are forwarded to the environment.
+     *
+     * @param event the event to dispatch
+     */
     @Override
-    public void sendEvent(Event event) {
+    public void sendEvent(@NonNull Event event) {
         if (event instanceof ShowToyEvent) {
             ShowToyEvent e = (ShowToyEvent) event;
             showToyWindow(e.getToy(), e.getInitialData().orElse(null));
@@ -38,7 +76,13 @@ class MDIWindowContext extends AbstractWindowContext<MDIWindow> {
         getEnvironment().handleEvent(this, event);
     }
 
-    private void showToyWindow(AbstractToy toy, Object data) {
+    /**
+     * Opens a toy inside a new {@link JInternalFrame} on the MDI desktop.
+     *
+     * @param toy  the toy to display
+     * @param data optional initial data for the toy context
+     */
+    private void showToyWindow(@NonNull AbstractToy toy, @Nullable Object data) {
         Context context = this.withInitialData(data);
 
         log.info(Slf4jUtil.TOYBOX_MARKER, "Showing toy \"{}\" backed by \"{}\"", toy.getLabel().getName(), toy.getClass().getSimpleName());

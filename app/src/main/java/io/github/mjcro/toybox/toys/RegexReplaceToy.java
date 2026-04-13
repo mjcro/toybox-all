@@ -13,41 +13,72 @@ import io.github.mjcro.toybox.swing.prefab.ToyBoxPanels;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxTextComponents;
 import io.github.mjcro.toybox.swing.util.Slf4jUtil;
 import io.github.mjcro.toybox.swing.widgets.MultiViewTextAreaOrExceptionPanel;
-import lombok.extern.slf4j.Slf4j;
 import net.miginfocom.swing.MigLayout;
+import org.jspecify.annotations.NonNull;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import javax.swing.*;
-import java.awt.*;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JButton;
+import javax.swing.JComboBox;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JSplitPane;
+import javax.swing.JTextArea;
+import javax.swing.JTextField;
+import java.awt.BorderLayout;
+import java.awt.Component;
+import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.util.List;
 import java.util.regex.Pattern;
 
-@Slf4j
+/**
+ * Toy that performs regular expression search-and-replace on text input.
+ */
 public class RegexReplaceToy implements Toy {
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public List<Menu> getPath() {
+    public @NonNull List<@NonNull Menu> getPath() {
         return List.of(Menu.TOYBOX_BASIC_TOOLS_MENU);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public Label getLabel() {
+    public @NonNull Label getLabel() {
         return Label.ofIconAndName("fam://sum", "Regexp replace");
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public JPanel build(Context context) {
+    public @NonNull JPanel build(@NonNull Context context) {
         return new Panel();
     }
 
+    /**
+     * Inner panel providing the regex replace UI with pattern/replacement fields,
+     * preset selector, and split input/output areas.
+     */
     private static class Panel extends JPanel {
-        private final JComboBox<Preset> preset = new JComboBox<>();
-        private final JTextField
+        private static final @NonNull Logger log = LoggerFactory.getLogger(Panel.class);
+
+        private final @NonNull JComboBox<@NonNull Preset> preset = new JComboBox<>();
+        private final @NonNull JTextField
                 pattern = ToyBoxTextComponents.createJTextField(),
                 replacement = ToyBoxTextComponents.createJTextField();
-        private final JTextArea input = ToyBoxTextComponents.createJTextArea();
-        private final MultiViewTextAreaOrExceptionPanel output = new MultiViewTextAreaOrExceptionPanel("");
-        private final JSplitPane pane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
+        private final @NonNull JTextArea input = ToyBoxTextComponents.createJTextArea();
+        private final @NonNull MultiViewTextAreaOrExceptionPanel output = new MultiViewTextAreaOrExceptionPanel("");
+        private final @NonNull JSplitPane pane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 
+        /**
+         * Constructs the regex replace panel.
+         */
         public Panel() {
             super(new BorderLayout());
 
@@ -55,7 +86,13 @@ public class RegexReplaceToy implements Toy {
             add(buildInputOutput(), BorderLayout.CENTER);
         }
 
-        private Component buildHeader() {
+        /**
+         * Builds the header component containing the preset selector, pattern/replacement
+         * text fields, and the apply button.
+         *
+         * @return the header component
+         */
+        private @NonNull Component buildHeader() {
             JPanel inputs = new JPanel(new MigLayout());
 
             preset.setEditable(false);
@@ -94,7 +131,12 @@ public class RegexReplaceToy implements Toy {
             return ToyBoxPanels.titledBordered("Settings", header);
         }
 
-        private Component buildInputOutput() {
+        /**
+         * Builds the split pane containing the input and output text areas.
+         *
+         * @return the input/output component
+         */
+        private @NonNull Component buildInputOutput() {
             Hints.TEXT_MONOSPACED.apply(input);
             Hints.NOT_EDITABLE_TEXT.apply(output.getTextArea());
             Hints.TEXT_MONOSPACED.apply(output.getTextArea());
@@ -105,7 +147,12 @@ public class RegexReplaceToy implements Toy {
             return pane;
         }
 
-        private void onApply(final ActionEvent e) {
+        /**
+         * Applies the regex replacement to the input text and displays the result.
+         *
+         * @param e the triggering action event
+         */
+        private void onApply(@NonNull ActionEvent e) {
             Components.setEnabled(false, preset, pattern, replacement, input);
 
             try {
@@ -120,25 +167,43 @@ public class RegexReplaceToy implements Toy {
             }
         }
 
+        /**
+         * A named preset containing pre-filled pattern and replacement values.
+         */
         private static class Preset {
-            private final String name;
-            private final String pattern;
-            private final String replacement;
+            private final @NonNull String name;
+            private final @NonNull String pattern;
+            private final @NonNull String replacement;
 
-            private Preset(String name, String pattern, String replacement) {
+            /**
+             * Constructs a preset.
+             *
+             * @param name        the display name
+             * @param pattern     the regex pattern
+             * @param replacement the replacement string
+             */
+            private Preset(@NonNull String name, @NonNull String pattern, @NonNull String replacement) {
                 this.name = name;
                 this.pattern = pattern;
                 this.replacement = replacement;
             }
 
+            /**
+             * {@inheritDoc}
+             */
             @Override
-            public String toString() {
+            public @NonNull String toString() {
                 return name;
             }
         }
     }
 
-    public static void main(String[] args) {
+    /**
+     * Standalone entry point for testing the regex replace panel.
+     *
+     * @param args command-line arguments (unused)
+     */
+    public static void main(@NonNull String[] args) {
         ToyBoxLaF.initialize(false);
         Components.show(new Panel());
     }

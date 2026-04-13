@@ -1,12 +1,23 @@
 package io.github.mjcro.toybox.api;
 
+import org.jspecify.annotations.NonNull;
+
 import java.util.Objects;
 
+/**
+ * Menu item that wraps an {@link Action}, combining menu ordering with action execution.
+ */
 class ActionMenu implements Menu, Action {
     private final int order;
-    private final Action action;
+    private final @NonNull Action action;
 
-    ActionMenu(int order, Action action) {
+    /**
+     * Constructs a new action menu item.
+     *
+     * @param order  Display order of the menu item.
+     * @param action Action to delegate to.
+     */
+    ActionMenu(int order, @NonNull Action action) {
         this.order = order;
         this.action = Objects.requireNonNull(action, "action");
     }
@@ -17,7 +28,7 @@ class ActionMenu implements Menu, Action {
     }
 
     @Override
-    public Label getLabel() {
+    public @NonNull Label getLabel() {
         return action.getLabel();
     }
 
@@ -27,7 +38,7 @@ class ActionMenu implements Menu, Action {
     }
 
     @Override
-    public String toString() {
+    public @NonNull String toString() {
         return getName();
     }
 }

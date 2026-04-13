@@ -3,59 +3,66 @@ package io.github.mjcro.toybox.templates;
 import io.github.mjcro.interfaces.tuples.OptionalPair;
 import io.github.mjcro.toybox.api.Label;
 import io.github.mjcro.toybox.api.Labeled;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 import java.util.Optional;
 
 /**
- * Represents enumeration value, where keys can be null.
+ * Represents an enumeration value whose key may be {@code null}.
  *
- * @param <T> Enumeration key type.
+ * @param <T> the enumeration key type
  */
 public class EnumerationValue<T> implements OptionalPair<T, Label> {
-    private final T key;
-    private final Label label;
+    private final @Nullable T key;
+    private final @NonNull Label label;
 
     /**
-     * Construct new enumeration value.
+     * Constructs a new enumeration value with a plain text label.
      *
-     * @param key  Enumeration key, nullable.
-     * @param text Text to display.
+     * @param key  the enumeration key, may be {@code null}
+     * @param text the text to display
      */
-    public EnumerationValue(T key, String text) {
+    public EnumerationValue(@Nullable T key, @NonNull String text) {
         this(key, Label.ofName(text));
     }
 
     /**
-     * Construct new enumeration value.
+     * Constructs a new enumeration value with the given label.
      *
-     * @param key   Enumeration key, nullable.
-     * @param label Label to display.
+     * @param key   the enumeration key, may be {@code null}
+     * @param label the label to display
      */
-    public EnumerationValue(T key, Label label) {
+    public EnumerationValue(@Nullable T key, @NonNull Label label) {
         this.key = key;
         this.label = Objects.requireNonNull(label, "label");
     }
 
     /**
-     * @return Enumeration value key, nullable.
+     * Returns the enumeration key wrapped in an optional.
+     *
+     * @return the key, or empty if {@code null}
      */
-    public Optional<T> getKey() {
+    public @NonNull Optional<T> getKey() {
         return Optional.ofNullable(key);
     }
 
     /**
-     * Checks if enumeration value has same key as given one.
+     * Checks whether this enumeration value has the same key as the given candidate.
      *
-     * @param candidate Object to compare enumeration key with.
-     * @return True if enumeration value key equal to given candidate.
+     * @param candidate the object to compare with
+     * @return {@code true} if the key equals the candidate
      */
-    public boolean hasKey(Object candidate) {
+    public boolean hasKey(@Nullable Object candidate) {
         return Objects.equals(key, candidate);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public Object get(int i) {
+    public @Nullable Object get(int i) {
         if (i == 0) {
             return key;
         } else if (i == 1) {
@@ -65,18 +72,27 @@ public class EnumerationValue<T> implements OptionalPair<T, Label> {
         }
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public Optional<T> getFirst() {
+    public @NonNull Optional<T> getFirst() {
         return Optional.ofNullable(key);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public Optional<Label> getSecond() {
+    public @NonNull Optional<@NonNull Label> getSecond() {
         return Optional.of(label);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     @Override
-    public String toString() {
+    public @NonNull String toString() {
         return getSecond().map(Labeled::getName).orElse("");
     }
 }

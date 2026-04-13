@@ -1,47 +1,77 @@
 package io.github.mjcro.toybox.swing.widgets;
 
-import io.github.mjcro.toybox.swing.prefab.ToyBoxIcons;
 import io.github.mjcro.toybox.swing.hint.Hints;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxIcons;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxLabels;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
 import javax.crypto.AEADBadTagException;
-import javax.swing.*;
+import javax.swing.Icon;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JTree;
 import javax.swing.border.EmptyBorder;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.FlowLayout;
 
+/**
+ * Tree component that renders an exception chain with stack traces,
+ * class information, and contextual hints.
+ */
 public class ExceptionDetailsJTree extends JTree {
 
-    public ExceptionDetailsJTree(Throwable e) {
+    /**
+     * Creates a tree displaying the given exception chain.
+     *
+     * @param e the exception to display, or {@code null} for an empty tree
+     */
+    public ExceptionDetailsJTree(@Nullable Throwable e) {
         setCellRenderer(new Renderer());
         setRootVisible(false);
         setException(e);
     }
 
+    /**
+     * Creates an empty exception details tree.
+     */
     public ExceptionDetailsJTree() {
         this(null);
     }
 
-    public void setException(Throwable e) {
+    /**
+     * Sets or clears the exception displayed in this tree.
+     *
+     * @param e the exception to display, or {@code null} to clear
+     */
+    public void setException(@Nullable Throwable e) {
         if (e == null) {
             setModel(null);
             return;
         }
 
-        DefaultMutableTreeNode root = new DefaultMutableTreeNode("Root");
+        final DefaultMutableTreeNode root = new DefaultMutableTreeNode("Root");
         attach(root, e);
         setModel(new DefaultTreeModel(root));
         expandRow(0);
     }
 
-    private void attach(DefaultMutableTreeNode node, Throwable e) {
-        DefaultMutableTreeNode n = new DefaultMutableTreeNode();
+    /**
+     * Recursively attaches an exception and its cause chain to the tree.
+     *
+     * @param node the parent tree node
+     * @param e    the exception to attach
+     */
+    private void attach(@NonNull DefaultMutableTreeNode node, @NonNull Throwable e) {
+        final DefaultMutableTreeNode n = new DefaultMutableTreeNode();
         node.add(n);
         node = n;
 
         node.setUserObject(e);
-        Throwable cause = e.getCause();
+        final Throwable cause = e.getCause();
         if (cause != null && cause != e) {
             attach(node, cause);
         }
@@ -50,25 +80,31 @@ public class ExceptionDetailsJTree extends JTree {
         attachHintsRecursively(node, e);
 
         // Adding stack trace
-        StackTraceElement[] stackTrace = e.getStackTrace();
+        final StackTraceElement[] stackTrace = e.getStackTrace();
         if (stackTrace != null && stackTrace.length > 0) {
-            for (StackTraceElement element : stackTrace) {
+            for (final StackTraceElement element : stackTrace) {
                 node.add(new DefaultMutableTreeNode(element));
             }
         }
     }
 
-    private void attachHintsRecursively(DefaultMutableTreeNode node, Throwable e) {
+    /**
+     * Recursively inspects the exception cause chain and attaches user-friendly hints.
+     *
+     * @param node the parent tree node
+     * @param e    the exception to inspect, or {@code null}
+     */
+    private void attachHintsRecursively(@NonNull DefaultMutableTreeNode node, @Nullable Throwable e) {
         if (e == null) {
             return;
         }
-        Throwable cause = e.getCause();
+        final Throwable cause = e.getCause();
         if (cause != null && cause != e) {
             attachHintsRecursively(node, cause);
         }
 
         // Suggesting hint
-        Class<?> clazz = e.getClass();
+        final Class<?> clazz = e.getClass();
         if (clazz == NumberFormatException.class) {
             node.add(new DefaultMutableTreeNode(new ExceptionHint("Possible problem with number parsing")));
         } else if (clazz == RuntimeException.class) {
@@ -78,12 +114,16 @@ public class ExceptionDetailsJTree extends JTree {
         }
     }
 
+    /**
+     * Tree cell renderer for exception detail nodes, handling throwables,
+     * class names, stack trace elements, and hints.
+     */
     private static class Renderer extends CustomTreeCellRenderer {
-        private final JLabel rootLabel = ToyBoxLabels.create();
-        private final JLabel messageLabel = ToyBoxLabels.create();
-        private final JLabel classLabel = ToyBoxLabels.create();
-        private final JLabel hintLabel = ToyBoxLabels.create();
-        private final StackPanel stackLabel = new StackPanel();
+        private final @NonNull JLabel rootLabel = ToyBoxLabels.create();
+        private final @NonNull JLabel messageLabel = ToyBoxLabels.create();
+        private final @NonNull JLabel classLabel = ToyBoxLabels.create();
+        private final @NonNull JLabel hintLabel = ToyBoxLabels.create();
+        private final @NonNull StackPanel stackLabel = new StackPanel();
 
         Renderer() {
             ToyBoxIcons.get("fam://bug").ifPresent(messageLabel::setIcon);
@@ -100,9 +140,9 @@ public class ExceptionDetailsJTree extends JTree {
         }
 
         @Override
-        public Component getTreeCellRendererComponent(
-                JTree tree,
-                Object value,
+        public @NonNull Component getTreeCellRendererComponent(
+                @NonNull JTree tree,
+                @Nullable Object value,
                 boolean selected,
                 boolean expanded,
                 boolean leaf,
@@ -113,11 +153,11 @@ public class ExceptionDetailsJTree extends JTree {
                 value = ((DefaultMutableTreeNode) value).getUserObject();
             }
 
-            Color color = selected ? colorSelectedFg : colorNormalFg;
+            final Color color = selected ? colorSelectedFg : colorNormalFg;
 
             if (value instanceof Throwable) {
-                Throwable t = (Throwable) value;
-                String message = t.getMessage();
+                final Throwable t = (Throwable) value;
+                @Nullable String message = t.getMessage();
                 if (message == null) {
                     message = t.getClass().getName();
                 }
@@ -144,23 +184,29 @@ public class ExceptionDetailsJTree extends JTree {
         }
     }
 
+    /**
+     * Holder for a user-friendly hint message associated with an exception.
+     */
     private static class ExceptionHint {
-        private final String string;
+        private final @NonNull String string;
 
-        private ExceptionHint(String string) {
+        private ExceptionHint(@NonNull String string) {
             this.string = string;
         }
     }
 
+    /**
+     * Panel that renders a single stack trace element with class name, file name, and line number.
+     */
     private static class StackPanel extends JPanel {
-        private final JLabel className = ToyBoxLabels.create();
-        private final JLabel fileName = ToyBoxLabels.create();
-        private final JLabel line = ToyBoxLabels.create();
+        private final @NonNull JLabel className = ToyBoxLabels.create();
+        private final @NonNull JLabel fileName = ToyBoxLabels.create();
+        private final @NonNull JLabel line = ToyBoxLabels.create();
 
-        private final Icon traceIcon;
-        private final Icon traceLambdaIcon;
-        private final Icon traceToyBoxIcon;
-        private final Icon traceJavaCoreIcon;
+        private final @Nullable Icon traceIcon;
+        private final @Nullable Icon traceLambdaIcon;
+        private final @Nullable Icon traceToyBoxIcon;
+        private final @Nullable Icon traceJavaCoreIcon;
 
         StackPanel() {
             super(new FlowLayout(FlowLayout.LEFT, 0, 0));
@@ -178,14 +224,24 @@ public class ExceptionDetailsJTree extends JTree {
             this.traceJavaCoreIcon = ToyBoxIcons.get("fam://bullet_white").orElse(null);
         }
 
-        void setForegroundColor(Color color) {
+        /**
+         * Sets the foreground color for all sub-labels.
+         *
+         * @param color the color to apply
+         */
+        void setForegroundColor(@NonNull Color color) {
             className.setForeground(color);
             fileName.setForeground(color);
             line.setForeground(color);
         }
 
-        void set(StackTraceElement e) {
-            String cn = e.getClassName();
+        /**
+         * Populates this panel from the given stack trace element.
+         *
+         * @param e the stack trace element to display
+         */
+        void set(@NonNull StackTraceElement e) {
+            final String cn = e.getClassName();
             if (cn.startsWith("java")) {
                 className.setIcon(traceJavaCoreIcon);
             } else if (cn.startsWith("io.github.mjcro.toybox")) {
@@ -198,7 +254,7 @@ public class ExceptionDetailsJTree extends JTree {
 
             className.setText(cn);
             fileName.setText(e.getFileName());
-            int lineNumber = e.getLineNumber();
+            final int lineNumber = e.getLineNumber();
             line.setText(lineNumber > 0 ? String.valueOf(lineNumber) : null);
         }
     }

@@ -7,65 +7,101 @@ import io.github.mjcro.toybox.swing.prefab.ToyBoxIcons;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxLaF;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxLabels;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxTreeCellRenderers;
+import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 
-import javax.swing.*;
+import javax.swing.Icon;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
+import javax.swing.JTree;
+import javax.swing.UIManager;
 import javax.swing.tree.DefaultMutableTreeNode;
 import javax.swing.tree.DefaultTreeModel;
-import java.awt.*;
+import java.awt.Color;
+import java.awt.Component;
+import java.awt.FlowLayout;
 import java.util.Collection;
 import java.util.EnumMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+/**
+ * Tree component that renders parsed JSON-like data structures
+ * (maps, collections, and primitives) in a navigable tree.
+ */
 public class JsonJTree extends JTree {
-    public JsonJTree(Object data) {
+    /**
+     * Creates a tree pre-populated with the given data.
+     *
+     * @param data the data to display, or {@code null} for an empty tree
+     */
+    public JsonJTree(@Nullable Object data) {
         super(new DefaultTreeModel(null));
         setRootVisible(false);
         setCellRenderer(new Renderer());
         setData(data);
     }
 
+    /**
+     * Creates an empty JSON tree.
+     */
     public JsonJTree() {
         this(null);
     }
 
-    public void setData(Object data) {
-        DefaultMutableTreeNode root = new DefaultMutableTreeNode("Root");
+    /**
+     * Replaces the displayed data.
+     *
+     * @param data the data to display, or {@code null} for an empty tree
+     */
+    public void setData(@Nullable Object data) {
+        final DefaultMutableTreeNode root = new DefaultMutableTreeNode("Root");
         setDataRecursively(root, data, null);
         setModel(new DefaultTreeModel(root));
     }
 
+    /**
+     * Expands all rows in the tree.
+     */
     public void openAll() {
         for (int i = 0; i < getRowCount(); i++) {
             expandRow(i);
         }
     }
 
-    private void setDataRecursively(DefaultMutableTreeNode parent, Object data, String keyName) {
+    /**
+     * Recursively populates the tree model from the given data.
+     *
+     * @param parent  the parent tree node
+     * @param data    the data element to add
+     * @param keyName optional key name for labeling container nodes
+     */
+    private void setDataRecursively(@NonNull DefaultMutableTreeNode parent, @Nullable Object data, @Nullable String keyName) {
         if (data == null) {
             parent.add(new DefaultMutableTreeNode(null));
         } else if (data instanceof Map<?, ?>) {
-            Map<?, ?> map = (Map<?, ?>) data;
-            DefaultMutableTreeNode node = new DefaultMutableTreeNode(new TypedDecorator<>(Type.OBJECT, keyName == null ? "object" : keyName + ":"));
+            final Map<?, ?> map = (Map<?, ?>) data;
+            final DefaultMutableTreeNode node = new DefaultMutableTreeNode(new TypedDecorator<>(Type.OBJECT, keyName == null ? "object" : keyName + ":"));
             parent.add(node);
-            for (Map.Entry<?, ?> entry : map.entrySet()) {
+            for (final Map.Entry<?, ?> entry : map.entrySet()) {
                 setDataRecursively(node, entry, null);
             }
         } else if (data instanceof Collection<?>) {
-            Collection<?> collection = (Collection<?>) data;
-            DefaultMutableTreeNode node = new DefaultMutableTreeNode(new TypedDecorator<>(Type.COLLECTION, keyName));
+            final Collection<?> collection = (Collection<?>) data;
+            final DefaultMutableTreeNode node = new DefaultMutableTreeNode(new TypedDecorator<>(Type.COLLECTION, keyName));
             parent.add(node);
-            for (Object o : collection) {
+            for (final Object o : collection) {
                 setDataRecursively(node, o, null);
             }
         } else if (data instanceof Map.Entry<?, ?>) {
-            Map.Entry<?, ?> entry = (Map.Entry<?, ?>) data;
-            String key = entry.getKey().toString();
-            Object value = entry.getValue();
+            final Map.Entry<?, ?> entry = (Map.Entry<?, ?>) data;
+            final String key = entry.getKey().toString();
+            final Object value = entry.getValue();
             if (value == null) {
                 parent.add(new DefaultMutableTreeNode(data));
             } else {
-                Class<?> valueClass = value.getClass();
+                final Class<?> valueClass = value.getClass();
                 if (CharSequence.class.isAssignableFrom(valueClass)
                         || Number.class.isAssignableFrom(valueClass)
                         || valueClass == Boolean.class
@@ -80,14 +116,21 @@ public class JsonJTree extends JTree {
         }
     }
 
+    /**
+     * Tree cell renderer for JSON-like data nodes, displaying key-value pairs,
+     * objects, and collections with distinct styling.
+     */
     public static class Renderer extends TypedDecoratorCustomTreeCellRenderer<Type> {
-        private final KeyValuePanel panelKeyValue = new KeyValuePanel();
+        private final @NonNull KeyValuePanel panelKeyValue = new KeyValuePanel();
 
-        private final Color colorString = UIManager.getColor("Actions.Green");
-        private final Color colorNumber = UIManager.getColor("Actions.Blue");
-        private final Color colorBoolean = UIManager.getColor("Actions.Yellow");
-        private final Color colorOther = UIManager.getColor("Actions.Red");
+        private final @NonNull Color colorString = UIManager.getColor("Actions.Green");
+        private final @NonNull Color colorNumber = UIManager.getColor("Actions.Blue");
+        private final @NonNull Color colorBoolean = UIManager.getColor("Actions.Yellow");
+        private final @NonNull Color colorOther = UIManager.getColor("Actions.Red");
 
+        /**
+         * Creates a new JSON tree cell renderer.
+         */
         Renderer() {
             super(new EnumMap<>(Map.of(
                     Type.OBJECT,
@@ -104,9 +147,9 @@ public class JsonJTree extends JTree {
         }
 
         @Override
-        public Component getTreeCellRendererComponent(
-                JTree tree,
-                Object value,
+        public @NonNull Component getTreeCellRendererComponent(
+                @NonNull JTree tree,
+                @Nullable Object value,
                 boolean selected,
                 boolean expanded,
                 boolean leaf,
@@ -118,8 +161,8 @@ public class JsonJTree extends JTree {
             }
 
             if (value instanceof Map.Entry<?, ?>) {
-                Map.Entry<?, ?> kv = (Map.Entry<?, ?>) value;
-                Object v = kv.getValue();
+                final Map.Entry<?, ?> kv = (Map.Entry<?, ?>) value;
+                final Object v = kv.getValue();
                 panelKeyValue.key.setText(kv.getKey() + ":  ");
                 panelKeyValue.value.setText(v == null ? "null" : v.toString());
                 panelKeyValue.key.setForeground(selected ? colorSelectedFg : colorNormalFg);
@@ -130,7 +173,13 @@ public class JsonJTree extends JTree {
             return super.getTreeCellRendererComponent(tree, value, selected, expanded, leaf, row, hasFocus);
         }
 
-        private Color getFgColorFor(Object v) {
+        /**
+         * Returns the foreground color appropriate for the given value type.
+         *
+         * @param v the value to inspect
+         * @return the corresponding foreground color
+         */
+        private @NonNull Color getFgColorFor(@Nullable Object v) {
             if (v instanceof CharSequence) {
                 return colorString;
             } else if (v instanceof Number) {
@@ -143,9 +192,12 @@ public class JsonJTree extends JTree {
             return colorNormalFg;
         }
 
+        /**
+         * Panel that renders a key-value pair as two adjacent labels.
+         */
         private static class KeyValuePanel extends JPanel {
-            private final JLabel key = ToyBoxLabels.create();
-            private final JLabel value = ToyBoxLabels.create();
+            private final @NonNull JLabel key = ToyBoxLabels.create();
+            private final @NonNull JLabel value = ToyBoxLabels.create();
 
             KeyValuePanel() {
                 super(new FlowLayout(FlowLayout.LEFT, 0, 0));
@@ -154,20 +206,36 @@ public class JsonJTree extends JTree {
                 add(value);
             }
 
-            public void setIcon(Icon icon) {
+            /**
+             * Sets the icon displayed before the key label.
+             *
+             * @param icon the icon to set
+             */
+            public void setIcon(@NonNull Icon icon) {
                 key.setIcon(icon);
             }
         }
     }
 
+    /**
+     * Node type discriminator for JSON-like tree structures.
+     */
     private enum Type {
-        OBJECT, COLLECTION;
+        /** Represents a JSON object (map). */
+        OBJECT,
+        /** Represents a JSON array (collection). */
+        COLLECTION;
     }
 
-    public static void main(String[] args) {
+    /**
+     * Demo entry point for visual testing of the JSON tree.
+     *
+     * @param args command-line arguments (unused)
+     */
+    public static void main(@NonNull String @NonNull [] args) {
         ToyBoxLaF.initialize(false);
 
-        Map<String, Object> data = new LinkedHashMap<>();
+        final Map<@NonNull String, @Nullable Object> data = new LinkedHashMap<>();
         data.put("foo", "bar");
         data.put("active", true);
         data.put("empty", null);
