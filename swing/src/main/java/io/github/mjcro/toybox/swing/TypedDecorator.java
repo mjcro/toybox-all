@@ -3,7 +3,6 @@ package io.github.mjcro.toybox.swing;
 import io.github.mjcro.interfaces.Decorator;
 import io.github.mjcro.interfaces.enums.WithType;
 import org.jspecify.annotations.NonNull;
-import org.jspecify.annotations.Nullable;
 
 import java.util.Objects;
 
@@ -15,17 +14,17 @@ import java.util.Objects;
  */
 public class TypedDecorator<T extends Enum<T>, V> implements Decorator<V>, WithType<T> {
     private final @NonNull T type;
-    private final @Nullable V decorated;
+    private final @NonNull V decorated;
 
     /**
      * Creates a new typed decorator.
      *
      * @param type      enum type, must not be {@code null}
-     * @param decorated value to decorate, may be {@code null}
+     * @param decorated value to decorate, must not be {@code null}
      */
-    public TypedDecorator(@NonNull T type, @Nullable V decorated) {
+    public TypedDecorator(@NonNull T type, @NonNull V decorated) {
         this.type = Objects.requireNonNull(type);
-        this.decorated = decorated;
+        this.decorated = Objects.requireNonNull(decorated);
     }
 
     @Override
@@ -34,12 +33,12 @@ public class TypedDecorator<T extends Enum<T>, V> implements Decorator<V>, WithT
     }
 
     @Override
-    public @Nullable V getDecorated() {
+    public @NonNull V getDecorated() {
         return decorated;
     }
 
     @Override
-    public @Nullable String toString() {
-        return decorated == null ? null : decorated.toString();
+    public @NonNull String toString() {
+        return decorated.toString();
     }
 }

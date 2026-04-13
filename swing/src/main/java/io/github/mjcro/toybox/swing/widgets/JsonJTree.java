@@ -89,7 +89,7 @@ public class JsonJTree extends JTree {
             }
         } else if (data instanceof Collection<?>) {
             final Collection<?> collection = (Collection<?>) data;
-            final DefaultMutableTreeNode node = new DefaultMutableTreeNode(new TypedDecorator<>(Type.COLLECTION, keyName));
+            final DefaultMutableTreeNode node = new DefaultMutableTreeNode(new TypedDecorator<>(Type.COLLECTION, keyName == null ? "collection" : keyName));
             parent.add(node);
             for (final Object o : collection) {
                 setDataRecursively(node, o, null);
