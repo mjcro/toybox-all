@@ -28,24 +28,39 @@ public class InlineBlockLayout implements LayoutManager {
     public @NonNull Dimension preferredLayoutSize(@NonNull Container parent) {
         synchronized (parent.getTreeLock()) {
             final Insets insets = parent.getInsets();
-            int parentWidth = parent.getWidth();
-            parentWidth = parentWidth == 0 ? Short.MAX_VALUE : parentWidth;
-            final int width = parentWidth - insets.left - insets.right;
+            final Component[] components = parent.getComponents();
+            final int parentWidth = parent.getWidth();
+            final int contentWidth = parentWidth > 0
+                    ? parentWidth - insets.left - insets.right
+                    : naturalLineWidth(components);
+            final int[] rows = rowHeights(components, contentWidth);
             int height = insets.top + insets.bottom;
-            final int[] rows = rowHeights(parent.getComponents(), width);
             for (int i = 0; i < rows.length; i++) {
                 height += rows[i];
                 if (i > 0) {
                     height += vGap;
                 }
             }
-            return new Dimension(width, height);
+            return new Dimension(contentWidth + insets.left + insets.right, height);
         }
     }
 
     @Override
     public @NonNull Dimension minimumLayoutSize(@NonNull Container parent) {
-        return preferredLayoutSize(parent);
+        synchronized (parent.getTreeLock()) {
+            final Insets insets = parent.getInsets();
+            int w = 0;
+            int h = 0;
+            for (final Component c : parent.getComponents()) {
+                if (!c.isVisible()) {
+                    continue;
+                }
+                final Dimension d = getDimensions(c);
+                w = Math.max(w, d.width);
+                h = Math.max(h, d.height);
+            }
+            return new Dimension(w + insets.left + insets.right, h + insets.top + insets.bottom);
+        }
     }
 
     @Override
@@ -55,29 +70,26 @@ public class InlineBlockLayout implements LayoutManager {
             final int width = parent.getWidth() - insets.right - insets.left;
 
             final Component[] components = parent.getComponents();
-            final int[] rows = rowHeights(parent.getComponents(), width);
+            final int[] rows = rowHeights(components, width);
 
             int row = 0;
             int offsetX = insets.left;
             int offsetY = insets.top;
             boolean first = true;
             for (final Component c : components) {
+                if (!c.isVisible()) {
+                    continue;
+                }
                 final Dimension d = getDimensions(c);
-                final int currentRow = row;
-                if (!first) {
-                    if (offsetX + d.width - insets.left > width) {
-                        // Component is out of bounds
-                        offsetY += rows[row];
-                        offsetY += vGap;
-                        row++;
-                        offsetX = insets.left;
-                        first = true;
-                    }
+                if (!first && offsetX + d.width - insets.left > width) {
+                    offsetY += rows[row];
+                    offsetY += vGap;
+                    row++;
+                    offsetX = insets.left;
                 }
 
-                c.setSize(d);
-                if (d.height < rows[currentRow] - 1) {
-                    final int delta = (rows[currentRow] - d.height) / 2;
+                if (d.height < rows[row]) {
+                    final int delta = (rows[row] - d.height) / 2;
                     c.setBounds(offsetX, offsetY + delta, d.width, d.height);
                 } else {
                     c.setBounds(offsetX, offsetY, d.width, d.height);
@@ -91,41 +103,47 @@ public class InlineBlockLayout implements LayoutManager {
         }
     }
 
+    private int naturalLineWidth(@NonNull Component @NonNull [] components) {
+        int total = 0;
+        boolean first = true;
+        for (final Component c : components) {
+            if (!c.isVisible()) {
+                continue;
+            }
+            if (!first) {
+                total += hGap;
+            }
+            total += getDimensions(c).width;
+            first = false;
+        }
+        return total;
+    }
+
     private int @NonNull [] rowHeights(@NonNull Component @NonNull [] components, int width) {
-        int[] heights = new int[1];
+        int[] heights = new int[Math.max(1, components.length)];
         int row = 0;
         int left = 0;
         boolean first = true;
         for (final Component c : components) {
+            if (!c.isVisible()) {
+                continue;
+            }
             final Dimension d = getDimensions(c);
-            // Checking if component is out of bounds
-            if (!first) {
-                left += hGap;
-                left += d.width;
-                if (left > width) {
-                    // Component is out of bounds
-                    row++;
-                    left = 0;
-                    first = true;
-
-                    // Scaling array
-                    final int[] larger = new int[heights.length + 1];
-                    System.arraycopy(heights, 0, larger, 0, heights.length);
-                    heights = larger;
-                } else {
-                    left -= hGap;
-                    left -= d.width;
-                }
+            if (first) {
+                left = d.width;
+            } else if (left + hGap + d.width > width) {
+                row++;
+                left = d.width;
+            } else {
+                left += hGap + d.width;
             }
-
-            if (!first) {
-                left += hGap;
-            }
-
-            left += d.width;
             heights[row] = Math.max(heights[row], d.height);
-
             first = false;
+        }
+        if (row + 1 < heights.length) {
+            final int[] trimmed = new int[row + 1];
+            System.arraycopy(heights, 0, trimmed, 0, row + 1);
+            return trimmed;
         }
         return heights;
     }
