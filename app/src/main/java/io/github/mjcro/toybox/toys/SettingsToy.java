@@ -8,13 +8,13 @@ import io.github.mjcro.toybox.api.SettingsStorage;
 import io.github.mjcro.toybox.api.Toy;
 import io.github.mjcro.toybox.app.settings.storage.SettingsStorageDispatcher;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxButtons;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxLabels;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxPanels;
 import io.github.mjcro.toybox.swing.widgets.FileChooserInput;
 import io.github.mjcro.toybox.swing.widgets.MultiViewTableOrExceptionPanel;
 import org.jspecify.annotations.NonNull;
 
 import javax.swing.JButton;
-import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JPasswordField;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -93,8 +93,8 @@ public class SettingsToy implements Toy {
          */
         private @NonNull JPanel buildHeader() {
             JPanel inputs = ToyBoxPanels.twoColumnsRight(
-                    new AbstractMap.SimpleEntry<>(new JLabel("Settings file"), fileChooserInput),
-                    new AbstractMap.SimpleEntry<>(new JLabel("Settings file secret"), secretField)
+                    new AbstractMap.SimpleEntry<>(ToyBoxLabels.create("Settings file"), fileChooserInput),
+                    new AbstractMap.SimpleEntry<>(ToyBoxLabels.create("Settings file secret"), secretField)
             );
 
             JPanel buttons = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));

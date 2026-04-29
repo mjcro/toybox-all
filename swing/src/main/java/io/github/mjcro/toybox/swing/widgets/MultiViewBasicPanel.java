@@ -1,5 +1,6 @@
 package io.github.mjcro.toybox.swing.widgets;
 
+import io.github.mjcro.toybox.swing.prefab.ToyBoxLabels;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
@@ -85,7 +86,7 @@ public abstract class MultiViewBasicPanel extends JPanel {
      * Simple panel containing a single centered label.
      */
     private static final class LabelOnlyJPanel extends JPanel {
-        private final @NonNull JLabel label = new JLabel();
+        private final @NonNull JLabel label = ToyBoxLabels.create();
 
         LabelOnlyJPanel() {
             add(label);
