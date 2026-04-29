@@ -16,6 +16,10 @@ public class ToyBoxLaF {
      * @param darkMode True if dark mode should be used, false otherwise.
      */
     public static void initialize(boolean darkMode) {
+        // Register bundled fonts before FlatLaf reads its theme properties,
+        // otherwise @fontFamily references in the .properties files will not resolve.
+        EmbeddedFonts.register();
+
         // Installing look and feel
         FlatLightLaf.registerCustomDefaultsSource("toybox.laf.themes");
         if (darkMode) {
