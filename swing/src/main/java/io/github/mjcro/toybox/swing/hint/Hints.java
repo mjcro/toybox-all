@@ -12,6 +12,7 @@ import javax.swing.BorderFactory;
 import javax.swing.JComponent;
 import javax.swing.JLabel;
 import javax.swing.SwingConstants;
+import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
@@ -64,7 +65,25 @@ public class Hints {
             TEXT_SMALL = new LaFStyle("small"),
             TEXT_LIGHT = new LaFStyle("light"),
             TEXT_SEMIBOLD = new LaFStyle("semibold"),
-            TEXT_MONOSPACED = new LaFStyle("monospaced"),
+            TEXT_MONOSPACED = new LaFStyle("monospaced") {
+                @Override
+                public void apply(@Nullable JComponent component) {
+                    super.apply(component);
+                    // FlatLaf's "monospaced" style class is honored by FlatLaf's
+                    // text UI delegates. Components using a non-FlatLaf UI
+                    // (e.g. RTextArea) need an explicit monospaced font.
+                    if (component instanceof JTextComponent
+                            && !component.getUI().getClass().getName().startsWith("com.formdev.flatlaf.")) {
+                        final Font cur = component.getFont();
+                        final int size = cur != null ? cur.getSize() : 16;
+                        Font themed = UIManager.getFont("monospaced.font");
+                        Font font = themed != null
+                                ? themed
+                                : new Font(Font.MONOSPACED, Font.PLAIN, size);
+                        component.setFont(font);
+                    }
+                }
+            },
             TEXT_BIGGEST = new LaFStyle("h00"),
             BUTTON_PRIMARY = new LaFStyle("buttonPrimary"),
             BUTTON_SUCCESS = new LaFStyle("buttonSuccess"),
