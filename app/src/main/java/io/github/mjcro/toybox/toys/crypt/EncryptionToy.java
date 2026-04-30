@@ -87,7 +87,7 @@ public class EncryptionToy implements Toy {
                 representationOutput = new JComboBox<>(BytesRepresentation.values());
         private final @NonNull JComboBox<@NonNull KeyTransformation> keyTransformations = new JComboBox<>(KeyTransformation.values());
         private final @NonNull JTextArea
-                inputTextArea = ToyBoxTextComponents.createJTextAreaMonospaced();
+                inputTextArea = ToyBoxTextComponents.createTextAreaMonospaced();
         private final @NonNull JTextField
                 inputFieldSecret = ToyBoxTextComponents.createJTextField(),
                 inputFieldIV = ToyBoxTextComponents.createJTextField(),

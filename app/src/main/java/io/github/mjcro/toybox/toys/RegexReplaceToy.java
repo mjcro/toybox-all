@@ -72,7 +72,7 @@ public class RegexReplaceToy implements Toy {
         private final @NonNull JTextField
                 pattern = ToyBoxTextComponents.createJTextField(),
                 replacement = ToyBoxTextComponents.createJTextField();
-        private final @NonNull JTextArea input = ToyBoxTextComponents.createJTextArea();
+        private final @NonNull JTextArea input = ToyBoxTextComponents.createBigTextArea();
         private final @NonNull MultiViewTextAreaOrExceptionPanel output = new MultiViewTextAreaOrExceptionPanel("");
         private final @NonNull JSplitPane pane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 

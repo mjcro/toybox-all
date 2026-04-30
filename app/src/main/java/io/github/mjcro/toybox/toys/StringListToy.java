@@ -73,8 +73,8 @@ public class StringListToy implements Toy {
         private static final @NonNull Logger log = LoggerFactory.getLogger(Panel.class);
 
         private final @NonNull JTextArea
-                sourceText = ToyBoxTextComponents.createJTextArea(),
-                resultText = ToyBoxTextComponents.createJTextArea(Hints.NOT_EDITABLE_TEXT);
+                sourceText = ToyBoxTextComponents.createTextArea(),
+                resultText = ToyBoxTextComponents.createTextArea(Hints.NOT_EDITABLE_TEXT);
 
         private final @NonNull JCheckBox
                 useSort = new JCheckBox("Sorted"),

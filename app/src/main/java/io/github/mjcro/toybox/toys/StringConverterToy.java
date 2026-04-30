@@ -136,8 +136,8 @@ public class StringConverterToy implements Toy {
         private final @NonNull JButton convertButton;
 
         Panel() {
-            this.sourceText = ToyBoxTextComponents.createJTextArea(Hints.TEXT_MONOSPACED);
-            this.resultText = ToyBoxTextComponents.createJTextArea(Hints.TEXT_MONOSPACED, Hints.NOT_EDITABLE_TEXT);
+            this.sourceText = ToyBoxTextComponents.createBigTextArea(Hints.TEXT_MONOSPACED);
+            this.resultText = ToyBoxTextComponents.createBigTextArea(Hints.TEXT_MONOSPACED, Hints.NOT_EDITABLE_TEXT);
             this.convertButton = ToyBoxButtons.createPrimary("Convert To", e -> doConvert());
             this.sourceTypeSelector = new JComboBox<>(new Vector<>(toBytesConverters));
             this.bytesToResultSelector = new JComboBox<>(new Vector<>(fromBytesConverters));

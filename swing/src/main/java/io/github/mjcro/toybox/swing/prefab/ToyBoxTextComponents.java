@@ -2,6 +2,7 @@ package io.github.mjcro.toybox.swing.prefab;
 
 import io.github.mjcro.toybox.swing.hint.Hint;
 import io.github.mjcro.toybox.swing.hint.Hints;
+import org.fife.ui.rtextarea.RTextArea;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
@@ -65,7 +66,7 @@ public class ToyBoxTextComponents {
      *
      * @return A new text area.
      */
-    public static @NonNull JTextArea createJTextArea() {
+    public static @NonNull JTextArea createTextArea() {
         return new JTextArea();
     }
 
@@ -75,8 +76,8 @@ public class ToyBoxTextComponents {
      * @param s The initial text, or null.
      * @return A new text area.
      */
-    public static @NonNull JTextArea createJTextArea(@Nullable String s) {
-        final JTextArea area = createJTextArea();
+    public static @NonNull JTextArea createTextArea(@Nullable String s) {
+        final JTextArea area = createTextArea();
         area.setText(s);
         return area;
     }
@@ -88,8 +89,8 @@ public class ToyBoxTextComponents {
      * @return A new text area.
      */
     @SafeVarargs
-    public static @NonNull JTextArea createJTextArea(@NonNull Hint<? super JTextArea>... hints) {
-        final JTextArea area = createJTextArea();
+    public static @NonNull JTextArea createTextArea(@NonNull Hint<? super JTextArea>... hints) {
+        final JTextArea area = createTextArea();
         Hint.applyAll(area, hints);
         return area;
     }
@@ -102,8 +103,8 @@ public class ToyBoxTextComponents {
      * @return A new text area.
      */
     @SafeVarargs
-    public static @NonNull JTextArea createJTextArea(@Nullable String s, @NonNull Hint<? super JTextArea>... hints) {
-        final JTextArea area = createJTextArea(hints);
+    public static @NonNull JTextArea createTextArea(@Nullable String s, @NonNull Hint<? super JTextArea>... hints) {
+        final JTextArea area = createTextArea(hints);
         area.setText(s);
         return area;
     }
@@ -113,7 +114,62 @@ public class ToyBoxTextComponents {
      *
      * @return A new monospaced text area.
      */
-    public static @NonNull JTextArea createJTextAreaMonospaced() {
-        return createJTextArea(Hints.TEXT_MONOSPACED);
+    public static @NonNull JTextArea createTextAreaMonospaced() {
+        return createTextArea(Hints.TEXT_MONOSPACED);
+    }
+
+    /**
+     * Creates a text area optimized for displaying large text content
+     * (in the megabyte range).
+     * <p>
+     * Backed by {@link RTextArea} from RSyntaxTextArea, which uses a faster
+     * document model and rendering pipeline than the standard {@link JTextArea}.
+     * No syntax highlighting is enabled.
+     *
+     * @return A new big-text-capable text area.
+     */
+    public static @NonNull RTextArea createBigTextArea() {
+        final RTextArea area = new RTextArea();
+        area.setHighlightCurrentLine(false);
+        return area;
+    }
+
+    /**
+     * Creates a big-text-capable text area with the given initial text.
+     *
+     * @param s The initial text, or null.
+     * @return A new big-text-capable text area.
+     */
+    public static @NonNull RTextArea createBigTextArea(@Nullable String s) {
+        final RTextArea area = createBigTextArea();
+        area.setText(s);
+        return area;
+    }
+
+    /**
+     * Creates a big-text-capable text area configured with the given hints.
+     *
+     * @param hints Hints to apply to the text area.
+     * @return A new big-text-capable text area.
+     */
+    @SafeVarargs
+    public static @NonNull RTextArea createBigTextArea(@NonNull Hint<? super RTextArea>... hints) {
+        final RTextArea area = createBigTextArea();
+        Hint.applyAll(area, hints);
+        return area;
+    }
+
+    /**
+     * Creates a big-text-capable text area with the given initial text and hints.
+     *
+     * @param s     The initial text, or null.
+     * @param hints Hints to apply to the text area.
+     * @return A new big-text-capable text area.
+     */
+    @SafeVarargs
+    public static @NonNull RTextArea createBigTextArea(@Nullable String s, @NonNull Hint<? super RTextArea>... hints) {
+        final RTextArea area = createBigTextArea(hints);
+        area.setText(s);
+        return area;
     }
 }

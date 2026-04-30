@@ -63,7 +63,7 @@ public class DataViewToy implements Toy {
     private static class Panel extends JPanel {
         private static final @NonNull Logger log = LoggerFactory.getLogger(Panel.class);
 
-        private final @NonNull JTextArea input = ToyBoxTextComponents.createJTextArea();
+        private final @NonNull JTextArea input = ToyBoxTextComponents.createBigTextArea(Hints.TEXT_MONOSPACED);
         private final @NonNull JSplitPane pane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
         private final @NonNull JComboBox<@NonNull Mode> modeChooser = new JComboBox<>(new Mode[]{
                 Mode.JSON_TREE,
@@ -128,7 +128,7 @@ public class DataViewToy implements Toy {
          * @param string the text to display
          */
         private void setResult(@NonNull String string) {
-            JTextArea textArea = ToyBoxTextComponents.createJTextArea(
+            JTextArea textArea = ToyBoxTextComponents.createBigTextArea(
                     string,
                     Hints.NOT_EDITABLE_TEXT,
                     Hints.TEXT_MONOSPACED

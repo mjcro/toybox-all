@@ -16,7 +16,7 @@ public class MultiViewTextAreaOrExceptionPanel extends MultiViewBasicPanel {
     public static final @NonNull String
             CARD_TEXT_AREA = "textArea";
 
-    private final @NonNull JTextArea textArea = ToyBoxTextComponents.createJTextArea();
+    private final @NonNull JTextArea textArea = ToyBoxTextComponents.createBigTextArea();
 
     /**
      * Creates a new panel with an empty text area.

@@ -65,7 +65,7 @@ public class StringAnalyzerToy implements Toy {
         private final @NonNull JPanel resultPanel;
 
         Panel() {
-            this.sourceText = ToyBoxTextComponents.createJTextArea(Hints.TEXT_MONOSPACED);
+            this.sourceText = ToyBoxTextComponents.createTextArea(Hints.TEXT_MONOSPACED);
 
             this.sourceText.getDocument().addDocumentListener(new DocumentListener() {
                 @Override

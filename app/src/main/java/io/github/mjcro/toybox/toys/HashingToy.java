@@ -129,7 +129,7 @@ public class HashingToy implements Toy {
 
         private final @NonNull Executor executor;
 
-        private final @NonNull JTextArea input = ToyBoxTextComponents.createJTextArea();
+        private final @NonNull JTextArea input = ToyBoxTextComponents.createTextArea();
         private final @NonNull JTextField password = ToyBoxTextComponents.createJTextField();
         private final @NonNull JTextField complexity = ToyBoxTextComponents.createJTextField();
         private final @NonNull JTextField output = ToyBoxTextComponents.createJTextField(Hints.NOT_EDITABLE_TEXT);
