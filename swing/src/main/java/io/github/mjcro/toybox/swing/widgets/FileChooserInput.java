@@ -33,7 +33,7 @@ public class FileChooserInput extends JPanel {
     private final @NonNull JButton
             chooseFileButton = ToyBoxButtons.create("Choose", this::onChooseFileButtonClick),
             clearButton = ToyBoxButtons.create("Clear", this::onClearButtonClick);
-    private final @NonNull JTextField chosenFileNameTextField = ToyBoxTextComponents.createJTextField();
+    private final @NonNull JTextField chosenFileNameTextField = ToyBoxTextComponents.createTextField();
     private final @NonNull FileFilter @NonNull [] fileFilters;
     private final @NonNull Runnable onFileChange;
     private volatile @Nullable File file;

@@ -34,7 +34,7 @@ public class LongArrayBinding extends AbstractLabeledBinding {
      */
     @Override
     protected @NonNull JComponent createEditor() {
-        textField = ToyBoxTextComponents.createJTextField();
+        textField = ToyBoxTextComponents.createTextField();
         textField.setToolTipText("Multiple int64 values\nSeparators are ',;' and space");
         textField.setPreferredSize(new Dimension(250, textField.getPreferredSize().height));
         Components.onPressEnter(textField, this::fireSubmit);

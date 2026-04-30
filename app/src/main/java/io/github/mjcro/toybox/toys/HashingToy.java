@@ -130,9 +130,9 @@ public class HashingToy implements Toy {
         private final @NonNull Executor executor;
 
         private final @NonNull JTextArea input = ToyBoxTextComponents.createTextArea();
-        private final @NonNull JTextField password = ToyBoxTextComponents.createJTextField();
-        private final @NonNull JTextField complexity = ToyBoxTextComponents.createJTextField();
-        private final @NonNull JTextField output = ToyBoxTextComponents.createJTextField(Hints.NOT_EDITABLE_TEXT);
+        private final @NonNull JTextField password = ToyBoxTextComponents.createTextField();
+        private final @NonNull JTextField complexity = ToyBoxTextComponents.createTextField();
+        private final @NonNull JTextField output = ToyBoxTextComponents.createTextField(Hints.NOT_EDITABLE_TEXT);
         private final @NonNull JCheckBox trimInput = new JCheckBox("Trim input");
         private final @NonNull JButton hashButton = ToyBoxButtons.createPrimary("Hash", this::onHash);
         private final @NonNull JComboBox<@NonNull Hash> hashSelector = new JComboBox<>(new Vector<>(hashes));

@@ -70,8 +70,8 @@ public class RegexReplaceToy implements Toy {
 
         private final @NonNull JComboBox<@NonNull Preset> preset = new JComboBox<>();
         private final @NonNull JTextField
-                pattern = ToyBoxTextComponents.createJTextField(),
-                replacement = ToyBoxTextComponents.createJTextField();
+                pattern = ToyBoxTextComponents.createTextField(),
+                replacement = ToyBoxTextComponents.createTextField();
         private final @NonNull JTextArea input = ToyBoxTextComponents.createBigTextArea();
         private final @NonNull MultiViewTextAreaOrExceptionPanel output = new MultiViewTextAreaOrExceptionPanel("");
         private final @NonNull JSplitPane pane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);

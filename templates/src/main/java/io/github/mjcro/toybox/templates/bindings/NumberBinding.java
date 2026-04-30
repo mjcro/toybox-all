@@ -31,7 +31,7 @@ public class NumberBinding extends AbstractLabeledDataLinkBinding<JTextField, Lo
     @Override
     protected @NonNull ComponentDataLink<@NonNull JTextField, @NonNull Long> createLink() {
         return ToyBoxDataLink.linkNumberField(
-                ToyBoxTextComponents.createJTextField(),
+                ToyBoxTextComponents.createTextField(),
                 field,
                 target,
                 Hints.setPreferredWidth(150),

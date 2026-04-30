@@ -33,7 +33,7 @@ public class StringArrayCsvBinding extends AbstractLabeledBinding {
      */
     @Override
     protected @NonNull JComponent createEditor() {
-        textField = ToyBoxTextComponents.createJTextField();
+        textField = ToyBoxTextComponents.createTextField();
         textField.setToolTipText("Multiple string values separated by comma");
         textField.setPreferredSize(new Dimension(300, textField.getPreferredSize().height));
         Components.onPressEnter(textField, this::fireSubmit);

@@ -131,19 +131,19 @@ public class AboutToy implements Toy {
             return ToyBoxPanels.twoColumnsRight(
                     new AbstractMap.SimpleEntry<>(
                             ToyBoxLabels.create("Application version"),
-                            ToyBoxTextComponents.createJTextField(Hints.setReadOnlyText(Application.VERSION))
+                            ToyBoxTextComponents.createTextField(Hints.setReadOnlyText(Application.VERSION))
                     ),
                     new AbstractMap.SimpleEntry<>(
                             ToyBoxLabels.create("ToyBox toolkit version"),
-                            ToyBoxTextComponents.createJTextField(Hints.setReadOnlyText(Application.INTERNAL_VERSION))
+                            ToyBoxTextComponents.createTextField(Hints.setReadOnlyText(Application.INTERNAL_VERSION))
                     ),
                     new AbstractMap.SimpleEntry<>(
                             ToyBoxLabels.create("Java version"),
-                            ToyBoxTextComponents.createJTextField(Hints.setReadOnlyText(Runtime.version().toString()))
+                            ToyBoxTextComponents.createTextField(Hints.setReadOnlyText(Runtime.version().toString()))
                     ),
                     new AbstractMap.SimpleEntry<>(
                             ToyBoxLabels.create("Operating system"),
-                            ToyBoxTextComponents.createJTextField(Hints.setReadOnlyText(System.getProperty("os.name")))
+                            ToyBoxTextComponents.createTextField(Hints.setReadOnlyText(System.getProperty("os.name")))
                     )
             );
         }

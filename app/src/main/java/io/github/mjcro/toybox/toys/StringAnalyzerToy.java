@@ -134,7 +134,7 @@ public class StringAnalyzerToy implements Toy {
         private static @NonNull JPanel buildLabelAndText(@NonNull String string, @NonNull String value) {
             JLabel label = ToyBoxLabels.create(string);
             label.setBorder(new EmptyBorder(0, 0, 0, 5));
-            JTextField text = ToyBoxTextComponents.createJTextField(value, Hints.NOT_EDITABLE_TEXT);
+            JTextField text = ToyBoxTextComponents.createTextField(value, Hints.NOT_EDITABLE_TEXT);
             JPanel panel = new JPanel();
             panel.setLayout(new BorderLayout());
             panel.add(label, BorderLayout.LINE_START);

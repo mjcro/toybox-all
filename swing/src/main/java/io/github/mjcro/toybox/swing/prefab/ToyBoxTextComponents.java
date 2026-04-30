@@ -18,7 +18,7 @@ public class ToyBoxTextComponents {
      *
      * @return A new text field.
      */
-    public static @NonNull JTextField createJTextField() {
+    public static @NonNull JTextField createTextField() {
         return new JTextField();
     }
 
@@ -28,8 +28,8 @@ public class ToyBoxTextComponents {
      * @param s The initial text, or null.
      * @return A new text field.
      */
-    public static @NonNull JTextField createJTextField(@Nullable String s) {
-        final JTextField field = createJTextField();
+    public static @NonNull JTextField createTextField(@Nullable String s) {
+        final JTextField field = createTextField();
         field.setText(s);
         return field;
     }
@@ -41,8 +41,8 @@ public class ToyBoxTextComponents {
      * @return A new text field.
      */
     @SafeVarargs
-    public static @NonNull JTextField createJTextField(@NonNull Hint<? super JTextField>... hints) {
-        final JTextField field = createJTextField();
+    public static @NonNull JTextField createTextField(@NonNull Hint<? super JTextField>... hints) {
+        final JTextField field = createTextField();
         Hint.applyAll(field, hints);
         return field;
     }
@@ -55,8 +55,8 @@ public class ToyBoxTextComponents {
      * @return A new text field.
      */
     @SafeVarargs
-    public static @NonNull JTextField createJTextField(@Nullable String s, @NonNull Hint<? super JTextField>... hints) {
-        final JTextField field = createJTextField(hints);
+    public static @NonNull JTextField createTextField(@Nullable String s, @NonNull Hint<? super JTextField>... hints) {
+        final JTextField field = createTextField(hints);
         field.setText(s);
         return field;
     }

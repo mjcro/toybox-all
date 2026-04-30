@@ -86,7 +86,7 @@ public class InstantAnalyzerToy implements Toy {
         private Consumer<Event> eventConsumer = event -> {
         };
 
-        private final JTextField inputField = ToyBoxTextComponents.createJTextField();
+        private final JTextField inputField = ToyBoxTextComponents.createTextField();
         private final JComboBox<TimeZoneSelection> tz = new JComboBox<>(TimeZoneSelection.items(true));
         private final ParsedInstantDisplay parsedInstantDisplay = new ParsedInstantDisplay();
         private final ModificationSet modificationSet = new ModificationSet();
@@ -471,7 +471,7 @@ public class InstantAnalyzerToy implements Toy {
     }
 
     private static class ParsedResultSingleElement extends JPanel {
-        private final JTextField textField = ToyBoxTextComponents.createJTextField(Hints.NOT_EDITABLE_TEXT);
+        private final JTextField textField = ToyBoxTextComponents.createTextField(Hints.NOT_EDITABLE_TEXT);
 
         ParsedResultSingleElement(String label) {
             super(new BorderLayout());

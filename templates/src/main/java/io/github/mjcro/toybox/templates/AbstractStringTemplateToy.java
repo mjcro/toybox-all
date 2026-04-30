@@ -118,7 +118,7 @@ public abstract class AbstractStringTemplateToy implements Toy {
             buttons.add(applyButton);
             topFooter.add(buttons, BorderLayout.LINE_END);
 
-            hash = ToyBoxTextComponents.createJTextField(Hints.NOT_EDITABLE_TEXT);
+            hash = ToyBoxTextComponents.createTextField(Hints.NOT_EDITABLE_TEXT);
             hash.setBorder(new EmptyBorder(0, 10, 0, 10));
             hash.setOpaque(false);
             hash.setToolTipText("MD5 hash of resulting text");

@@ -31,7 +31,7 @@ public class StringBinding extends AbstractLabeledDataLinkBinding<JTextField, St
     @Override
     protected @NonNull ComponentDataLink<@NonNull JTextField, @NonNull String> createLink() {
         return ToyBoxDataLink.linkStringField(
-                ToyBoxTextComponents.createJTextField(),
+                ToyBoxTextComponents.createTextField(),
                 field,
                 target,
                 annotation.trim() ? String::trim : null,

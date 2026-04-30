@@ -89,9 +89,9 @@ public class EncryptionToy implements Toy {
         private final @NonNull JTextArea
                 inputTextArea = ToyBoxTextComponents.createTextAreaMonospaced();
         private final @NonNull JTextField
-                inputFieldSecret = ToyBoxTextComponents.createJTextField(),
-                inputFieldIV = ToyBoxTextComponents.createJTextField(),
-                outputFieldIV = ToyBoxTextComponents.createJTextField(Hints.NOT_EDITABLE_TEXT);
+                inputFieldSecret = ToyBoxTextComponents.createTextField(),
+                inputFieldIV = ToyBoxTextComponents.createTextField(),
+                outputFieldIV = ToyBoxTextComponents.createTextField(Hints.NOT_EDITABLE_TEXT);
         private final @NonNull JButton
                 buttonEncrypt = ToyBoxButtons.createPrimary("Encrypt", this::onEncryptClick),
                 buttonDecrypt = ToyBoxButtons.createPrimary("Decrypt", this::onDecryptClick);
