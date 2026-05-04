@@ -19,7 +19,11 @@ import java.util.concurrent.TimeUnit;
  * keystroke-triggered searches.
  */
 public class DelayedInvoker implements Executor {
-    private static final @NonNull ScheduledExecutorService delays = Executors.newScheduledThreadPool(2);
+    private static final @NonNull ScheduledExecutorService delays = Executors.newScheduledThreadPool(2, r -> {
+        final Thread t = new Thread(r, "toybox-delayed-invoker");
+        t.setDaemon(true);
+        return t;
+    });
 
     private final @NonNull Duration delay;
     private volatile @Nullable ScheduledFuture<?> future;
