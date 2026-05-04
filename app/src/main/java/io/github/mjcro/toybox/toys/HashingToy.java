@@ -248,11 +248,14 @@ public class HashingToy implements Toy {
         private void onHash(@Nullable ActionEvent e) {
             Hash h = (Hash) hashSelector.getSelectedItem();
             boolean trim = trimInput.isSelected();
+            String in = input.getText();
+            String cmp = complexity.getText();
+            String pw = password.getText();
             if (h.isFast()) {
-                doHash(h, trim);
+                doHash(h, trim, in, cmp, pw);
             } else {
                 setEnabled(false);
-                executor.execute(() -> doHash(h, trim));
+                executor.execute(() -> doHash(h, trim, in, cmp, pw));
             }
         }
 
@@ -261,13 +264,13 @@ public class HashingToy implements Toy {
          *
          * @param h    the hash algorithm to apply
          * @param trim whether to trim the input before hashing
+         * @param in   the input text, captured on the EDT before dispatch
+         * @param cmp  the complexity field text, captured on the EDT before dispatch
+         * @param pw   the password field text, captured on the EDT before dispatch
          */
-        private void doHash(@NonNull Hash h, boolean trim) {
+        private void doHash(@NonNull Hash h, boolean trim, @NonNull String in, @NonNull String cmp, @NonNull String pw) {
             Instant before = Instant.now();
             try {
-                String in = input.getText();
-                String cmp = complexity.getText();
-                String pw = password.getText();
                 if (trim) {
                     in = in.strip();
                 }
@@ -518,9 +521,9 @@ public class HashingToy implements Toy {
             Digest digest = super.supplier.get();
 
             HMac hMac = new HMac(digest);
-            hMac.init(new KeyParameter(password.getBytes()));
+            hMac.init(new KeyParameter(password.getBytes(StandardCharsets.UTF_8)));
 
-            byte[] hmacIn = input.getBytes();
+            byte[] hmacIn = input.getBytes(StandardCharsets.UTF_8);
             hMac.update(hmacIn, 0, hmacIn.length);
             byte[] hmacOut = new byte[hMac.getMacSize()];
 
