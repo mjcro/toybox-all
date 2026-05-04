@@ -10,6 +10,7 @@ import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.context.ApplicationContext;
+import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.context.annotation.AnnotationConfigApplicationContext;
 
 import javax.swing.SwingUtilities;
@@ -90,6 +91,11 @@ public class Application {
         // Building application context
         ApplicationContext context = applicationContextSupplier.get();
         log.info(Slf4jUtil.TOYBOX_MARKER, "Spring ApplicationContext ready");
+
+        // Ensure beans with destroy methods (e.g. ScheduledExecutorService) are stopped on JVM exit
+        if (context instanceof ConfigurableApplicationContext closeable) {
+            Runtime.getRuntime().addShutdownHook(new Thread(closeable::close, "toybox-context-shutdown"));
+        }
 
         // Starting
         ApplicationFrame window = context.getBean(Application.WINDOW, ApplicationFrame.class);
