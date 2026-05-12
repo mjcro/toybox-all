@@ -62,7 +62,10 @@ public class StringConverterToy implements Toy {
             new BytesToResult("URL Decode", bytes -> Util.isEmpty(bytes)
                     ? ""
                     : URLDecoder.decode(new String(bytes, StandardCharsets.UTF_8), StandardCharsets.UTF_8)),
-            new BytesToResult("Hex table", StringConverterToy::hexTable)
+            new BytesToResult("Hex table", StringConverterToy::hexTable),
+            new BytesToResult("Strip AI markers", bytes -> Util.isEmpty(bytes)
+                    ? ""
+                    : stripAiMarkers(new String(bytes, StandardCharsets.UTF_8)))
     );
 
     @Override
@@ -77,7 +80,7 @@ public class StringConverterToy implements Toy {
 
     @Override
     public @NonNull Optional<@NonNull String> getVersion() {
-        return Optional.of("v0.2");
+        return Optional.of("v0.3");
     }
 
     @Override
@@ -119,6 +122,126 @@ public class StringConverterToy implements Toy {
             } else {
                 sb.append(" ");
                 x++;
+            }
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Normalizes typographic characters frequently emitted by LLMs (em/en dashes, smart quotes,
+     * ellipsis, non-breaking and Unicode spaces) and strips invisible/steganographic codepoints
+     * such as zero-width characters, bidi controls, variation selectors and the Tag block
+     * ({@code U+E0000..U+E007F}) which is commonly used to embed hidden fingerprints.
+     *
+     * @param input source string
+     * @return string containing only characters humans typically type
+     */
+    private static @NonNull String stripAiMarkers(@NonNull String input) {
+        if (input.isEmpty()) {
+            return input;
+        }
+
+        final StringBuilder sb = new StringBuilder(input.length());
+        final int length = input.length();
+        int index = 0;
+        while (index < length) {
+            final int cp = input.codePointAt(index);
+            index += Character.charCount(cp);
+
+            // Tag block — steganographic fingerprints
+            if (cp >= 0xE0000 && cp <= 0xE007F) {
+                continue;
+            }
+            // Variation selectors
+            if (cp >= 0xFE00 && cp <= 0xFE0F) {
+                continue;
+            }
+            if (cp >= 0xE0100 && cp <= 0xE01EF) {
+                continue;
+            }
+
+            switch (cp) {
+                // Hyphen, non-breaking hyphen, figure/en/em dash, horizontal bar,
+                // minus sign, small/fullwidth hyphen variants
+                case 0x2010:
+                case 0x2011:
+                case 0x2012:
+                case 0x2013:
+                case 0x2014:
+                case 0x2015:
+                case 0x2212:
+                case 0xFE58:
+                case 0xFE63:
+                case 0xFF0D:
+                    sb.append('-');
+                    break;
+                // Smart single quotes / low-9 quote
+                case 0x2018:
+                case 0x2019:
+                case 0x201A:
+                case 0x201B:
+                    sb.append('\'');
+                    break;
+                // Smart double quotes / low-9 / reversed
+                case 0x201C:
+                case 0x201D:
+                case 0x201E:
+                case 0x201F:
+                    sb.append('"');
+                    break;
+                // Horizontal ellipsis
+                case 0x2026:
+                    sb.append("...");
+                    break;
+                // Non-breaking space, en/em/figure/punctuation spaces,
+                // thin/hair/six-/four-/three-per-em, narrow/medium-math, ideographic
+                case 0x00A0:
+                case 0x2000:
+                case 0x2001:
+                case 0x2002:
+                case 0x2003:
+                case 0x2004:
+                case 0x2005:
+                case 0x2006:
+                case 0x2007:
+                case 0x2008:
+                case 0x2009:
+                case 0x200A:
+                case 0x202F:
+                case 0x205F:
+                case 0x3000:
+                    sb.append(' ');
+                    break;
+                // Soft hyphen, zero-width space/non-joiner/joiner, LRM/RLM,
+                // line/paragraph separator, bidi embedding/override controls,
+                // word joiner, invisible math operators, isolate controls, BOM
+                case 0x00AD:
+                case 0x200B:
+                case 0x200C:
+                case 0x200D:
+                case 0x200E:
+                case 0x200F:
+                case 0x2028:
+                case 0x2029:
+                case 0x202A:
+                case 0x202B:
+                case 0x202C:
+                case 0x202D:
+                case 0x202E:
+                case 0x2060:
+                case 0x2061:
+                case 0x2062:
+                case 0x2063:
+                case 0x2064:
+                case 0x2066:
+                case 0x2067:
+                case 0x2068:
+                case 0x2069:
+                case 0xFEFF:
+                    break;
+                default:
+                    sb.appendCodePoint(cp);
+                    break;
             }
         }
         return sb.toString();
