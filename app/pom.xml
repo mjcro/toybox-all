@@ -42,6 +42,11 @@
             <version>1.0.3</version>
         </dependency>
         <dependency>
+            <groupId>io.github.mjcro</groupId>
+            <artifactId>masker</artifactId>
+            <version>0.1.0</version>
+        </dependency>
+        <dependency>
             <groupId>com.fasterxml.jackson.core</groupId>
             <artifactId>jackson-databind</artifactId>
             <version>2.18.2</version>
