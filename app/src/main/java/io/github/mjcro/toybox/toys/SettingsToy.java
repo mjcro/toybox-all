@@ -4,34 +4,34 @@ import io.github.mjcro.toybox.api.Context;
 import io.github.mjcro.toybox.api.Label;
 import io.github.mjcro.toybox.api.Menu;
 import io.github.mjcro.toybox.api.Setting;
-import io.github.mjcro.toybox.api.SettingsStorage;
 import io.github.mjcro.toybox.api.Toy;
-import io.github.mjcro.toybox.app.settings.storage.SettingsStorageDispatcher;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxButtons;
-import io.github.mjcro.toybox.swing.prefab.ToyBoxLabels;
-import io.github.mjcro.toybox.swing.prefab.ToyBoxPanels;
-import io.github.mjcro.toybox.swing.widgets.FileChooserInput;
 import io.github.mjcro.toybox.swing.widgets.MultiViewTableOrExceptionPanel;
+import io.github.mjcro.toybox.swing.widgets.panels.ActionBar;
 import org.jspecify.annotations.NonNull;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
-import javax.swing.JPasswordField;
-import javax.swing.filechooser.FileNameExtensionFilter;
 import javax.swing.table.DefaultTableModel;
 import java.awt.BorderLayout;
-import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
-import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
 /**
- * Toy for viewing and managing application settings, including binding
- * or creating encrypted settings files.
+ * Toy for viewing current application settings values.
+ *
+ * <p>This toy is read-only - settings file binding and creation are performed
+ * using the settings file section of the application status bar.
  */
 public class SettingsToy implements Toy {
+    /** Amount of leading value characters shown for sensitive settings. */
+    private static final int SENSITIVE_VISIBLE_CHARS = 3;
+
+    /** Mask appended to truncated values of sensitive settings. */
+    private static final @NonNull String MASK = "***";
+
     @Override
     public @NonNull List<@NonNull Menu> getPath() {
         return List.of(Menu.TOYBOX_MENU);
@@ -48,18 +48,12 @@ public class SettingsToy implements Toy {
     }
 
     /**
-     * Inner panel providing the settings management UI with file binding,
-     * creation, and a table view of current settings.
+     * Inner panel rendering current settings as a read-only table.
      */
     private static class Panel extends JPanel {
         private final @NonNull Context context;
         private final @NonNull MultiViewTableOrExceptionPanel multiView = new MultiViewTableOrExceptionPanel();
-        private final @NonNull JButton
-                buttonLoad = ToyBoxButtons.createPrimary("Load settings", this::onLoadClick),
-                buttonCreate = ToyBoxButtons.createPrimary("Create settings", this::onCreateClick),
-                buttonRefresh = ToyBoxButtons.create("Refresh", this::onRefreshClick);
-        private final @NonNull JPasswordField secretField = new JPasswordField();
-        private final @NonNull FileChooserInput fileChooserInput;
+        private final @NonNull JButton buttonRefresh = ToyBoxButtons.create("Refresh", this::onRefreshClick);
 
         /**
          * Constructs the settings panel.
@@ -69,99 +63,22 @@ public class SettingsToy implements Toy {
         Panel(@NonNull Context context) {
             super(new BorderLayout());
             this.context = context;
-            this.fileChooserInput = new FileChooserInput(
-                    context.getEnvironment(),
-                    "-",
-                    () -> setEnabled(true),
-                    new FileNameExtensionFilter("DAT files", "dat")
-            );
-
-            secretField.getDocument().addUndoableEditListener(e -> setEnabled(true));
 
             multiView.getTable().setDefaultEditor(Object.class, null);
             add(multiView, BorderLayout.CENTER);
 
-            add(buildHeader(), BorderLayout.PAGE_START);
+            ActionBar actionBar = new ActionBar();
+            actionBar.add(buttonRefresh);
+            add(actionBar, BorderLayout.PAGE_START);
 
             refresh();
-        }
-
-        /**
-         * Builds the header panel containing file selection, password input, and action buttons.
-         *
-         * @return the header panel
-         */
-        private @NonNull JPanel buildHeader() {
-            JPanel inputs = ToyBoxPanels.twoColumnsRight(
-                    new AbstractMap.SimpleEntry<>(ToyBoxLabels.create("Settings file"), fileChooserInput),
-                    new AbstractMap.SimpleEntry<>(ToyBoxLabels.create("Settings file secret"), secretField)
-            );
-
-            JPanel buttons = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 0));
-            buttons.add(buttonCreate);
-            buttons.add(buttonLoad);
-            buttons.add(buttonRefresh);
-
-            JPanel panel = new JPanel(new BorderLayout());
-            panel.add(inputs, BorderLayout.CENTER);
-            panel.add(buttons, BorderLayout.PAGE_END);
-
-            return ToyBoxPanels.titledBordered("Application settings configuration", panel);
-        }
-
-        /**
-         * Handles the load button click, binding an existing settings file.
-         *
-         * @param a the action event
-         */
-        void onLoadClick(@NonNull ActionEvent a) {
-            SettingsStorage storage = context.getEnvironment().getSettingsStorage();
-            setEnabled(false);
-            try {
-                if (!(storage instanceof SettingsStorageDispatcher)) {
-                    throw new RuntimeException("Unsupported session storage type");
-                }
-                SettingsStorageDispatcher sdd = (SettingsStorageDispatcher) storage;
-                sdd.bindExistingSettingsFile(fileChooserInput.getFile().get(), new String(secretField.getPassword()));
-                refresh();
-            } catch (Exception e) {
-                multiView.setViewException(e);
-            } finally {
-                setEnabled(true);
-            }
-        }
-
-        /**
-         * Handles the create button click, creating a new settings file.
-         *
-         * @param a the action event
-         */
-        void onCreateClick(@NonNull ActionEvent a) {
-            SettingsStorage storage = context.getEnvironment().getSettingsStorage();
-            setEnabled(false);
-            try {
-                if (!(storage instanceof SettingsStorageDispatcher)) {
-                    throw new RuntimeException("Unsupported session storage type");
-                }
-                SettingsStorageDispatcher sdd = (SettingsStorageDispatcher) storage;
-                sdd.createNewSettingFile(fileChooserInput.getFile().get(), new String(secretField.getPassword()));
-                refresh();
-            } catch (Exception e) {
-                multiView.setViewException(e);
-            } finally {
-                setEnabled(true);
-            }
         }
 
         @Override
         public void setEnabled(boolean enabled) {
             super.setEnabled(enabled);
             multiView.setEnabled(enabled);
-            buttonLoad.setEnabled(enabled && fileChooserInput.getFile().isPresent() && fileChooserInput.getFile().get().exists());
-            buttonCreate.setEnabled(enabled && fileChooserInput.getFile().isPresent() && !fileChooserInput.getFile().get().exists());
             buttonRefresh.setEnabled(enabled);
-            fileChooserInput.setEnabled(enabled);
-            secretField.setEnabled(enabled);
         }
 
         /**
@@ -170,12 +87,24 @@ public class SettingsToy implements Toy {
          * @param a the action event
          */
         void onRefreshClick(@NonNull ActionEvent a) {
-            Panel.this.setEnabled(false);
-            try {
-                Panel.this.refresh();
-            } finally {
-                Panel.this.setEnabled(true);
+            refresh();
+        }
+
+        /**
+         * Prepares setting value for rendering in the table.
+         * Values of sensitive settings are truncated to their first three
+         * characters followed by a mask. Non-sensitive values are rendered as is.
+         *
+         * @param setting the setting to render
+         * @return display string for the value column
+         */
+        private static @NonNull String render(@NonNull Setting setting) {
+            String value = setting.getDisplayValue();
+            if (!setting.isSensitive() || setting.getValue() == null) {
+                return value;
             }
+
+            return value.substring(0, Math.min(SENSITIVE_VISIBLE_CHARS, value.length())) + MASK;
         }
 
         /**
@@ -184,7 +113,6 @@ public class SettingsToy implements Toy {
         void refresh() {
             setEnabled(false);
             try {
-                // Sorting toys
                 ArrayList<Setting> settings = new ArrayList<>();
                 for (Setting setting : context.getEnvironment().getSettingsStorage()) {
                     settings.add(setting);
@@ -200,11 +128,13 @@ public class SettingsToy implements Toy {
                     model.addRow(new Object[]{
                             setting.getNamespace(),
                             setting.getName(),
-                            setting.getDisplayValue()
+                            render(setting)
                     });
                 }
 
                 multiView.setViewTable(model);
+            } catch (Exception e) {
+                multiView.setViewException(e);
             } finally {
                 setEnabled(true);
             }

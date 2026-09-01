@@ -41,4 +41,11 @@ public interface Setting {
         @Nullable Object v = getValue();
         return v == null ? "null" : v.toString();
     }
+
+    /**
+     * @return True if setting is sensitive, false otherwise
+     */
+    default boolean isSensitive() {
+        return true;
+    }
 }

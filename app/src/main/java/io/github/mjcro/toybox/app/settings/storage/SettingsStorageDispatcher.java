@@ -29,12 +29,21 @@ public class SettingsStorageDispatcher implements SettingsStorage {
     }
 
     /**
+     * Returns the currently bound settings file, if any.
+     *
+     * @return optional containing the settings file, or empty if no file is bound
+     */
+    public @NonNull Optional<@NonNull File> getFile() {
+        return Optional.ofNullable(file);
+    }
+
+    /**
      * Returns the name of the currently bound settings file, if any.
      *
      * @return optional containing the file name, or empty if no file is bound
      */
     public @NonNull Optional<@NonNull String> getFileName() {
-        return Optional.ofNullable(file).map(File::getName);
+        return getFile().map(File::getName);
     }
 
     /**
@@ -56,7 +65,8 @@ public class SettingsStorageDispatcher implements SettingsStorage {
         SettingsStorage storage = CipheredJsonFileStorage.Aes256Gcm(file, password);
         // Reading data to verify that everything is ok
         storage.get(ToyBoxSettingFileCreatedSetting.class);
-        fileStorage = storage;
+        this.fileStorage = storage;
+        this.file = file;
     }
 
     /**
@@ -73,7 +83,8 @@ public class SettingsStorageDispatcher implements SettingsStorage {
                 storage.put(setting);
             }
         }
-        fileStorage = storage;
+        this.fileStorage = storage;
+        this.file = file;
     }
 
     /**

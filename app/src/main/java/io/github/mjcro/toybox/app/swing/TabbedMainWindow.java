@@ -74,7 +74,7 @@ public class TabbedMainWindow extends JFrame implements ApplicationFrame {
 
         BiConsumer<Class<? extends Toy>, Object> toyRunner = (c, d) -> getContext().findAndShow(c, d, true);
 
-        getContentPane().add(StatusBarWidget.interactive(toyRunner, daemonExecutor), BorderLayout.PAGE_END);
+        getContentPane().add(StatusBarWidget.interactive(environment, toyRunner, daemonExecutor), BorderLayout.PAGE_END);
         getContentPane().add(tabbedPane, BorderLayout.CENTER);
 
         setJMenuBar(new NavigationTreeMenuBuilder().buildMenuBar(getContext(), environment.getRegisteredToys()));

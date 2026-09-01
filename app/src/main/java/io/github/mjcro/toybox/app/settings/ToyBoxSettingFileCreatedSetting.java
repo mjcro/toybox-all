@@ -65,4 +65,9 @@ public class ToyBoxSettingFileCreatedSetting extends ToyBoxAbstractSetting {
                 .withZone(ZoneOffset.UTC)
                 .format(getValue()) + " UTC";
     }
+
+    @Override
+    public boolean isSensitive() {
+        return false;
+    }
 }

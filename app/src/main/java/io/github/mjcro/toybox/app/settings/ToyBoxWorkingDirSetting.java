@@ -49,4 +49,9 @@ public class ToyBoxWorkingDirSetting extends ToyBoxAbstractSetting {
     public @NonNull String getValue() {
         return value;
     }
+
+    @Override
+    public boolean isSensitive() {
+        return false;
+    }
 }
