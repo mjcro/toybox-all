@@ -6,18 +6,22 @@ import io.github.mjcro.toybox.api.Menu;
 import io.github.mjcro.toybox.api.Setting;
 import io.github.mjcro.toybox.api.Toy;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxButtons;
-import io.github.mjcro.toybox.swing.widgets.MultiViewTableOrExceptionPanel;
+import io.github.mjcro.toybox.swing.widgets.KeyValueJPanel;
+import io.github.mjcro.toybox.swing.widgets.MultiViewBasicPanel;
+import io.github.mjcro.toybox.swing.widgets.OrderedKeyValueModel;
 import io.github.mjcro.toybox.swing.widgets.panels.ActionBar;
 import org.jspecify.annotations.NonNull;
 
 import javax.swing.JButton;
 import javax.swing.JPanel;
-import javax.swing.table.DefaultTableModel;
+import javax.swing.JScrollPane;
 import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Toy for viewing current application settings values.
@@ -48,11 +52,11 @@ public class SettingsToy implements Toy {
     }
 
     /**
-     * Inner panel rendering current settings as a read-only table.
+     * Inner panel rendering current settings as read-only key-value data.
      */
-    private static class Panel extends JPanel {
+    private static final class Panel extends JPanel {
         private final @NonNull Context context;
-        private final @NonNull MultiViewTableOrExceptionPanel multiView = new MultiViewTableOrExceptionPanel();
+        private final @NonNull SettingsView settingsView = new SettingsView();
         private final @NonNull JButton buttonRefresh = ToyBoxButtons.create("Refresh", this::onRefreshClick);
 
         /**
@@ -64,10 +68,9 @@ public class SettingsToy implements Toy {
             super(new BorderLayout());
             this.context = context;
 
-            multiView.getTable().setDefaultEditor(Object.class, null);
-            add(multiView, BorderLayout.CENTER);
+            add(settingsView, BorderLayout.CENTER);
 
-            ActionBar actionBar = new ActionBar();
+            final ActionBar actionBar = new ActionBar();
             actionBar.add(buttonRefresh);
             add(actionBar, BorderLayout.PAGE_START);
 
@@ -77,12 +80,12 @@ public class SettingsToy implements Toy {
         @Override
         public void setEnabled(boolean enabled) {
             super.setEnabled(enabled);
-            multiView.setEnabled(enabled);
+            settingsView.setEnabled(enabled);
             buttonRefresh.setEnabled(enabled);
         }
 
         /**
-         * Handles the refresh button click by reloading the settings table.
+         * Handles the refresh button click by reloading the settings view.
          *
          * @param a the action event
          */
@@ -91,15 +94,15 @@ public class SettingsToy implements Toy {
         }
 
         /**
-         * Prepares setting value for rendering in the table.
+         * Prepares a setting value for rendering.
          * Values of sensitive settings are truncated to their first three
          * characters followed by a mask. Non-sensitive values are rendered as is.
          *
          * @param setting the setting to render
-         * @return display string for the value column
+         * @return display string for the setting value
          */
         private static @NonNull String render(@NonNull Setting setting) {
-            String value = setting.getDisplayValue();
+            final String value = setting.getDisplayValue();
             if (!setting.isSensitive() || setting.getValue() == null) {
                 return value;
             }
@@ -108,36 +111,51 @@ public class SettingsToy implements Toy {
         }
 
         /**
-         * Reloads the settings table from the current storage.
+         * Reloads the settings view from the current storage.
          */
         void refresh() {
             setEnabled(false);
             try {
-                ArrayList<Setting> settings = new ArrayList<>();
-                for (Setting setting : context.getEnvironment().getSettingsStorage()) {
+                final ArrayList<@NonNull Setting> settings = new ArrayList<>();
+                for (final Setting setting : context.getEnvironment().getSettingsStorage()) {
                     settings.add(setting);
                 }
                 settings.sort(Comparator.comparing(Setting::getNamespace).thenComparing(Setting::getName));
 
-                DefaultTableModel model = new DefaultTableModel();
-                model.addColumn("Namespace");
-                model.addColumn("Name");
-                model.addColumn("Value");
-
-                for (Setting setting : settings) {
-                    model.addRow(new Object[]{
-                            setting.getNamespace(),
-                            setting.getName(),
-                            render(setting)
-                    });
-                }
-
-                multiView.setViewTable(model);
-            } catch (Exception e) {
-                multiView.setViewException(e);
+                settingsView.setViewSettings(toModel(settings));
+            } catch (final Exception e) {
+                settingsView.setViewException(e);
             } finally {
                 setEnabled(true);
             }
+        }
+
+        private static @NonNull OrderedKeyValueModel toModel(@NonNull List<@NonNull Setting> settings) {
+            final Map<@NonNull String, @NonNull String> values = new LinkedHashMap<>();
+            for (final Setting setting : settings) {
+                values.put(setting.getName(), render(setting));
+            }
+            return new OrderedKeyValueModel(values);
+        }
+    }
+
+    private static final class SettingsView extends MultiViewBasicPanel {
+        private static final @NonNull String CARD_SETTINGS = "settings";
+        private final @NonNull KeyValueJPanel keyValuePanel = new KeyValueJPanel();
+
+        SettingsView() {
+            add(new JScrollPane(keyValuePanel), CARD_SETTINGS);
+        }
+
+        void setViewSettings(@NonNull OrderedKeyValueModel model) {
+            keyValuePanel.setModel(model);
+            setSelectedCard(CARD_SETTINGS);
+        }
+
+        @Override
+        public void setEnabled(boolean enabled) {
+            super.setEnabled(enabled);
+            keyValuePanel.setEnabled(enabled);
         }
     }
 }
