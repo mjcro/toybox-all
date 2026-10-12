@@ -10,6 +10,7 @@ import io.github.mjcro.toybox.swing.hint.Hints;
 import io.github.mjcro.toybox.swing.prefab.SilkIcons;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxButtons;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxLaF;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxPanels;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxTextComponents;
 import io.github.mjcro.toybox.swing.util.Slf4jUtil;
 import io.github.mjcro.toybox.swing.widgets.ExceptionDetailsJPanel;
@@ -19,14 +20,10 @@ import org.jspecify.annotations.NonNull;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import javax.swing.JButton;
-import javax.swing.JComboBox;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
-import javax.swing.JTextArea;
-import java.awt.BorderLayout;
-import java.awt.Component;
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.util.List;
 
 /**
@@ -65,12 +62,12 @@ public class DataViewToy implements Toy {
         private static final @NonNull Logger log = LoggerFactory.getLogger(Panel.class);
 
         private final @NonNull JTextArea input = ToyBoxTextComponents.createBigTextArea(Hints.TEXT_MONOSPACED);
-        private final @NonNull JSplitPane pane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
         private final @NonNull JComboBox<@NonNull Mode> modeChooser = new JComboBox<>(new Mode[]{
                 Mode.JSON_TREE,
                 Mode.JSON_PRETTY,
                 Mode.XML_TREE
         });
+        private final @NonNull JPanel result = new JPanel(new BorderLayout());
 
         /**
          * Constructs the data view panel.
@@ -78,8 +75,11 @@ public class DataViewToy implements Toy {
         Panel() {
             super(new BorderLayout());
 
-            add(buildHeaderPanel(), BorderLayout.PAGE_START);
-            add(buildContentPanel(), BorderLayout.CENTER);
+            this.add(ToyBoxPanels.verticalSplit(
+                    "Input", new JScrollPane(input),
+                    null, buildHeaderPanel(),
+                    null, result
+            ));
         }
 
         /**
@@ -89,41 +89,27 @@ public class DataViewToy implements Toy {
          */
         private @NonNull JPanel buildHeaderPanel() {
             JPanel panel = new JPanel();
-            JButton apply = ToyBoxButtons.create("Apply", Hints.onAction(this::apply));
+            JButton apply = ToyBoxButtons.createPrimary("Apply", e -> apply());
             panel.add(modeChooser);
             panel.add(apply);
             return panel;
         }
 
         /**
-         * Builds the content panel containing the split pane with input and result areas.
-         *
-         * @return the content panel
-         */
-        private @NonNull JPanel buildContentPanel() {
-            JPanel panel = new JPanel(new BorderLayout());
-            pane.setResizeWeight(.5d);
-            pane.add(new JScrollPane(input), JSplitPane.TOP);
-            pane.add(new JPanel(), JSplitPane.BOTTOM);
-
-            panel.add(pane);
-            return panel;
-        }
-
-        /**
-         * Replaces the bottom half of the split pane with the given component.
+         * Replaces the result area content with the given component.
          *
          * @param component the component to display as the result
          */
         private void setResult(@NonNull Component component) {
-            int loc = pane.getDividerLocation();
-            pane.add(component, JSplitPane.BOTTOM);
-            pane.setDividerLocation(loc);
-            Components.setInheritedPopupRecursively(pane);
+            result.removeAll();
+            result.add(component, BorderLayout.CENTER);
+            Components.setInheritedPopupRecursively(result);
+            result.revalidate();
+            result.repaint();
         }
 
         /**
-         * Replaces the bottom half of the split pane with a read-only text area
+         * Replaces the result area content with a read-only text area
          * showing the given string.
          *
          * @param string the text to display

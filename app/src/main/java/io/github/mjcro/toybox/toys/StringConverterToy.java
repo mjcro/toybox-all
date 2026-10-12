@@ -10,6 +10,7 @@ import io.github.mjcro.toybox.swing.Components;
 import io.github.mjcro.toybox.swing.hint.Hints;
 import io.github.mjcro.toybox.swing.prefab.SilkIcons;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxButtons;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxPanels;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxTextComponents;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -19,7 +20,6 @@ import javax.swing.JComboBox;
 import javax.swing.JPanel;
 import javax.swing.JPopupMenu;
 import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
@@ -272,11 +272,6 @@ public class StringConverterToy implements Toy {
             this.sourceTypeSelector.addActionListener(e -> doConvert());
             this.bytesToResultSelector.addActionListener(e -> doConvert());
 
-            JSplitPane textAreasPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-            textAreasPanel.setResizeWeight(.5d);
-            textAreasPanel.add(new JScrollPane(sourceText));
-            textAreasPanel.add(new JScrollPane(resultText));
-
             JPanel selectorsPanel = new JPanel();
             selectorsPanel.setLayout(new GridLayout(1, 3));
             selectorsPanel.add(Components.with(new JPanel(), p -> {
@@ -297,8 +292,11 @@ public class StringConverterToy implements Toy {
 
             Hints.PADDING_NORMAL.apply(this);
             this.setLayout(new BorderLayout());
-            this.add(selectorsPanel, BorderLayout.PAGE_START);
-            this.add(textAreasPanel, BorderLayout.CENTER);
+            this.add(ToyBoxPanels.verticalSplit(
+                    null, new JScrollPane(sourceText),
+                    null, selectorsPanel,
+                    null, new JScrollPane(resultText)
+            ), BorderLayout.CENTER);
         }
 
         void setSourceText(@NonNull String s) {

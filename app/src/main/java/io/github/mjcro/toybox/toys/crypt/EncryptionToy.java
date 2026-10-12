@@ -27,7 +27,6 @@ import javax.swing.JComboBox;
 import javax.swing.JComponent;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
@@ -210,15 +209,14 @@ public class EncryptionToy implements Toy {
             outputPanel.add(outputRepresentationPanel, BorderLayout.PAGE_START);
             outputPanel.add(outputArea);
 
-            JSplitPane pane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-            pane.add(ToyBoxPanels.titledBordered("Input", inputPanel));
-            pane.add(ToyBoxPanels.titledBordered("Output", outputPanel));
             Hints.TEXT_MONOSPACED.apply(inputTextArea);
             Hints.NOT_EDITABLE_TEXT.apply(outputArea.getTextArea());
             Hints.TEXT_MONOSPACED.apply(outputArea.getTextArea());
 
-            pane.setResizeWeight(0.5);
-            return pane;
+            return ToyBoxPanels.verticalSplit(
+                    ToyBoxPanels.titledBordered("Input", inputPanel),
+                    ToyBoxPanels.titledBordered("Output", outputPanel)
+            );
         }
 
         /**

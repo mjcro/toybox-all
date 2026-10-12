@@ -19,10 +19,8 @@ import org.slf4j.LoggerFactory;
 import javax.swing.JCheckBox;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import java.awt.BorderLayout;
-import java.awt.Component;
 import java.awt.event.ActionEvent;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -89,8 +87,11 @@ public class StringListToy implements Toy {
         Panel() {
             super(new BorderLayout());
 
-            add(buildHeader(), BorderLayout.PAGE_START);
-            add(buildTextArea(), BorderLayout.CENTER);
+            add(ToyBoxPanels.verticalSplit(
+                    null, new JScrollPane(sourceText),
+                    null, buildHeader(),
+                    null, new JScrollPane(resultText)
+            ), BorderLayout.CENTER);
         }
 
         /**
@@ -115,20 +116,6 @@ public class StringListToy implements Toy {
             panel.add(checkboxes, BorderLayout.CENTER);
 
             return ToyBoxPanels.titledBordered("Settings", panel);
-        }
-
-        /**
-         * Builds the split pane containing source and result text areas.
-         *
-         * @return the text area component
-         */
-        private @NonNull Component buildTextArea() {
-            JSplitPane pane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-            pane.setResizeWeight(.5d);
-            pane.add(new JScrollPane(sourceText));
-            pane.add(new JScrollPane(resultText));
-
-            return pane;
         }
 
         /**

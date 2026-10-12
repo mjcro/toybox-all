@@ -9,6 +9,7 @@ import io.github.mjcro.toybox.swing.Components;
 import io.github.mjcro.toybox.swing.hint.Hints;
 import io.github.mjcro.toybox.swing.prefab.SilkIcons;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxLabels;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxPanels;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxTextComponents;
 import io.github.mjcro.toybox.swing.widgets.panels.HorizontalComponentsPanel;
 import org.jspecify.annotations.NonNull;
@@ -17,7 +18,6 @@ import org.jspecify.annotations.Nullable;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JSplitPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.border.EmptyBorder;
@@ -88,13 +88,14 @@ public class StringAnalyzerToy implements Toy {
             resultPanel = new HorizontalComponentsPanel();
             Hints.PADDING_NORMAL.apply(resultPanel);
 
-            JSplitPane textAreasPanel = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
-            textAreasPanel.setResizeWeight(.5d);
-            textAreasPanel.add(new JScrollPane(sourceText));
-            textAreasPanel.add(resultPanel);
-
             this.setLayout(new BorderLayout());
-            this.add(textAreasPanel, BorderLayout.CENTER);
+            this.add(
+                    ToyBoxPanels.verticalSplit(
+                            new JScrollPane(sourceText),
+                            resultPanel
+                    ),
+                    BorderLayout.CENTER
+            );
         }
 
         void setSourceText(@NonNull String s) {

@@ -8,11 +8,14 @@ import org.jspecify.annotations.Nullable;
 import javax.swing.Box;
 import javax.swing.BoxLayout;
 import javax.swing.JPanel;
+import javax.swing.JSplitPane;
 import javax.swing.border.EtchedBorder;
 import javax.swing.border.TitledBorder;
 import java.awt.BorderLayout;
 import java.awt.Component;
 import java.awt.GridLayout;
+import java.awt.event.ComponentAdapter;
+import java.awt.event.ComponentEvent;
 import java.util.Map;
 
 /**
@@ -107,6 +110,83 @@ public class ToyBoxPanels {
             }
         }
         return panel;
+    }
+
+    /**
+     * Constructs vertical split pane where top and bottom components
+     * share height equally.
+     *
+     * @param top    Top component.
+     * @param bottom Bottom component.
+     * @return Split pane.
+     */
+    public static @NonNull JSplitPane verticalSplit(@NonNull Component top, @NonNull Component bottom) {
+        return withRatio(new JSplitPane(JSplitPane.VERTICAL_SPLIT, top, bottom), .5d);
+    }
+
+    /**
+     * Constructs vertical split pane where top component takes 40% of height
+     * and bottom part holds fixed-height center component (e.g. toolbar)
+     * above bottom component.
+     * Components with non-empty titles are wrapped in titled border.
+     *
+     * @param topTitle    Top component title, optional.
+     * @param top         Top component.
+     * @param centerTitle Center component title, optional.
+     * @param center      Fixed-height component placed above bottom one.
+     * @param bottomTitle Bottom component title, optional.
+     * @param bottom      Bottom component.
+     * @return Split pane.
+     */
+    public static @NonNull JSplitPane verticalSplit(
+            @Nullable String topTitle,
+            @NonNull Component top,
+            @Nullable String centerTitle,
+            @NonNull Component center,
+            @Nullable String bottomTitle,
+            @NonNull Component bottom
+    ) {
+        final JPanel bottomPanel = new JPanel(new BorderLayout());
+        bottomPanel.add(titledBorderedIfPresent(centerTitle, center), BorderLayout.NORTH);
+        bottomPanel.add(titledBorderedIfPresent(bottomTitle, bottom), BorderLayout.CENTER);
+
+        return withRatio(
+                new JSplitPane(JSplitPane.VERTICAL_SPLIT, titledBorderedIfPresent(topTitle, top), bottomPanel),
+                .4d
+        );
+    }
+
+    /**
+     * Makes split pane start at given ratio and keep it on resize.
+     *
+     * @param splitPane Split pane to configure.
+     * @param ratio     Share of space given to top (left) component, from 0 to 1.
+     * @return Same split pane.
+     */
+    private static @NonNull JSplitPane withRatio(@NonNull JSplitPane splitPane, double ratio) {
+        splitPane.setResizeWeight(ratio);
+        // Proportional location is ignored until the pane has a size, so apply it on first resize
+        splitPane.addComponentListener(new ComponentAdapter() {
+            @Override
+            public void componentResized(ComponentEvent e) {
+                if (splitPane.getWidth() > 0 && splitPane.getHeight() > 0) {
+                    splitPane.removeComponentListener(this);
+                    splitPane.setDividerLocation(ratio);
+                }
+            }
+        });
+        return splitPane;
+    }
+
+    /**
+     * Wraps component in titled border when title is present and not empty.
+     *
+     * @param title     Title, optional.
+     * @param component Component to wrap.
+     * @return Wrapped component or given one when title is absent.
+     */
+    private static @NonNull Component titledBorderedIfPresent(@Nullable String title, @NonNull Component component) {
+        return title == null || title.isEmpty() ? component : titledBordered(title, component);
     }
 
     /**

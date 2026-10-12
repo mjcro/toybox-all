@@ -81,7 +81,6 @@ public class MaskerToy implements Toy {
 
         private final @NonNull RTextArea input = ToyBoxTextComponents.createBigTextArea();
         private final @NonNull MultiViewTextAreaOrExceptionPanel output = new MultiViewTextAreaOrExceptionPanel("");
-        private final @NonNull JSplitPane pane = new JSplitPane(JSplitPane.VERTICAL_SPLIT);
 
         /**
          * Constructs the masker panel.
@@ -89,8 +88,15 @@ public class MaskerToy implements Toy {
         public Panel() {
             super(new BorderLayout());
 
-            add(buildHeader(), BorderLayout.PAGE_START);
-            add(buildInputOutput(), BorderLayout.CENTER);
+            Hints.TEXT_MONOSPACED.apply(input);
+            Hints.NOT_EDITABLE_TEXT.apply(output.getTextArea());
+            Hints.TEXT_MONOSPACED.apply(output.getTextArea());
+
+            add(ToyBoxPanels.verticalSplit(
+                    "Input", new JScrollPane(input),
+                    null, buildHeader(),
+                    "Output", output
+            ), BorderLayout.CENTER);
         }
 
         /**
@@ -107,23 +113,7 @@ public class MaskerToy implements Toy {
             JPanel header = new JPanel(new BorderLayout());
             header.add(buttons, BorderLayout.PAGE_END);
 
-            return ToyBoxPanels.titledBordered("Settings", header);
-        }
-
-        /**
-         * Builds the split pane containing the input and read-only output areas.
-         *
-         * @return the input/output component
-         */
-        private @NonNull Component buildInputOutput() {
-            Hints.TEXT_MONOSPACED.apply(input);
-            Hints.NOT_EDITABLE_TEXT.apply(output.getTextArea());
-            Hints.TEXT_MONOSPACED.apply(output.getTextArea());
-
-            pane.add(ToyBoxPanels.titledBordered("Input", new JScrollPane(input)));
-            pane.add(ToyBoxPanels.titledBordered("Output", output));
-            pane.setResizeWeight(0.5);
-            return pane;
+            return header;
         }
 
         /**
