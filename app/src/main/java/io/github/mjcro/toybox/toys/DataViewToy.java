@@ -1,6 +1,8 @@
 package io.github.mjcro.toybox.toys;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.google.common.io.BaseEncoding;
 import io.github.mjcro.toybox.api.Context;
 import io.github.mjcro.toybox.api.Label;
 import io.github.mjcro.toybox.api.Menu;
@@ -17,6 +19,7 @@ import io.github.mjcro.toybox.swing.widgets.ExceptionDetailsJPanel;
 import io.github.mjcro.toybox.swing.widgets.JsonJTree;
 import io.github.mjcro.toybox.swing.widgets.XmlJTree;
 import org.jspecify.annotations.NonNull;
+import org.jspecify.annotations.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,7 +27,10 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.nio.charset.StandardCharsets;
+import java.util.LinkedHashMap;
 import java.util.List;
+import java.util.Map;
 
 /**
  * Toy that renders structured data (JSON, XML) as a tree or formatted text.
@@ -65,7 +71,8 @@ public class DataViewToy implements Toy {
         private final @NonNull JComboBox<@NonNull Mode> modeChooser = new JComboBox<>(new Mode[]{
                 Mode.JSON_TREE,
                 Mode.JSON_PRETTY,
-                Mode.XML_TREE
+                Mode.XML_TREE,
+                Mode.JWT_TREE
         });
         private final @NonNull JPanel result = new JPanel(new BorderLayout());
 
@@ -144,11 +151,53 @@ public class DataViewToy implements Toy {
                     case XML_TREE:
                         setResult(new JScrollPane(new XmlJTree(input.getText())));
                         break;
+                    case JWT_TREE:
+                        setResult(new JScrollPane(new JsonJTree(decodeJwt(input.getText()))));
+                        break;
                 }
             } catch (Exception e) {
-                log.error(Slf4jUtil.TOYBOX_MARKER, "Error parsing JSON", e);
+                log.error(Slf4jUtil.TOYBOX_MARKER, "Error parsing data", e);
                 setResult(new ExceptionDetailsJPanel(e));
             }
+        }
+    }
+
+    /**
+     * Decodes JWS compact serialization without verifying its signature.
+     *
+     * @param token token, optionally prefixed with {@code Bearer}
+     * @return map with parsed {@code header} and {@code payload} and raw {@code signature}
+     * @throws IllegalArgumentException if token is malformed or encrypted (JWE)
+     */
+    static @NonNull Map<@NonNull String, @Nullable Object> decodeJwt(@NonNull String token) {
+        String compact = token.strip();
+        if (compact.regionMatches(true, 0, "Bearer ", 0, 7)) {
+            compact = compact.substring(7).strip();
+        }
+        final String[] parts = compact.split("\\.", -1);
+        if (parts.length == 5) {
+            throw new IllegalArgumentException("Encrypted JWT (JWE) is not supported");
+        }
+        if (parts.length != 3) {
+            throw new IllegalArgumentException("Expected 3 dot-separated parts, got " + parts.length);
+        }
+
+        final Map<String, Object> result = new LinkedHashMap<>();
+        result.put("header", decodeJwtPart(parts[0]));
+        result.put("payload", decodeJwtPart(parts[1]));
+        result.put("signature", parts[2]);
+        return result;
+    }
+
+    /**
+     * Decodes Base64URL part as JSON, falling back to plain string for non-JSON payloads.
+     */
+    private static @Nullable Object decodeJwtPart(@NonNull String part) {
+        final String json = new String(BaseEncoding.base64Url().decode(part), StandardCharsets.UTF_8);
+        try {
+            return new ObjectMapper().readValue(json, Object.class);
+        } catch (JsonProcessingException e) {
+            return json;
         }
     }
 
@@ -161,7 +210,9 @@ public class DataViewToy implements Toy {
         /** Formats JSON with indentation. */
         JSON_PRETTY("Formatted JSON"),
         /** Renders XML as an expandable tree. */
-        XML_TREE("XML tree");
+        XML_TREE("XML tree"),
+        /** Renders decoded JWT header and payload as an expandable tree. */
+        JWT_TREE("JWT tree");
 
         private final @NonNull String displayName;
 

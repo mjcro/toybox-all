@@ -1,6 +1,8 @@
 package io.github.mjcro.toybox.toys;
 
+import com.google.common.base.CharMatcher;
 import com.google.common.io.BaseEncoding;
+import com.google.common.net.InetAddresses;
 import io.github.mjcro.toybox.api.Context;
 import io.github.mjcro.toybox.api.Label;
 import io.github.mjcro.toybox.api.Menu;
@@ -23,8 +25,11 @@ import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import java.awt.BorderLayout;
 import java.awt.GridLayout;
+import java.net.Inet6Address;
+import java.net.InetAddress;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.Locale;
@@ -32,6 +37,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Vector;
 import java.util.function.Function;
+import java.util.regex.Pattern;
 
 /**
  * Toy for converting strings between different encodings and representations.
@@ -40,9 +46,11 @@ public class StringConverterToy implements Toy {
 
     private static final @NonNull List<@NonNull SourceToBytes> toBytesConverters = List.of(
             new SourceToBytes("String", s -> s.getBytes(StandardCharsets.UTF_8)),
-            new SourceToBytes("Hexadecimal", s -> BaseEncoding.base16().decode(s.toUpperCase(Locale.ROOT))),
-            new SourceToBytes("Base 32", s -> BaseEncoding.base32().decode(s.toUpperCase(Locale.ROOT))),
-            new SourceToBytes("Base 64", s -> BaseEncoding.base64().decode(s))
+            new SourceToBytes("Hexadecimal", StringConverterToy::decodeHex),
+            new SourceToBytes("Base 32", StringConverterToy::decodeBase32),
+            new SourceToBytes("Base 64", StringConverterToy::decodeBase64),
+            new SourceToBytes("Base 64 URL", StringConverterToy::decodeBase64Url),
+            new SourceToBytes("Escaped string", s -> unescape(s).getBytes(StandardCharsets.UTF_8))
     );
     private static final @NonNull List<@NonNull BytesToResult> fromBytesConverters = List.of(
             new BytesToResult("String", b -> new String(b, StandardCharsets.UTF_8)),
@@ -51,12 +59,7 @@ public class StringConverterToy implements Toy {
             new BytesToResult("Hexadecimal", b -> BaseEncoding.base16().lowerCase().encode(b)),
             new BytesToResult("Base 32", b -> BaseEncoding.base32().encode(b)),
             new BytesToResult("Base 64", b -> BaseEncoding.base64().encode(b)),
-            new BytesToResult("IP address", bytes -> {
-                if (bytes == null || bytes.length != 4) {
-                    throw new IllegalArgumentException("Expected 4 bytes exactly");
-                }
-                return Byte.toUnsignedInt(bytes[0]) + "." + Byte.toUnsignedInt(bytes[1]) + "." + Byte.toUnsignedInt(bytes[2]) + "." + Byte.toUnsignedInt(bytes[3]);
-            }),
+            new BytesToResult("IP address", StringConverterToy::ipAddress),
             new BytesToResult("URL Encode", bytes -> Util.isEmpty(bytes)
                     ? ""
                     : URLEncoder.encode(new String(bytes, StandardCharsets.UTF_8), StandardCharsets.UTF_8)),
@@ -66,8 +69,13 @@ public class StringConverterToy implements Toy {
             new BytesToResult("Hex table", StringConverterToy::hexTable),
             new BytesToResult("Strip AI markers", bytes -> Util.isEmpty(bytes)
                     ? ""
-                    : stripAiMarkers(new String(bytes, StandardCharsets.UTF_8)))
+                    : AiMarkers.strip(new String(bytes, StandardCharsets.UTF_8)))
     );
+
+    /**
+     * Separators and prefixes tolerated in hexadecimal input, e.g. {@code 0xDE, AD:BE \xEF}.
+     */
+    private static final @NonNull Pattern HEX_NOISE = Pattern.compile("(?i)0x|\\\\x|[\\s:,_-]");
 
     @Override
     public @NonNull List<@NonNull Menu> getPath() {
@@ -81,7 +89,7 @@ public class StringConverterToy implements Toy {
 
     @Override
     public @NonNull Optional<@NonNull String> getVersion() {
-        return Optional.of("v0.3");
+        return Optional.of("v0.4");
     }
 
     @Override
@@ -93,6 +101,118 @@ public class StringConverterToy implements Toy {
                 .ifPresent(panel::setSourceText);
 
         return panel;
+    }
+
+    /**
+     * Decodes hexadecimal ignoring case, whitespace, {@code 0x}/{@code \x} prefixes and
+     * {@code :,_-} separators.
+     */
+    static byte @NonNull [] decodeHex(@NonNull String s) {
+        return BaseEncoding.base16().decode(HEX_NOISE.matcher(s).replaceAll("").toUpperCase(Locale.ROOT));
+    }
+
+    /**
+     * Decodes Base 32 ignoring case, whitespace and missing padding.
+     */
+    static byte @NonNull [] decodeBase32(@NonNull String s) {
+        return BaseEncoding.base32().decode(CharMatcher.whitespace().removeFrom(s).toUpperCase(Locale.ROOT));
+    }
+
+    /**
+     * Decodes Base 64 in either standard or URL-safe alphabet, ignoring whitespace and missing padding.
+     */
+    static byte @NonNull [] decodeBase64(@NonNull String s) {
+        return BaseEncoding.base64().decode(CharMatcher.whitespace().removeFrom(s).replace('-', '+').replace('_', '/'));
+    }
+
+    /**
+     * Decodes Base 64 in URL-safe alphabet, ignoring whitespace and missing padding.
+     */
+    static byte @NonNull [] decodeBase64Url(@NonNull String s) {
+        return BaseEncoding.base64Url().decode(CharMatcher.whitespace().removeFrom(s));
+    }
+
+    /**
+     * Unescapes JSON/Java string literal, surrounding double quotes are optional.
+     *
+     * @param s escaped string
+     * @return unescaped string
+     * @throws IllegalArgumentException on unknown or truncated escape sequence
+     */
+    static @NonNull String unescape(@NonNull String s) {
+        final String body = s.length() >= 2 && s.startsWith("\"") && s.endsWith("\"")
+                ? s.substring(1, s.length() - 1)
+                : s;
+        final StringBuilder sb = new StringBuilder(body.length());
+        int i = 0;
+        while (i < body.length()) {
+            final char c = body.charAt(i++);
+            if (c != '\\') {
+                sb.append(c);
+                continue;
+            }
+            if (i >= body.length()) {
+                throw new IllegalArgumentException("Trailing backslash");
+            }
+            final char e = body.charAt(i++);
+            switch (e) {
+                case '"':
+                case '\'':
+                case '\\':
+                case '/':
+                    sb.append(e);
+                    break;
+                case 'b':
+                    sb.append('\b');
+                    break;
+                case 'f':
+                    sb.append('\f');
+                    break;
+                case 'n':
+                    sb.append('\n');
+                    break;
+                case 'r':
+                    sb.append('\r');
+                    break;
+                case 't':
+                    sb.append('\t');
+                    break;
+                case 'u':
+                    if (i + 4 > body.length()) {
+                        throw new IllegalArgumentException("Truncated \\u escape at " + (i - 2));
+                    }
+                    try {
+                        sb.append((char) Integer.parseInt(body.substring(i, i + 4), 16));
+                    } catch (NumberFormatException ex) {
+                        throw new IllegalArgumentException("Invalid \\u escape at " + (i - 2), ex);
+                    }
+                    i += 4;
+                    break;
+                default:
+                    throw new IllegalArgumentException("Unsupported escape \\" + e + " at " + (i - 2));
+            }
+        }
+        return sb.toString();
+    }
+
+    /**
+     * Formats 4 or 16 bytes as IPv4 or compressed IPv6 address.
+     *
+     * @throws IllegalArgumentException on other lengths
+     */
+    static @NonNull String ipAddress(byte @Nullable [] bytes) {
+        try {
+            if (bytes != null && bytes.length == 4) {
+                return InetAddresses.toAddrString(InetAddress.getByAddress(bytes));
+            }
+            if (bytes != null && bytes.length == 16) {
+                // Inet6Address keeps IPv4-mapped addresses in IPv6 form, unlike InetAddress
+                return InetAddresses.toAddrString(Inet6Address.getByAddress(null, bytes, -1));
+            }
+        } catch (UnknownHostException e) {
+            throw new IllegalArgumentException(e);
+        }
+        throw new IllegalArgumentException("Expected 4 or 16 bytes exactly");
     }
 
     private static @NonNull String hexTable(byte @Nullable [] bytes) {
@@ -123,126 +243,6 @@ public class StringConverterToy implements Toy {
             } else {
                 sb.append(" ");
                 x++;
-            }
-        }
-        return sb.toString();
-    }
-
-    /**
-     * Normalizes typographic characters frequently emitted by LLMs (em/en dashes, smart quotes,
-     * ellipsis, non-breaking and Unicode spaces) and strips invisible/steganographic codepoints
-     * such as zero-width characters, bidi controls, variation selectors and the Tag block
-     * ({@code U+E0000..U+E007F}) which is commonly used to embed hidden fingerprints.
-     *
-     * @param input source string
-     * @return string containing only characters humans typically type
-     */
-    private static @NonNull String stripAiMarkers(@NonNull String input) {
-        if (input.isEmpty()) {
-            return input;
-        }
-
-        final StringBuilder sb = new StringBuilder(input.length());
-        final int length = input.length();
-        int index = 0;
-        while (index < length) {
-            final int cp = input.codePointAt(index);
-            index += Character.charCount(cp);
-
-            // Tag block — steganographic fingerprints
-            if (cp >= 0xE0000 && cp <= 0xE007F) {
-                continue;
-            }
-            // Variation selectors
-            if (cp >= 0xFE00 && cp <= 0xFE0F) {
-                continue;
-            }
-            if (cp >= 0xE0100 && cp <= 0xE01EF) {
-                continue;
-            }
-
-            switch (cp) {
-                // Hyphen, non-breaking hyphen, figure/en/em dash, horizontal bar,
-                // minus sign, small/fullwidth hyphen variants
-                case 0x2010:
-                case 0x2011:
-                case 0x2012:
-                case 0x2013:
-                case 0x2014:
-                case 0x2015:
-                case 0x2212:
-                case 0xFE58:
-                case 0xFE63:
-                case 0xFF0D:
-                    sb.append('-');
-                    break;
-                // Smart single quotes / low-9 quote
-                case 0x2018:
-                case 0x2019:
-                case 0x201A:
-                case 0x201B:
-                    sb.append('\'');
-                    break;
-                // Smart double quotes / low-9 / reversed
-                case 0x201C:
-                case 0x201D:
-                case 0x201E:
-                case 0x201F:
-                    sb.append('"');
-                    break;
-                // Horizontal ellipsis
-                case 0x2026:
-                    sb.append("...");
-                    break;
-                // Non-breaking space, en/em/figure/punctuation spaces,
-                // thin/hair/six-/four-/three-per-em, narrow/medium-math, ideographic
-                case 0x00A0:
-                case 0x2000:
-                case 0x2001:
-                case 0x2002:
-                case 0x2003:
-                case 0x2004:
-                case 0x2005:
-                case 0x2006:
-                case 0x2007:
-                case 0x2008:
-                case 0x2009:
-                case 0x200A:
-                case 0x202F:
-                case 0x205F:
-                case 0x3000:
-                    sb.append(' ');
-                    break;
-                // Soft hyphen, zero-width space/non-joiner/joiner, LRM/RLM,
-                // line/paragraph separator, bidi embedding/override controls,
-                // word joiner, invisible math operators, isolate controls, BOM
-                case 0x00AD:
-                case 0x200B:
-                case 0x200C:
-                case 0x200D:
-                case 0x200E:
-                case 0x200F:
-                case 0x2028:
-                case 0x2029:
-                case 0x202A:
-                case 0x202B:
-                case 0x202C:
-                case 0x202D:
-                case 0x202E:
-                case 0x2060:
-                case 0x2061:
-                case 0x2062:
-                case 0x2063:
-                case 0x2064:
-                case 0x2066:
-                case 0x2067:
-                case 0x2068:
-                case 0x2069:
-                case 0xFEFF:
-                    break;
-                default:
-                    sb.appendCodePoint(cp);
-                    break;
             }
         }
         return sb.toString();

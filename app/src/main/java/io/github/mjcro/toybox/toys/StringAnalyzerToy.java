@@ -62,8 +62,11 @@ public class StringAnalyzerToy implements Toy {
      */
     private static final class Panel extends JPanel {
 
+        private static final int MAX_MARKERS = 1000;
+        private static final @NonNull Pattern WORDS = Pattern.compile("[\\p{L}\\p{N}]+(?:['\\-][\\p{L}\\p{N}]+)*");
         private final @NonNull JTextArea sourceText;
         private final @NonNull JPanel resultPanel;
+        private final @NonNull JTextArea markersText;
 
         Panel() {
             this.sourceText = ToyBoxTextComponents.createTextArea(Hints.TEXT_MONOSPACED);
@@ -87,12 +90,14 @@ public class StringAnalyzerToy implements Toy {
 
             resultPanel = new HorizontalComponentsPanel();
             Hints.PADDING_NORMAL.apply(resultPanel);
+            markersText = ToyBoxTextComponents.createBigTextArea(Hints.TEXT_MONOSPACED, Hints.NOT_EDITABLE_TEXT);
 
             this.setLayout(new BorderLayout());
             this.add(
                     ToyBoxPanels.verticalSplit(
-                            new JScrollPane(sourceText),
-                            resultPanel
+                            null, new JScrollPane(sourceText),
+                            null, resultPanel,
+                            "AI markers and invisible characters", new JScrollPane(markersText)
                     ),
                     BorderLayout.CENTER
             );
@@ -106,10 +111,14 @@ public class StringAnalyzerToy implements Toy {
         private void doAnalyze() {
             String s = sourceText.getText();
             resultPanel.removeAll();
+            markersText.setText(describeMarkers(s));
+            markersText.setCaretPosition(0);
             if (!s.isEmpty()) {
                 resultPanel.add(buildLabelAndText("Length", String.valueOf(s.length())));
+                resultPanel.add(buildLabelAndText("Code points", String.valueOf(s.codePointCount(0, s.length()))));
                 resultPanel.add(buildLabelAndText("Bytes", String.valueOf(s.getBytes(StandardCharsets.UTF_8).length)));
                 resultPanel.add(buildLabelAndText("Lines", String.valueOf(s.lines().count())));
+                resultPanel.add(buildLabelAndText("Words", String.valueOf(WORDS.matcher(s).results().count())));
                 resultPanel.add(buildLabelAndText("SHA256", String.valueOf(Hashing.sha256().hashString(s, StandardCharsets.UTF_8))));
 
                 LinkedHashSet<Assertion> assertions = new LinkedHashSet<>();
@@ -129,8 +138,73 @@ public class StringAnalyzerToy implements Toy {
                     resultPanel.add(panel);
                 }
                 Components.setInheritedPopupRecursively(resultPanel);
-                updateUI();
             }
+            resultPanel.revalidate();
+            resultPanel.repaint();
+        }
+
+        /**
+         * Lists fragments {@link AiMarkers#strip(String)} would remove or replace,
+         * one per line as {@code line:column  what  action}.
+         */
+        private static @NonNull String describeMarkers(@NonNull String s) {
+            final List<AiMarkers.Marker> markers = AiMarkers.find(s);
+            final StringBuilder sb = new StringBuilder();
+            int line = 1;
+            int lineStart = 0;
+            int scanned = 0;
+            for (int i = 0; i < markers.size() && i < MAX_MARKERS; i++) {
+                final AiMarkers.Marker marker = markers.get(i);
+                for (; scanned < marker.offset(); scanned++) {
+                    if (s.charAt(scanned) == '\n') {
+                        line++;
+                        lineStart = scanned + 1;
+                    }
+                }
+                final int column = s.codePointCount(lineStart, marker.offset()) + 1;
+                sb.append(String.format(
+                        "%-9s %-48s %s%n",
+                        line + ":" + column,
+                        describe(marker.original()),
+                        marker.replacement().isEmpty() ? "removed" : "-> \"" + escape(marker.replacement()) + "\""
+                ));
+            }
+            if (markers.size() > MAX_MARKERS) {
+                sb.append("... and ").append(markers.size() - MAX_MARKERS).append(" more\n");
+            }
+            return sb.toString();
+        }
+
+        private static @NonNull String describe(@NonNull String fragment) {
+            if (fragment.codePointCount(0, fragment.length()) != 1) {
+                return "\"" + escape(fragment) + "\"";
+            }
+            final int cp = fragment.codePointAt(0);
+            final String name = Character.getName(cp);
+            return String.format("U+%04X %s", cp, name == null ? "UNASSIGNED" : name);
+        }
+
+        /**
+         * Replaces invisible and line-breaking codepoints with {@code \\u} escapes.
+         */
+        private static @NonNull String escape(@NonNull String s) {
+            final StringBuilder sb = new StringBuilder(s.length());
+            s.codePoints().forEach(cp -> {
+                final int type = Character.getType(cp);
+                if (cp == ' ' || (type != Character.CONTROL
+                        && type != Character.FORMAT
+                        && type != Character.PRIVATE_USE
+                        && type != Character.SPACE_SEPARATOR
+                        && type != Character.LINE_SEPARATOR
+                        && type != Character.PARAGRAPH_SEPARATOR)) {
+                    sb.appendCodePoint(cp);
+                } else {
+                    for (char c : Character.toChars(cp)) {
+                        sb.append(String.format("\\u%04X", (int) c));
+                    }
+                }
+            });
+            return sb.toString();
         }
 
         private static @NonNull JPanel buildLabelAndText(@NonNull String string, @NonNull String value) {
