@@ -58,6 +58,9 @@
                 <extensions>true</extensions>
                 <configuration>
                     <publishingServerId>central</publishingServerId>
+                    <excludeArtifacts>
+                        <artifact>eve</artifact>
+                    </excludeArtifacts>
                 </configuration>
             </plugin>
             <plugin>
