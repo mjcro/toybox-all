@@ -132,6 +132,11 @@ Command-line flags consumed automatically by `Application.main`:
 | `--mdi` / `--tab`        | MDI window or tabbed window mode    |
 | `-t<ToyClassName>`       | Open the given toy on startup       |
 
+The theme can also be switched at runtime via *ToyBox → Themes*; the choice is saved to the
+settings file and restored when it is opened (ignored if that theme is not on the classpath).
+It lists FlatLaf themes, JDK-installed Look-and-Feels and any `javax.swing.LookAndFeel`
+registered in `META-INF/services` (e.g. Eve, when the `eve` module is on the classpath).
+
 ## Customising the Spring context
 
 If you need additional beans (services, executors, settings), pass your own

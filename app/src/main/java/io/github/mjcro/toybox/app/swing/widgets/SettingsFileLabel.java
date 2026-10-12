@@ -3,6 +3,7 @@ package io.github.mjcro.toybox.app.swing.widgets;
 import io.github.mjcro.toybox.api.Environment;
 import io.github.mjcro.toybox.api.SettingsStorage;
 import io.github.mjcro.toybox.app.settings.storage.SettingsStorageDispatcher;
+import io.github.mjcro.toybox.app.swing.ThemeSwitcher;
 import io.github.mjcro.toybox.swing.hint.Hints;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxIcons;
 import io.github.mjcro.toybox.swing.util.Slf4jUtil;
@@ -226,6 +227,7 @@ public class SettingsFileLabel extends JLabel {
         try {
             dispatcher.get().bindExistingSettingsFile(file, password.get());
             log.info(Slf4jUtil.TOYBOX_MARKER, "Bound settings file {}", file.getAbsolutePath());
+            SwingUtilities.invokeLater(() -> new ThemeSwitcher(environment.getSettingsStorage()).restore());
         } catch (Exception e) {
             log.error(Slf4jUtil.TOYBOX_MARKER, "Error binding settings file {}", file.getAbsolutePath(), e);
             showError("Unable to open " + file.getName(), e);

@@ -3,6 +3,7 @@ package io.github.mjcro.toybox.app.swing;
 import io.github.mjcro.toybox.api.Action;
 import io.github.mjcro.toybox.api.Context;
 import io.github.mjcro.toybox.api.Menu;
+import io.github.mjcro.toybox.api.SettingsStorage;
 import io.github.mjcro.toybox.api.Toy;
 import io.github.mjcro.toybox.app.NavigationTree;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxIcons;
@@ -14,11 +15,23 @@ import javax.swing.JMenuItem;
 import javax.swing.SwingUtilities;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Objects;
 
 /**
  * Builds Swing menu bars from a navigation tree or a collection of toys.
  */
 public class NavigationTreeMenuBuilder {
+    private final @NonNull SettingsStorage settingsStorage;
+
+    /**
+     * Constructs the builder.
+     *
+     * @param settingsStorage storage the selected theme is saved to
+     */
+    public NavigationTreeMenuBuilder(@NonNull SettingsStorage settingsStorage) {
+        this.settingsStorage = Objects.requireNonNull(settingsStorage, "settingsStorage");
+    }
+
     /**
      * Builds a menu bar from the given navigation tree.
      *
@@ -68,7 +81,8 @@ public class NavigationTreeMenuBuilder {
     }
 
     /**
-     * Recursively builds nested submenus for the given parent menu item.
+     * Recursively builds nested submenus for the given parent menu item;
+     * the Themes submenu follows the Development menu.
      *
      * @param parent the parent menu item to attach children to
      * @param node   the navigation node whose children to process
@@ -82,6 +96,9 @@ public class NavigationTreeMenuBuilder {
             }
 
             parent.add(item);
+            if (Menu.TOYBOX_DEVELOPMENT_MENU.equals(subnode.getMenu())) {
+                parent.add(new ThemeMenuBuilder(new ThemeSwitcher(settingsStorage)).build());
+            }
         }
     }
 
