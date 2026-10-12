@@ -5,6 +5,7 @@ import ch.qos.logback.classic.pattern.Abbreviator;
 import ch.qos.logback.classic.pattern.TargetLengthBasedClassNameAbbreviator;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import io.github.mjcro.toybox.swing.hint.Hints;
+import io.github.mjcro.toybox.swing.prefab.SilkIcons;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxIcons;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxLabels;
 import org.jspecify.annotations.NonNull;
@@ -85,11 +86,11 @@ public class LogsJList extends JList<ILoggingEvent> {
         private final @NonNull JLabel messageLabel = ToyBoxLabels.create();
         private final @NonNull JLabel loggerLabel = ToyBoxLabels.create();
 
-        private final @Nullable Icon iconTrace = ToyBoxIcons.get("fam://bullet_white").orElse(null);
-        private final @Nullable Icon iconDebug = ToyBoxIcons.get("fam://bullet_black").orElse(null);
-        private final @Nullable Icon iconInfo = ToyBoxIcons.get("fam://bullet_green").orElse(null);
-        private final @Nullable Icon iconWarn = ToyBoxIcons.get("fam://bullet_orange").orElse(null);
-        private final @Nullable Icon iconError = ToyBoxIcons.get("fam://bullet_red").orElse(null);
+        private final @Nullable Icon iconTrace = ToyBoxIcons.get(SilkIcons.BULLET_WHITE).orElse(null);
+        private final @Nullable Icon iconDebug = ToyBoxIcons.get(SilkIcons.BULLET_BLACK).orElse(null);
+        private final @Nullable Icon iconInfo = ToyBoxIcons.get(SilkIcons.BULLET_GREEN).orElse(null);
+        private final @Nullable Icon iconWarn = ToyBoxIcons.get(SilkIcons.BULLET_ORANGE).orElse(null);
+        private final @Nullable Icon iconError = ToyBoxIcons.get(SilkIcons.BULLET_RED).orElse(null);
 
         private final @NonNull DateTimeFormatter timeFormatter = DateTimeFormatter.ofPattern("HH:mm:ss.SSS");
 

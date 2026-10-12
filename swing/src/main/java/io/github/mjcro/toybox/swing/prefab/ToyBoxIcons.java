@@ -14,6 +14,7 @@ import java.awt.Image;
 import java.awt.Taskbar;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.Locale;
 import java.util.NoSuchElementException;
 import java.util.Objects;
 import java.util.Optional;
@@ -23,11 +24,19 @@ import java.util.concurrent.ConcurrentHashMap;
  * Utility class for loading and caching Swing icons.
  *
  * <p>Icons are resolved from UIManager defaults, classpath resources
- * (famfamfam-silk webjar), and custom asset folders. Loaded icons
- * are cached by name and requested dimensions.
+ * (famfamfam-silk and famfamfam-flags webjars), and custom asset folders.
+ * Prefix {@code fam://} limits lookup to silk icons, {@code flag://} to flags
+ * by lowercase ISO 3166-1 alpha-2 code. Loaded icons are cached by name and
+ * requested dimensions.
+ *
+ * @see SilkIcons
+ * @see FlagIcons
  */
 public class ToyBoxIcons {
     private static final @NonNull Logger log = LoggerFactory.getLogger(ToyBoxIcons.class);
+    private static final @NonNull String SILK_FOLDER = "/META-INF/resources/webjars/famfamfam-silk/1.3/icons/";
+    private static final @NonNull String FLAGS_FOLDER = "/META-INF/resources/webjars/famfamfam-flags/0.0/png/";
+    private static final @NonNull String ASSETS_FOLDER = "/assets/icons/";
     private static final @NonNull ConcurrentHashMap<@NonNull Key, @NonNull Icon> icons = new ConcurrentHashMap<>();
 
     /** Whether dark mode is active, affecting icon resolution. */
@@ -126,10 +135,14 @@ public class ToyBoxIcons {
                 ArrayList<String> resourcesFolders = new ArrayList<>();
                 if (hasSchemaPrefix && $.name.startsWith("fam://")) {
                     name = name.substring(6);
-                    resourcesFolders.add("/META-INF/resources/webjars/famfamfam-silk/1.3/icons/");
+                    resourcesFolders.add(SILK_FOLDER);
+                } else if (hasSchemaPrefix && $.name.startsWith("flag://")) {
+                    name = name.substring(7).toLowerCase(Locale.ROOT);
+                    resourcesFolders.add(FLAGS_FOLDER);
                 } else {
-                    resourcesFolders.add("/META-INF/resources/webjars/famfamfam-silk/1.3/icons/");
-                    resourcesFolders.add("/assets/icons/");
+                    resourcesFolders.add(SILK_FOLDER);
+                    resourcesFolders.add(ASSETS_FOLDER);
+                    resourcesFolders.add(FLAGS_FOLDER);
                 }
 
                 for (String folder : resourcesFolders) {

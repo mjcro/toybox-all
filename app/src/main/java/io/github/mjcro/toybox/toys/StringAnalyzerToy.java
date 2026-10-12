@@ -7,6 +7,7 @@ import io.github.mjcro.toybox.api.Menu;
 import io.github.mjcro.toybox.api.Toy;
 import io.github.mjcro.toybox.swing.Components;
 import io.github.mjcro.toybox.swing.hint.Hints;
+import io.github.mjcro.toybox.swing.prefab.SilkIcons;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxLabels;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxTextComponents;
 import io.github.mjcro.toybox.swing.widgets.panels.HorizontalComponentsPanel;
@@ -42,7 +43,7 @@ public class StringAnalyzerToy implements Toy {
 
     @Override
     public @NonNull Label getLabel() {
-        return Label.ofIconAndName("fam://text_allcaps", "String Analyzer");
+        return Label.ofIconAndName(SilkIcons.TEXT_ALLCAPS, "String Analyzer");
     }
 
     @Override

@@ -6,6 +6,7 @@ import io.github.mjcro.toybox.api.Menu;
 import io.github.mjcro.toybox.api.Toy;
 import io.github.mjcro.toybox.app.LogBuffer;
 import io.github.mjcro.toybox.app.swing.LogsJPanel;
+import io.github.mjcro.toybox.swing.prefab.SilkIcons;
 import org.jspecify.annotations.NonNull;
 
 import javax.swing.JPanel;
@@ -22,7 +23,7 @@ public class LogsToy implements Toy {
 
     @Override
     public @NonNull Label getLabel() {
-        return Label.ofIconAndName("fam://folder_bug", "Application logs");
+        return Label.ofIconAndName(SilkIcons.FOLDER_BUG, "Application logs");
     }
 
     @Override

@@ -5,6 +5,7 @@ import io.github.mjcro.toybox.api.Label;
 import io.github.mjcro.toybox.api.Menu;
 import io.github.mjcro.toybox.api.Toy;
 import io.github.mjcro.toybox.swing.hint.Hints;
+import io.github.mjcro.toybox.swing.prefab.SilkIcons;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxButtons;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxLabels;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxPanels;
@@ -75,7 +76,7 @@ public class HashingToy implements Toy {
      */
     @Override
     public @NonNull Label getLabel() {
-        return Label.ofIconAndName("fam://asterisk_orange", "Hashing");
+        return Label.ofIconAndName(SilkIcons.ASTERISK_ORANGE, "Hashing");
     }
 
     /**

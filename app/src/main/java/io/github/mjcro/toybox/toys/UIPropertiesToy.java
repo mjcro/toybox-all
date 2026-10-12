@@ -5,6 +5,7 @@ import io.github.mjcro.toybox.api.Label;
 import io.github.mjcro.toybox.api.Menu;
 import io.github.mjcro.toybox.api.Toy;
 import io.github.mjcro.toybox.swing.hint.Hints;
+import io.github.mjcro.toybox.swing.prefab.SilkIcons;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxLabels;
 import io.github.mjcro.toybox.swing.renderers.AbstractTableCellRendererLabel;
 import io.github.mjcro.toybox.swing.renderers.TableCellRendererString;
@@ -48,7 +49,7 @@ public class UIPropertiesToy implements Toy {
 
     @Override
     public @NonNull Label getLabel() {
-        return Label.ofIconAndName("fam://palette", "Swing UI properties");
+        return Label.ofIconAndName(SilkIcons.PALETTE, "Swing UI properties");
     }
 
     @Override

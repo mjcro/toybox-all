@@ -8,6 +8,7 @@ import io.github.mjcro.toybox.api.Toy;
 import io.github.mjcro.toybox.api.util.Util;
 import io.github.mjcro.toybox.swing.Components;
 import io.github.mjcro.toybox.swing.hint.Hints;
+import io.github.mjcro.toybox.swing.prefab.SilkIcons;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxButtons;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxTextComponents;
 import org.jspecify.annotations.NonNull;
@@ -75,7 +76,7 @@ public class StringConverterToy implements Toy {
 
     @Override
     public @NonNull Label getLabel() {
-        return Label.ofIconAndName("fam://text_replace", "String Convert");
+        return Label.ofIconAndName(SilkIcons.TEXT_REPLACE, "String Convert");
     }
 
     @Override

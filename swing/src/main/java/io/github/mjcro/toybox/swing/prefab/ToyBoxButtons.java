@@ -125,7 +125,7 @@ public class ToyBoxButtons {
      * @return A new confirm button.
      */
     public static @NonNull JButton createConfirm(@NonNull String text, @NonNull ActionListener listener) {
-        final JButton button = create(text, Hints.BUTTON_SUCCESS, Hints.buttonIcon("fam://tick"));
+        final JButton button = create(text, Hints.BUTTON_SUCCESS, Hints.buttonIcon(SilkIcons.TICK));
         button.addActionListener(listener);
         return button;
     }
@@ -138,7 +138,7 @@ public class ToyBoxButtons {
      * @return A new add button.
      */
     public static @NonNull JButton createAdd(@NonNull String text, @NonNull ActionListener listener) {
-        final JButton button = create(text, Hints.BUTTON_SUCCESS, Hints.buttonIcon("fam://add"));
+        final JButton button = create(text, Hints.BUTTON_SUCCESS, Hints.buttonIcon(SilkIcons.ADD));
         button.addActionListener(listener);
         return button;
     }
@@ -151,7 +151,7 @@ public class ToyBoxButtons {
      * @return A new delete button.
      */
     public static @NonNull JButton createDelete(@NonNull String text, @NonNull ActionListener listener) {
-        final JButton button = create(text, Hints.BUTTON_DANGER, Hints.buttonIcon("fam://bin_closed"));
+        final JButton button = create(text, Hints.BUTTON_DANGER, Hints.buttonIcon(SilkIcons.BIN_CLOSED));
         button.addActionListener(listener);
         return button;
     }
@@ -164,7 +164,7 @@ public class ToyBoxButtons {
      * @return A new cancel button.
      */
     public static @NonNull JButton createCancel(@NonNull String text, @NonNull ActionListener listener) {
-        final JButton button = create(text, Hints.BUTTON_DANGER, Hints.buttonIcon("fam://cross"));
+        final JButton button = create(text, Hints.BUTTON_DANGER, Hints.buttonIcon(SilkIcons.CROSS));
         button.addActionListener(listener);
         return button;
     }

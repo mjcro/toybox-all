@@ -7,6 +7,7 @@ import io.github.mjcro.toybox.api.Menu;
 import io.github.mjcro.toybox.api.Toy;
 import io.github.mjcro.toybox.swing.Components;
 import io.github.mjcro.toybox.swing.hint.Hints;
+import io.github.mjcro.toybox.swing.prefab.SilkIcons;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxButtons;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxLaF;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxTextComponents;
@@ -45,7 +46,7 @@ public class DataViewToy implements Toy {
      */
     @Override
     public @NonNull Label getLabel() {
-        return Label.ofIconAndName("fam://tag", "Data view");
+        return Label.ofIconAndName(SilkIcons.TAG, "Data view");
     }
 
     /**

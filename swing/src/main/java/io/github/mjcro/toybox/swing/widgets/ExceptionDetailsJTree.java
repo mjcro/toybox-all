@@ -1,6 +1,7 @@
 package io.github.mjcro.toybox.swing.widgets;
 
 import io.github.mjcro.toybox.swing.hint.Hints;
+import io.github.mjcro.toybox.swing.prefab.SilkIcons;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxIcons;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxLabels;
 import org.jspecify.annotations.NonNull;
@@ -126,9 +127,9 @@ public class ExceptionDetailsJTree extends JTree {
         private final @NonNull StackPanel stackLabel = new StackPanel();
 
         Renderer() {
-            ToyBoxIcons.get("fam://bug").ifPresent(messageLabel::setIcon);
-            ToyBoxIcons.get("fam://tag").ifPresent(classLabel::setIcon);
-            ToyBoxIcons.get("fam://lightbulb").ifPresent(hintLabel::setIcon);
+            ToyBoxIcons.get(SilkIcons.BUG).ifPresent(messageLabel::setIcon);
+            ToyBoxIcons.get(SilkIcons.TAG).ifPresent(classLabel::setIcon);
+            ToyBoxIcons.get(SilkIcons.LIGHTBULB).ifPresent(hintLabel::setIcon);
 
             Hints.RENDERER_JTREE_PADDING.apply(messageLabel);
             Hints.RENDERER_JTREE_PADDING.apply(classLabel);
@@ -218,10 +219,10 @@ public class ExceptionDetailsJTree extends JTree {
             Hints.ITALIC.apply(className);
             fileName.setBorder(new EmptyBorder(0, 5, 0, 5));
 
-            this.traceIcon = ToyBoxIcons.get("fam://bullet_yellow").orElse(null);
-            this.traceLambdaIcon = ToyBoxIcons.get("fam://bullet_blue").orElse(null);
-            this.traceToyBoxIcon = ToyBoxIcons.get("fam://bullet_pink").orElse(null);
-            this.traceJavaCoreIcon = ToyBoxIcons.get("fam://bullet_white").orElse(null);
+            this.traceIcon = ToyBoxIcons.get(SilkIcons.BULLET_YELLOW).orElse(null);
+            this.traceLambdaIcon = ToyBoxIcons.get(SilkIcons.BULLET_BLUE).orElse(null);
+            this.traceToyBoxIcon = ToyBoxIcons.get(SilkIcons.BULLET_PINK).orElse(null);
+            this.traceJavaCoreIcon = ToyBoxIcons.get(SilkIcons.BULLET_WHITE).orElse(null);
         }
 
         /**

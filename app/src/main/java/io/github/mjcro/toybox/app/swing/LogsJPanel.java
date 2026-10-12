@@ -4,6 +4,7 @@ import ch.qos.logback.classic.Level;
 import ch.qos.logback.classic.spi.ILoggingEvent;
 import io.github.mjcro.toybox.swing.hint.Hint;
 import io.github.mjcro.toybox.swing.hint.Hints;
+import io.github.mjcro.toybox.swing.prefab.SilkIcons;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxButtons;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxIcons;
 import io.github.mjcro.toybox.swing.util.Slf4jUtil;
@@ -77,11 +78,11 @@ public class LogsJPanel extends JPanel {
         JPanel header = new JPanel();
 
         JPanel togglers = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 1));
-        ToyBoxIcons.get("fam://bullet_white").ifPresent(toggleTrace::setIcon);
-        ToyBoxIcons.get("fam://bullet_black").ifPresent(toggleDebug::setIcon);
-        ToyBoxIcons.get("fam://bullet_green").ifPresent(toggleInfo::setIcon);
-        ToyBoxIcons.get("fam://bullet_orange").ifPresent(toggleWarn::setIcon);
-        ToyBoxIcons.get("fam://bullet_red").ifPresent(toggleError::setIcon);
+        ToyBoxIcons.get(SilkIcons.BULLET_WHITE).ifPresent(toggleTrace::setIcon);
+        ToyBoxIcons.get(SilkIcons.BULLET_BLACK).ifPresent(toggleDebug::setIcon);
+        ToyBoxIcons.get(SilkIcons.BULLET_GREEN).ifPresent(toggleInfo::setIcon);
+        ToyBoxIcons.get(SilkIcons.BULLET_ORANGE).ifPresent(toggleWarn::setIcon);
+        ToyBoxIcons.get(SilkIcons.BULLET_RED).ifPresent(toggleError::setIcon);
 
         toggleTrace.setSelected(false);
         toggleDebug.setSelected(false);

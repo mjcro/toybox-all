@@ -117,7 +117,7 @@ before calling `startSpringApplication(...)`:
 | Field             | Purpose                                                |
 |-------------------|--------------------------------------------------------|
 | `MAIN_TITLE`      | Window title.                                          |
-| `MAIN_ICON`       | Icon URI (classpath resource name or `fam://...`).     |
+| `MAIN_ICON`       | Icon URI (resource name, `fam://...` or `flag://...`). |
 | `VERSION`         | Version string shown in the *About* toy.               |
 | `WINDOW`          | `"tabWindow"` (default) or `"mdiWindow"`.              |
 | `DARK_MODE`       | Force dark FlatLaf theme.                              |

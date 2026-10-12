@@ -1,5 +1,6 @@
 package io.github.mjcro.toybox.app.swing;
 
+import io.github.mjcro.toybox.swing.prefab.SilkIcons;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxIcons;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxLaF;
 import org.jspecify.annotations.NonNull;
@@ -38,7 +39,7 @@ public class ThemeMenuBuilder {
      */
     public @NonNull JMenu build() {
         JMenu menu = new JMenu("Themes");
-        ToyBoxIcons.getSmall("fam://palette").ifPresent(menu::setIcon);
+        ToyBoxIcons.getSmall(SilkIcons.PALETTE).ifPresent(menu::setIcon);
         ButtonGroup group = new ButtonGroup();
         for (UIManager.LookAndFeelInfo info : ToyBoxLaF.available()) {
             JRadioButtonMenuItem item = new JRadioButtonMenuItem(info.getName());

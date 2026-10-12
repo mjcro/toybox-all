@@ -4,6 +4,7 @@ import io.github.mjcro.toybox.api.Context;
 import io.github.mjcro.toybox.api.Label;
 import io.github.mjcro.toybox.api.Menu;
 import io.github.mjcro.toybox.api.Toy;
+import io.github.mjcro.toybox.swing.prefab.SilkIcons;
 import org.jspecify.annotations.NonNull;
 
 import javax.swing.JPanel;
@@ -30,7 +31,7 @@ public class CipherListToy implements Toy {
 
     @Override
     public @NonNull Label getLabel() {
-        return Label.ofIconAndName("fam://shield", "Cipher List");
+        return Label.ofIconAndName(SilkIcons.SHIELD, "Cipher List");
     }
 
     @Override

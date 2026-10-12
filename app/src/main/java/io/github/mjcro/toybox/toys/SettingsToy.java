@@ -5,6 +5,7 @@ import io.github.mjcro.toybox.api.Label;
 import io.github.mjcro.toybox.api.Menu;
 import io.github.mjcro.toybox.api.Setting;
 import io.github.mjcro.toybox.api.Toy;
+import io.github.mjcro.toybox.swing.prefab.SilkIcons;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxButtons;
 import io.github.mjcro.toybox.swing.widgets.KeyValueJPanel;
 import io.github.mjcro.toybox.swing.widgets.MultiViewBasicPanel;
@@ -43,7 +44,7 @@ public class SettingsToy implements Toy {
 
     @Override
     public @NonNull Label getLabel() {
-        return Label.ofIconAndName("fam://cog", "Settings");
+        return Label.ofIconAndName(SilkIcons.COG, "Settings");
     }
 
     @Override

@@ -7,6 +7,7 @@ import io.github.mjcro.toybox.api.Toy;
 import io.github.mjcro.toybox.swing.Components;
 import io.github.mjcro.toybox.swing.TypedDecorator;
 import io.github.mjcro.toybox.swing.layouts.RowsLayout;
+import io.github.mjcro.toybox.swing.prefab.SilkIcons;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxButtons;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxPanels;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxTreeCellRenderers;
@@ -34,7 +35,7 @@ public class ShowRoomComponentsToy implements Toy {
 
     @Override
     public @NonNull Label getLabel() {
-        return Label.ofIconAndName("fam://color_swatch", "Components showroom");
+        return Label.ofIconAndName(SilkIcons.COLOR_SWATCH, "Components showroom");
     }
 
     @Override
@@ -86,7 +87,7 @@ public class ShowRoomComponentsToy implements Toy {
             JTree tree = new JTree();
             tree.setCellRenderer(ToyBoxTreeCellRenderers.typeSelector(Map.ofEntries(
                     new AbstractMap.SimpleEntry<>(TreeNodeType.NORMAL, new DefaultTreeCellRenderer()),
-                    new AbstractMap.SimpleEntry<>(TreeNodeType.ICON, ToyBoxTreeCellRenderers.createWithIcon("fam://sport_8ball"))
+                    new AbstractMap.SimpleEntry<>(TreeNodeType.ICON, ToyBoxTreeCellRenderers.createWithIcon(SilkIcons.SPORT_8BALL))
             )));
 
             DefaultMutableTreeNode root = TreeNodeType.NORMAL.n("Root");

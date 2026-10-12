@@ -3,6 +3,7 @@ package io.github.mjcro.toybox.swing.widgets;
 import io.github.mjcro.toybox.swing.Components;
 import io.github.mjcro.toybox.swing.TypedDecorator;
 import io.github.mjcro.toybox.swing.hint.Hints;
+import io.github.mjcro.toybox.swing.prefab.SilkIcons;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxIcons;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxLaF;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxLabels;
@@ -134,16 +135,16 @@ public class JsonJTree extends JTree {
         Renderer() {
             super(new EnumMap<>(Map.of(
                     Type.OBJECT,
-                    ToyBoxTreeCellRenderers.createWithIcon("fam://table"),
+                    ToyBoxTreeCellRenderers.createWithIcon(SilkIcons.TABLE),
                     Type.COLLECTION,
-                    ToyBoxTreeCellRenderers.createWithIcon("fam://text_list_bullets")
+                    ToyBoxTreeCellRenderers.createWithIcon(SilkIcons.TEXT_LIST_BULLETS)
             )));
 
-            Hints.treeIcon("fam://bullet_black").apply(this);
+            Hints.treeIcon(SilkIcons.BULLET_BLACK).apply(this);
 
             Hints.BOLD.apply(panelKeyValue.value);
 
-            ToyBoxIcons.get("fam://bullet_black").ifPresent(panelKeyValue::setIcon);
+            ToyBoxIcons.get(SilkIcons.BULLET_BLACK).ifPresent(panelKeyValue::setIcon);
         }
 
         @Override

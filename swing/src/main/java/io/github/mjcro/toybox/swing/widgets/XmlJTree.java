@@ -3,6 +3,7 @@ package io.github.mjcro.toybox.swing.widgets;
 import io.github.mjcro.toybox.swing.Components;
 import io.github.mjcro.toybox.swing.TypedDecorator;
 import io.github.mjcro.toybox.swing.hint.Hints;
+import io.github.mjcro.toybox.swing.prefab.SilkIcons;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxIcons;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxLaF;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxLabels;
@@ -178,13 +179,13 @@ public class XmlJTree extends JTree {
         public Renderer() {
             super(new EnumMap<>(Map.of(
                     Type.ELEMENT,
-                    ToyBoxTreeCellRenderers.createWithIcon("fam://tag"),
+                    ToyBoxTreeCellRenderers.createWithIcon(SilkIcons.TAG),
                     Type.ATTR,
-                    new KeyValueRenderer(ToyBoxIcons.get("fam://tag_blue").orElse(null)),
+                    new KeyValueRenderer(ToyBoxIcons.get(SilkIcons.TAG_BLUE).orElse(null)),
                     Type.ATTR_ID,
-                    new KeyValueRenderer(ToyBoxIcons.get("fam://tag_green").orElse(null)),
+                    new KeyValueRenderer(ToyBoxIcons.get(SilkIcons.TAG_GREEN).orElse(null)),
                     Type.ATTR_NS,
-                    new KeyValueRenderer(ToyBoxIcons.get("fam://tag_purple").orElse(null))
+                    new KeyValueRenderer(ToyBoxIcons.get(SilkIcons.TAG_PURPLE).orElse(null))
             )));
         }
 

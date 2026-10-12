@@ -8,6 +8,7 @@ import io.github.mjcro.toybox.api.Toy;
 import io.github.mjcro.toybox.api.events.SetWindowHintEvent;
 import io.github.mjcro.toybox.swing.Components;
 import io.github.mjcro.toybox.swing.hint.Hints;
+import io.github.mjcro.toybox.swing.prefab.SilkIcons;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxButtons;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxLaF;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxLabels;
@@ -68,7 +69,7 @@ public class InstantAnalyzerToy implements Toy {
 
     @Override
     public @NonNull Label getLabel() {
-        return Label.ofIconAndName("fam://time", "Instant Analyzer");
+        return Label.ofIconAndName(SilkIcons.TIME, "Instant Analyzer");
     }
 
     @Override

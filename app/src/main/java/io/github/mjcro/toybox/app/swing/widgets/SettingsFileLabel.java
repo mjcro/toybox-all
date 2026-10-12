@@ -5,6 +5,7 @@ import io.github.mjcro.toybox.api.SettingsStorage;
 import io.github.mjcro.toybox.app.settings.storage.SettingsStorageDispatcher;
 import io.github.mjcro.toybox.app.swing.ThemeSwitcher;
 import io.github.mjcro.toybox.swing.hint.Hints;
+import io.github.mjcro.toybox.swing.prefab.SilkIcons;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxIcons;
 import io.github.mjcro.toybox.swing.util.Slf4jUtil;
 import org.jspecify.annotations.NonNull;
@@ -99,11 +100,11 @@ public class SettingsFileLabel extends JLabel {
     public void refresh() {
         Optional<File> file = getDispatcher().flatMap(SettingsStorageDispatcher::getFile);
         if (file.isPresent()) {
-            ToyBoxIcons.get("lightbulb").ifPresent(this::setIcon);
+            ToyBoxIcons.get(SilkIcons.LIGHTBULB).ifPresent(this::setIcon);
             setText(file.get().getName());
             setToolTipText("Settings file " + file.get().getAbsolutePath());
         } else {
-            ToyBoxIcons.get("lightbulb_off").ifPresent(this::setIcon);
+            ToyBoxIcons.get(SilkIcons.LIGHTBULB_OFF).ifPresent(this::setIcon);
             setText("mem");
             setToolTipText("Settings are kept in memory only and will be lost on exit");
         }
@@ -140,7 +141,7 @@ public class SettingsFileLabel extends JLabel {
 
         for (Map.Entry<File, List<File>> entry : listSettingsFiles().entrySet()) {
             JMenuItem header = new JMenuItem(entry.getKey().getAbsolutePath());
-            ToyBoxIcons.getSmall("folder").ifPresent(header::setIcon);
+            ToyBoxIcons.getSmall(SilkIcons.FOLDER).ifPresent(header::setIcon);
             header.setEnabled(false);
             popup.add(header);
 
@@ -151,7 +152,7 @@ public class SettingsFileLabel extends JLabel {
             } else {
                 for (File file : entry.getValue()) {
                     JMenuItem item = new JMenuItem(file.getName());
-                    ToyBoxIcons.getSmall("page_white_key").ifPresent(item::setIcon);
+                    ToyBoxIcons.getSmall(SilkIcons.PAGE_WHITE_KEY).ifPresent(item::setIcon);
                     item.setToolTipText(file.getAbsolutePath());
                     item.addActionListener($ -> onSettingsFileChosen(file));
                     popup.add(item);
@@ -161,13 +162,13 @@ public class SettingsFileLabel extends JLabel {
         }
 
         JMenuItem create = new JMenuItem("Create new settings file...");
-        ToyBoxIcons.getSmall("add").ifPresent(create::setIcon);
+        ToyBoxIcons.getSmall(SilkIcons.ADD).ifPresent(create::setIcon);
         create.addActionListener($ -> onCreateNewClick());
         popup.add(create);
 
         if (dispatcher.get().isFileStorageEnabled()) {
             JMenuItem detach = new JMenuItem("Detach, use in-memory settings");
-            ToyBoxIcons.getSmall("disconnect").ifPresent(detach::setIcon);
+            ToyBoxIcons.getSmall(SilkIcons.DISCONNECT).ifPresent(detach::setIcon);
             detach.addActionListener($ -> onDetachClick());
             popup.add(detach);
         }
