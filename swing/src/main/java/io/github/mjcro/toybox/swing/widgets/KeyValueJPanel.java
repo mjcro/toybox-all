@@ -31,6 +31,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.function.Supplier;
 
 /**
  * Table-like Swing component for ordered, nested key-value data.
@@ -42,7 +43,7 @@ public class KeyValueJPanel extends JPanel {
             KeyValueJPanel.class.getName() + ".contentAvailable";
     private static final @NonNull Insets CELL_INSETS = new Insets(4, 8, 4, 8);
 
-    private final @NonNull ChangeListener modelListener = event -> refreshFromModel();
+    private final @NonNull ChangeListener modelListener = event -> scheduleRefresh();
     private final @NonNull AtomicBoolean refreshScheduled = new AtomicBoolean();
     private @NonNull OrderedKeyValueModel model;
 
@@ -87,15 +88,18 @@ public class KeyValueJPanel extends JPanel {
         this.model.removeChangeListener(modelListener);
         this.model = replacement;
         this.model.addChangeListener(modelListener);
-        refreshFromModel();
-    }
-
-    private void refreshFromModel() {
         if (SwingUtilities.isEventDispatchThread()) {
             refreshScheduled.set(false);
             refresh();
-            return;
+        } else {
+            scheduleRefresh();
         }
+    }
+
+    /**
+     * Coalesces model changes into one rebuild on the next EDT cycle, including changes made on the EDT.
+     */
+    private void scheduleRefresh() {
         if (refreshScheduled.compareAndSet(false, true)) {
             SwingUtilities.invokeLater(() -> {
                 if (refreshScheduled.compareAndSet(true, false)) {
@@ -147,11 +151,13 @@ public class KeyValueJPanel extends JPanel {
             int depth,
             int row
     ) {
-        final JPanel nestedTable = createTable();
-        renderMapEntries(nestedTable, entries, depth + 1);
-        nestedTable.setVisible(false);
-
-        final JButton toggle = createToggleButton(nestedTable, "map");
+        final JPanel section = new JPanel(new BorderLayout());
+        section.setBackground(tableBackground());
+        final JButton toggle = createToggleButton(section, !entries.isEmpty(), "map", () -> {
+            final JPanel nestedTable = createTable();
+            renderMapEntries(nestedTable, entries, depth + 1);
+            return nestedTable;
+        });
         final JLabel keyLabel = new JLabel(key);
         keyLabel.setFont(keyLabel.getFont().deriveFont(Font.BOLD));
         final JLabel countLabel = new JLabel(itemCount(entries.size(), "entry", "entries"));
@@ -166,10 +172,7 @@ public class KeyValueJPanel extends JPanel {
         header.add(countLabel, BorderLayout.LINE_END);
         applyForeground(header, keyForeground());
 
-        final JPanel section = new JPanel(new BorderLayout());
-        section.setBackground(tableBackground());
         section.add(header, BorderLayout.PAGE_START);
-        section.add(nestedTable, BorderLayout.CENTER);
         addFullWidth(table, section, row);
     }
 
@@ -209,26 +212,25 @@ public class KeyValueJPanel extends JPanel {
     }
 
     private @NonNull Component createCollectionValue(@NonNull Collection<?> values, int depth) {
-        final JPanel itemTable = createTable();
-        int row = 0;
-        for (final Object item : values) {
-            addKeyValueRow(itemTable, "[" + row + "]", item, depth + 1, row);
-            row++;
-        }
-        itemTable.setVisible(false);
-
-        final JButton toggle = createToggleButton(itemTable, "collection");
+        final JPanel value = new JPanel(new BorderLayout());
+        value.setBackground(tableBackground());
+        value.setBorder(valueBorder());
+        final JButton toggle = createToggleButton(value, !values.isEmpty(), "collection", () -> {
+            final JPanel itemTable = createTable();
+            int row = 0;
+            for (final Object item : values) {
+                addKeyValueRow(itemTable, "[" + row + "]", item, depth + 1, row);
+                row++;
+            }
+            return itemTable;
+        });
         final JLabel count = new JLabel(itemCount(values.size(), "item", "items"));
         final JPanel control = new JPanel(new FlowLayout(FlowLayout.LEFT, 0, 0));
         control.setOpaque(false);
         control.add(toggle);
         control.add(count);
 
-        final JPanel value = new JPanel(new BorderLayout());
-        value.setBackground(tableBackground());
-        value.setBorder(valueBorder());
         value.add(control, BorderLayout.PAGE_START);
-        value.add(itemTable, BorderLayout.CENTER);
         return value;
     }
 
@@ -241,7 +243,15 @@ public class KeyValueJPanel extends JPanel {
         return label;
     }
 
-    private @NonNull JButton createToggleButton(@NonNull Component content, @NonNull String type) {
+    /**
+     * Creates a toggle that builds its content on first expansion into the holder's center slot.
+     */
+    private @NonNull JButton createToggleButton(
+            @NonNull JPanel holder,
+            boolean contentAvailable,
+            @NonNull String type,
+            @NonNull Supplier<@NonNull Component> contentFactory
+    ) {
         final JButton button = new JButton();
         setToggleState(button, type, false);
         button.setBorder(new EmptyBorder(2, 4, 2, 6));
@@ -249,10 +259,15 @@ public class KeyValueJPanel extends JPanel {
         button.setContentAreaFilled(false);
         button.setFocusPainted(false);
         button.setFocusable(false);
-        final boolean contentAvailable = content.getPreferredSize().height > 0;
         button.putClientProperty(CONTENT_AVAILABLE_PROPERTY, contentAvailable);
         button.setEnabled(contentAvailable);
         button.addActionListener(event -> {
+            Component content = ((BorderLayout) holder.getLayout()).getLayoutComponent(BorderLayout.CENTER);
+            if (content == null) {
+                content = contentFactory.get();
+                content.setVisible(false);
+                holder.add(content, BorderLayout.CENTER);
+            }
             final boolean expanded = !content.isVisible();
             content.setVisible(expanded);
             setToggleState(button, type, expanded);

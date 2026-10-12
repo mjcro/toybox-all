@@ -1,5 +1,6 @@
 package io.github.mjcro.toybox.app.swing.widgets;
 
+import ch.qos.logback.classic.spi.ILoggingEvent;
 import io.github.mjcro.toybox.api.Environment;
 import io.github.mjcro.toybox.api.Toy;
 import io.github.mjcro.toybox.app.ApplicationEnvironment;
@@ -29,6 +30,8 @@ import java.time.Duration;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicBoolean;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BiConsumer;
 
 /**
@@ -41,6 +44,9 @@ public class StatusBarWidget extends JPanel {
     private final @NonNull JLabel memoryUsageLabel = ToyBoxLabels.create("0M", Hints.CENTER);
     private final @NonNull JLabel threadsCountLabel = ToyBoxLabels.create("1", Hints.CENTER);
     private final @NonNull SettingsFileLabel settingsFileLabel;
+    private final @NonNull AtomicReference<@Nullable ILoggingEvent> pendingEvent = new AtomicReference<>();
+    private final @NonNull AtomicReference<@Nullable Duration> pendingElapsed = new AtomicReference<>();
+    private final @NonNull AtomicBoolean flushScheduled = new AtomicBoolean();
 
     /**
      * Creates an interactive status bar that auto-updates from logging events and a scheduler.
@@ -57,19 +63,7 @@ public class StatusBarWidget extends JPanel {
     ) {
         StatusBarWidget w = new StatusBarWidget(environment, toyRunner);
         CustomLoggingAppender cla = new CustomLoggingAppender();
-        cla.listen(e -> SwingUtilities.invokeLater(() -> w.setInformation(e.getFormattedMessage())));
-        cla.listen(e -> {
-            Object[] arr = e.getArgumentArray();
-            if (arr != null) {
-                for (Object o : arr) {
-                    if (o instanceof Duration) {
-                        SwingUtilities.invokeLater(() -> {
-                            w.setLastElapsed((Duration) o);
-                        });
-                    }
-                }
-            }
-        });
+        cla.listen(w::offerLoggingEvent);
 
         scheduler.scheduleWithFixedDelay(() -> {
             Runtime runtime = Runtime.getRuntime();
@@ -141,6 +135,43 @@ public class StatusBarWidget extends JPanel {
         Hints.PADDING_NANO.apply(label);
         bevel.add(label, BorderLayout.CENTER);
         return outer;
+    }
+
+    /**
+     * Records the latest logging event and schedules a single coalesced EDT update.
+     * Safe to call from any thread; bursts of events result in one label update.
+     *
+     * @param event the logging event
+     */
+    private void offerLoggingEvent(@NonNull ILoggingEvent event) {
+        pendingEvent.set(event);
+        final Object[] arguments = event.getArgumentArray();
+        if (arguments != null) {
+            for (final Object argument : arguments) {
+                if (argument instanceof Duration) {
+                    pendingElapsed.set((Duration) argument);
+                }
+            }
+        }
+        if (flushScheduled.compareAndSet(false, true)) {
+            SwingUtilities.invokeLater(this::flushLoggingEvents);
+        }
+    }
+
+    /**
+     * Applies the latest pending logging state to the labels. Must run on the EDT.
+     */
+    private void flushLoggingEvents() {
+        // Reset before reading so events offered during the flush schedule another one
+        flushScheduled.set(false);
+        final ILoggingEvent event = pendingEvent.getAndSet(null);
+        if (event != null) {
+            setInformation(event.getFormattedMessage());
+        }
+        final Duration elapsed = pendingElapsed.getAndSet(null);
+        if (elapsed != null) {
+            setLastElapsed(elapsed);
+        }
     }
 
     /**
