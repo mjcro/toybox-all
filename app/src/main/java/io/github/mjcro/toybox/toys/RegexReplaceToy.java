@@ -104,7 +104,32 @@ public class RegexReplaceToy implements Toy {
             preset.setEditable(false);
             preset.setModel(new DefaultComboBoxModel<>(new Preset[]{
                     new Preset("None", "", ""),
-                    new Preset("Concat number lines using comma", "(\\d+)\\n", "$1,"),
+                    new Preset("Concat number lines using comma", "(\\d+)\\R(?=\\d)", "$1,"),
+                    new Preset("Join lines with comma", "\\R+(?=.)", ", "),
+                    new Preset("Split comma list into lines", "\\s*,\\s*", "\\n"),
+                    new Preset("Quote each line", "(?m)^(.+)$", "'$1',"),
+                    new Preset("Trim trailing whitespace", "(?m)[ \\t]+$", ""),
+                    new Preset("Trim leading whitespace", "(?m)^[ \\t]+", ""),
+                    new Preset("Remove blank lines", "(?m)^[ \\t]*\\R", ""),
+                    new Preset("Collapse repeated spaces", "[ \\t]{2,}", " "),
+                    new Preset("Convert CRLF/CR to LF", "\\r\\n?", "\\n"),
+                    new Preset("Remove consecutive duplicate lines", "(?m)^(.*)(\\R\\1)+$", "$1"),
+                    new Preset("Remove line numbers", "(?m)^[ \\t]*\\d+[.:)]?[ \\t]+", ""),
+                    new Preset(
+                            "Remove log timestamps",
+                            "(?m)^\\d{4}-\\d{2}-\\d{2}[T ]\\d{2}:\\d{2}:\\d{2}(?:[.,]\\d+)?(?:Z|[+-]\\d{2}:?\\d{2})?[ \\t]*",
+                            ""
+                    ),
+                    new Preset(
+                            "Replace UUIDs with placeholder",
+                            "\\b[0-9a-fA-F]{8}-(?:[0-9a-fA-F]{4}-){3}[0-9a-fA-F]{12}\\b",
+                            "<uuid>"
+                    ),
+                    new Preset("Remove ANSI color codes", "\\x1B\\[[0-9;]*[A-Za-z]", ""),
+                    new Preset("Remove HTML tags", "<[^>]+>", ""),
+                    new Preset("Keep keys of key=value", "(?m)^[ \\t]*([^=\\r\\n]+?)[ \\t]*=.*$", "$1"),
+                    new Preset("Swap key and value", "(?m)^([^=\\r\\n]+)=(.*)$", "$2=$1"),
+                    new Preset("Keep digits only", "\\D+", ""),
             }));
             preset.addActionListener(e -> {
                 Object item = preset.getSelectedItem();
