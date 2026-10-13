@@ -1,5 +1,7 @@
 package io.github.mjcro.toybox.app.config;
 
+import io.github.mjcro.toybox.app.http.HttpCaptureBuffer;
+import io.github.mjcro.toybox.app.http.HttpClientFactory;
 import io.github.mjcro.toybox.app.settings.storage.SettingsStorageDispatcher;
 import org.jspecify.annotations.NonNull;
 import org.springframework.context.annotation.Bean;
@@ -40,5 +42,15 @@ public class MainConfiguration {
     @Bean
     public @NonNull SettingsStorageDispatcher settingsStorage() {
         return new SettingsStorageDispatcher();
+    }
+
+    /**
+     * Creates the factory of HTTP clients capturing exchanges into in-memory buffer of last 1000 exchanges.
+     *
+     * @return the HTTP client factory
+     */
+    @Bean
+    public @NonNull HttpClientFactory httpClientFactory() {
+        return new HttpClientFactory(new HttpCaptureBuffer(1000));
     }
 }

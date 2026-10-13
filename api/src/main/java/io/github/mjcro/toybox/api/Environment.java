@@ -1,6 +1,7 @@
 package io.github.mjcro.toybox.api;
 
 import io.github.mjcro.toybox.api.events.EventListener;
+import io.github.mjcro.toybox.api.http.HttpExchangeLog;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
 
@@ -9,15 +10,20 @@ import javax.swing.filechooser.FileFilter;
 import java.awt.datatransfer.StringSelection;
 import java.io.File;
 import java.io.IOException;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
 /**
  * Central application environment providing access to toy registry, event handling,
- * settings storage, clipboard operations, file dialogs, and background execution.
+ * settings storage, clipboard operations, file dialogs, background execution and
+ * HTTP communication.
  */
 public interface Environment extends Executor {
     /**
@@ -168,6 +174,60 @@ public interface Environment extends Executor {
      * @param file     Initial file, optional, nullable.
      */
     void chooseFileToSave(@NonNull FileCallback callback, @Nullable File file);
+
+    /**
+     * Returns shared HTTP client, capturing exchanges into {@link #getHttpExchangeLog()}.
+     *
+     * @return HTTP client.
+     */
+    @NonNull HttpClient getHttpClient();
+
+    /**
+     * Creates new HTTP client builder, producing clients capturing exchanges
+     * into {@link #getHttpExchangeLog()}.
+     *
+     * @return HTTP client builder.
+     */
+    HttpClient.@NonNull Builder newHttpClientBuilder();
+
+    /**
+     * Returns log of HTTP exchanges made using clients provided by this environment.
+     *
+     * @return HTTP exchanges log.
+     */
+    @NonNull HttpExchangeLog getHttpExchangeLog();
+
+    /**
+     * Sends HTTP request using shared client, blocking until response is received.
+     *
+     * @param request     Request to send.
+     * @param bodyHandler Response body handler.
+     * @param <T>         Response body type.
+     * @return HTTP response.
+     * @throws IOException          If an I/O error occurs.
+     * @throws InterruptedException If interrupted while waiting.
+     */
+    default <T> @NonNull HttpResponse<T> sendHttpRequest(
+            @NonNull HttpRequest request,
+            HttpResponse.@NonNull BodyHandler<T> bodyHandler
+    ) throws IOException, InterruptedException {
+        return getHttpClient().send(request, bodyHandler);
+    }
+
+    /**
+     * Sends HTTP request asynchronously using shared client.
+     *
+     * @param request     Request to send.
+     * @param bodyHandler Response body handler.
+     * @param <T>         Response body type.
+     * @return Future completing with HTTP response.
+     */
+    default <T> @NonNull CompletableFuture<HttpResponse<T>> sendHttpRequestAsync(
+            @NonNull HttpRequest request,
+            HttpResponse.@NonNull BodyHandler<T> bodyHandler
+    ) {
+        return getHttpClient().sendAsync(request, bodyHandler);
+    }
 
     /**
      * Defines popup hook for contributing actions to context menus.

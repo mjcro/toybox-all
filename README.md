@@ -13,9 +13,9 @@ in your distribution.
 
 | Module      | Java | What you get                                                                     |
 |-------------|------|----------------------------------------------------------------------------------|
-| `api`       | 8    | Core interfaces — `Toy`, `Context`, `Environment`, `Menu`, `Label`, events.      |
+| `api`       | 11   | Core interfaces — `Toy`, `Context`, `Environment`, `Menu`, `Label`, events.      |
 | `swing`     | 11   | Swing toolkit — widgets, layouts, prefabs, FlatLaf themes, embedded Noto fonts.  |
-| `templates` | 8    | String template engine with typed bindings (number, date, file, enum, ...).     |
+| `templates` | 11   | String template engine with typed bindings (number, date, file, enum, ...).     |
 | `app`       | 17   | Spring-based application shell + a set of generic, reusable toys.                |
 | `all`       | 17   | Aggregate dependency that pulls everything in.                                   |
 
@@ -141,7 +141,9 @@ registered in `META-INF/services` (e.g. Eve, when the `eve` module is on the cla
 
 If you need additional beans (services, executors, settings), pass your own
 `@Configuration` class — it can `@Import(MainConfiguration.class)` to keep the
-default app wiring, or replace it entirely.
+default app wiring, or replace it entirely. A replacement must still provide
+the `ScheduledExecutorService`, `SettingsStorageDispatcher` and
+`HttpClientFactory` beans.
 
 ```java
 @Configuration
@@ -167,8 +169,9 @@ and register them as `@Component` (and skip the SPI file).
 - **`Context`** — passed to `Toy#build`. Gives access to the `Environment`,
   initial data, the event bus and helpers like `context.show(otherToy, data)`
   to chain toys together.
-- **`Environment`** — clipboard, file dialogs, settings storage and a thread
-  pool (`environment.execute(Runnable)` for background work).
+- **`Environment`** — clipboard, file dialogs, settings storage, capturing
+  HTTP clients and a thread pool (`environment.execute(Runnable)` for
+  background work).
 - **`swing.prefab.*`** — opinionated factories: `ToyBoxButtons`,
   `ToyBoxLabels`, `ToyBoxPanels`, `ToyBoxTextComponents`, `ToyBoxIcons`,
   `ToyBoxLaF`. Use them instead of raw `JButton` / `JPanel` to inherit the
@@ -177,14 +180,21 @@ and register them as `@Component` (and skip the SPI file).
   geared towards form-style toys.
 - **`templates`** — string template + typed bindings; useful for toys that
   produce text from structured input (SQL, code snippets, requests, ...).
+- **HTTP** — `environment.getHttpClient()`, `newHttpClientBuilder()` and
+  `sendHttpRequest(...)` / `sendHttpRequestAsync(...)` give regular
+  `java.net.http` clients that record every request and response (headers and
+  bodies) into `environment.getHttpExchangeLog()` (last 1000 exchanges, kept
+  in memory). The captured count is shown in the status bar; click it to open
+  the HTTP log. `swing.widgets.HttpExchangeJPanel` renders a single exchange
+  in tabs.
 - **Menus** — `Menu.TOYBOX_*` constants give you a stable place in the
   hierarchy; or build your own with `Menu.text(...)` / `Menu.iconText(...)`.
 
 ## Bundled toys
 
 Reuse them as-is, or take them out by replacing `MainConfiguration`:
-About, Cipher List, Data View, Encryption (AES/GCM), Hashing, Instant
-Analyzer, Logs, Regex Replace, Settings, ShowRoom Components, String
+About, Cipher List, Data View, Encryption (AES/GCM), Hashing, HTTP Client,
+HTTP Log, Instant Analyzer, Logs, Regex Replace, Settings, ShowRoom Components, String
 Analyzer, String Converter, String List, UI Properties.
 
 ## Build

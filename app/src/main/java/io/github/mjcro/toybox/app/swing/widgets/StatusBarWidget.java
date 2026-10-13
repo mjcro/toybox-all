@@ -5,13 +5,18 @@ import io.github.mjcro.toybox.api.Environment;
 import io.github.mjcro.toybox.api.Toy;
 import io.github.mjcro.toybox.app.ApplicationEnvironment;
 import io.github.mjcro.toybox.app.CustomLoggingAppender;
+import io.github.mjcro.toybox.app.http.HttpCaptureBuffer;
+import io.github.mjcro.toybox.app.http.HttpClientFactory;
 import io.github.mjcro.toybox.app.settings.storage.SettingsStorageDispatcher;
 import io.github.mjcro.toybox.app.utils.TextFormat;
 import io.github.mjcro.toybox.swing.BorderLayoutMaster;
 import io.github.mjcro.toybox.swing.Components;
 import io.github.mjcro.toybox.swing.hint.Hints;
+import io.github.mjcro.toybox.swing.prefab.SilkIcons;
+import io.github.mjcro.toybox.swing.prefab.ToyBoxIcons;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxLaF;
 import io.github.mjcro.toybox.swing.prefab.ToyBoxLabels;
+import io.github.mjcro.toybox.toys.HttpLogToy;
 import io.github.mjcro.toybox.toys.LogsToy;
 import org.jspecify.annotations.NonNull;
 import org.jspecify.annotations.Nullable;
@@ -36,13 +41,15 @@ import java.util.function.BiConsumer;
 
 /**
  * Status bar panel displayed at the bottom of the main window, showing
- * information messages, timing, memory usage, thread count, and settings file status.
+ * information messages, timing, memory usage, thread count, captured HTTP exchanges count
+ * and settings file status.
  */
 public class StatusBarWidget extends JPanel {
     private final @NonNull JLabel informationLabel = ToyBoxLabels.create("Welcome");
     private final @NonNull JLabel lastElapsedLabel = ToyBoxLabels.create("", Hints.CENTER);
     private final @NonNull JLabel memoryUsageLabel = ToyBoxLabels.create("0M", Hints.CENTER);
     private final @NonNull JLabel threadsCountLabel = ToyBoxLabels.create("1", Hints.CENTER);
+    private final @NonNull JLabel httpCountLabel = ToyBoxLabels.create("0", Hints.CENTER);
     private final @NonNull SettingsFileLabel settingsFileLabel;
     private final @NonNull AtomicReference<@Nullable ILoggingEvent> pendingEvent = new AtomicReference<>();
     private final @NonNull AtomicReference<@Nullable Duration> pendingElapsed = new AtomicReference<>();
@@ -66,9 +73,14 @@ public class StatusBarWidget extends JPanel {
         cla.listen(w::offerLoggingEvent);
 
         scheduler.scheduleWithFixedDelay(() -> {
-            Runtime runtime = Runtime.getRuntime();
-            w.setMemoryUsage(runtime.totalMemory());
-            w.setThreadCount(Thread.activeCount());
+            long memory = Runtime.getRuntime().totalMemory();
+            int threads = Thread.activeCount();
+            int httpExchanges = environment.getHttpExchangeLog().size();
+            SwingUtilities.invokeLater(() -> {
+                w.setMemoryUsage(memory);
+                w.setThreadCount(threads);
+                w.setHttpExchangesCount(httpExchanges);
+            });
         }, 0, 1000, TimeUnit.MILLISECONDS);
 
         return w;
@@ -93,6 +105,8 @@ public class StatusBarWidget extends JPanel {
         informationLabel.setToolTipText("Information message");
         memoryUsageLabel.setToolTipText("Current memory usage");
         threadsCountLabel.setToolTipText("Threads count");
+        httpCountLabel.setToolTipText("Captured HTTP exchanges, click to open log");
+        ToyBoxIcons.get(SilkIcons.TRANSMIT).ifPresent(httpCountLabel::setIcon);
 
         informationLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         informationLabel.addMouseListener(new MouseAdapter() {
@@ -104,10 +118,21 @@ public class StatusBarWidget extends JPanel {
             }
         });
 
-        JPanel metrics = new JPanel(new GridLayout(1, 3));
+        httpCountLabel.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
+        httpCountLabel.addMouseListener(new MouseAdapter() {
+            @Override
+            public void mouseClicked(MouseEvent e) {
+                if (e.getButton() == MouseEvent.BUTTON1) {
+                    toyRunner.accept(HttpLogToy.class, null);
+                }
+            }
+        });
+
+        JPanel metrics = new JPanel(new GridLayout(1, 4));
         metrics.add(wrapBevel(lastElapsedLabel));
         metrics.add(wrapBevel(memoryUsageLabel));
         metrics.add(wrapBevel(threadsCountLabel));
+        metrics.add(wrapBevel(httpCountLabel));
 
         // Settings file section is placed rightmost and sized to its content
         JPanel rightSide = new JPanel(new BorderLayout());
@@ -211,6 +236,15 @@ public class StatusBarWidget extends JPanel {
     }
 
     /**
+     * Updates the captured HTTP exchanges count display.
+     *
+     * @param count current number of captured exchanges
+     */
+    public void setHttpExchangesCount(int count) {
+        httpCountLabel.setText(" " + count + " ");
+    }
+
+    /**
      * Main method for standalone visual testing of the status bar widget.
      *
      * @param args command-line arguments (unused)
@@ -224,7 +258,11 @@ public class StatusBarWidget extends JPanel {
 
         ToyBoxLaF.initialize(false);
 
-        Environment environment = new ApplicationEnvironment(new SettingsStorageDispatcher(), service);
+        Environment environment = new ApplicationEnvironment(
+                new SettingsStorageDispatcher(),
+                service,
+                new HttpClientFactory(new HttpCaptureBuffer(1000))
+        );
 
         JPanel container = new JPanel(new BorderLayout());
         container.add(new JPanel(), BorderLayout.CENTER);

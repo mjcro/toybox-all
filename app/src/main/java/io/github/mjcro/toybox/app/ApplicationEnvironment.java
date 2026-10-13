@@ -1,11 +1,14 @@
 package io.github.mjcro.toybox.app;
 
+import com.google.common.base.Suppliers;
 import io.github.mjcro.toybox.api.Context;
 import io.github.mjcro.toybox.api.Environment;
 import io.github.mjcro.toybox.api.Event;
 import io.github.mjcro.toybox.api.SettingsStorage;
 import io.github.mjcro.toybox.api.Toy;
 import io.github.mjcro.toybox.api.events.EventListener;
+import io.github.mjcro.toybox.api.http.HttpExchangeLog;
+import io.github.mjcro.toybox.app.http.HttpClientFactory;
 import io.github.mjcro.toybox.app.settings.ToyBoxWorkingDirSetting;
 import io.github.mjcro.toybox.swing.util.Slf4jUtil;
 import org.jspecify.annotations.NonNull;
@@ -27,12 +30,15 @@ import java.awt.datatransfer.UnsupportedFlavorException;
 import java.io.File;
 import java.io.IOException;
 import java.net.URI;
+import java.net.http.HttpClient;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.ExecutorService;
+import java.util.function.Supplier;
 
 /**
  * Spring-managed implementation of {@link Environment} that provides
@@ -49,20 +55,30 @@ public class ApplicationEnvironment implements Environment {
     private final @NonNull ConcurrentLinkedQueue<@NonNull Toy> registeredToys = new ConcurrentLinkedQueue<>();
     private final @NonNull SettingsStorage settingsStorage;
     private final @NonNull ExecutorService executorService;
+    private final @NonNull HttpClientFactory httpClientFactory;
+    private final @NonNull Supplier<@NonNull HttpClient> httpClient;
     private java.awt.@Nullable Component modalParent = null;
 
     /**
      * Creates a new application environment.
      *
      * @param settingsStorage the settings storage backend
-     * @param executorService the executor for background tasks
+     * @param executorService   the executor for background tasks
+     * @param httpClientFactory the factory of capturing HTTP clients
      */
     public ApplicationEnvironment(
             @NonNull SettingsStorage settingsStorage,
-            @NonNull ExecutorService executorService
+            @NonNull ExecutorService executorService,
+            @NonNull HttpClientFactory httpClientFactory
     ) {
         this.settingsStorage = settingsStorage;
         this.executorService = executorService;
+        this.httpClientFactory = httpClientFactory;
+        // Created lazily, as each client starts own selector thread
+        this.httpClient = Suppliers.memoize(() -> httpClientFactory.newHttpClientBuilder()
+                .connectTimeout(Duration.ofSeconds(10))
+                .followRedirects(HttpClient.Redirect.NORMAL)
+                .build());
     }
 
     /**
@@ -93,6 +109,21 @@ public class ApplicationEnvironment implements Environment {
     @Override
     public @NonNull SettingsStorage getSettingsStorage() {
         return settingsStorage;
+    }
+
+    @Override
+    public @NonNull HttpClient getHttpClient() {
+        return httpClient.get();
+    }
+
+    @Override
+    public HttpClient.@NonNull Builder newHttpClientBuilder() {
+        return httpClientFactory.newHttpClientBuilder();
+    }
+
+    @Override
+    public @NonNull HttpExchangeLog getHttpExchangeLog() {
+        return httpClientFactory.getBuffer();
     }
 
     @Override

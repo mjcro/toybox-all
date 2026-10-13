@@ -10,6 +10,8 @@ io.github.mjcro.toybox.toys.SettingsToy
 io.github.mjcro.toybox.toys.AboutToy
 io.github.mjcro.toybox.toys.CipherListToy
 io.github.mjcro.toybox.toys.LogsToy
+io.github.mjcro.toybox.toys.HttpLogToy
+io.github.mjcro.toybox.toys.DevelopmentHTTPClientToy
 io.github.mjcro.toybox.toys.ShowRoomComponentsToy
 io.github.mjcro.toybox.toys.HashingToy
 io.github.mjcro.toybox.toys.crypt.EncryptionToy
